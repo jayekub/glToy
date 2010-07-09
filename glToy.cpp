@@ -4,7 +4,12 @@
 #include <boost/foreach.hpp>
 
 #include <GL/glew.h>
+
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#else
 #include <GL/glut.h>
+#endif
 
 #include "utils.h"
 #include "Particle.h"
