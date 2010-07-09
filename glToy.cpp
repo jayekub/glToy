@@ -25,6 +25,8 @@ double particleSize = 100.0;
 int windowWidth = 1024;
 int windowHeight = 768;
 
+void reloadShaders();
+
 void resize(int w, int h) {
 	windowWidth = w;
 	windowHeight = h;
@@ -37,6 +39,18 @@ void resize(int w, int h) {
 
 	glMatrixMode(GL_MODELVIEW);
 	//	glLoadIdentity();
+}
+
+void handleKey(unsigned char key, int x, int y)
+{
+	switch(key) {
+		case 'r':
+			reloadShaders();
+			break;
+		case 'q':
+			exit(0);
+			break;
+	}
 }
 
 void initParticles() {
@@ -116,6 +130,14 @@ void draw() {
 	glutSwapBuffers();
 }
 
+void reloadShaders()
+{
+	std::vector<GLuint> shaders;
+	shaders.push_back(makeShader("cellNoise.fp", GL_FRAGMENT_SHADER));
+	
+	cellNoiseProgram = makeProgram(shaders);
+}
+
 int main(int argc, char **argv) {
 	glutInit(&argc, argv);
 
@@ -131,14 +153,11 @@ int main(int argc, char **argv) {
 	glutDisplayFunc(draw);
 	glutIdleFunc(draw);
 	glutReshapeFunc(resize);
-
-	std::vector<GLuint> shaders;
-	shaders.push_back(makeShader("cellNoise.fp", GL_FRAGMENT_SHADER));
-
-	cellNoiseProgram = makeProgram(shaders);
-
+	glutKeyboardFunc(handleKey);
+	
 	initParticles();
-
+	reloadShaders();
+	
 	glEnable(GL_DEPTH_TEST);
 	glutMainLoop();
 

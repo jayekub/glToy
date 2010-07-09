@@ -1,0 +1,10 @@
+glToy
+*.o
+
+# Xcode/OSX stuff
+build/*
+*.pbxuser
+*.mode1v3
+
+.DS_Store
+profile
