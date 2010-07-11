@@ -1,4 +1,6 @@
-OBJS =glToy.o utils.o Particle.o
+OBJS = glToy.o utils.o Particle.o ParticleSystem.o Program.o RenderPass.o \
+	   ScreenRenderPass.o TextureRenderPass.o Renderer.o CellNoiseRenderer.o \
+	   FractalRenderer.o
 TARGET = glToy
 
 UNAME := $(shell uname)

@@ -3,14 +3,6 @@
 #include <string>
 #include <vector>
 
-#include <GL/glew.h>
-
-#ifdef __APPLE__
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
-
 #include <boost/foreach.hpp>
 
 #include "utils.h"
@@ -31,55 +23,26 @@ std::string readFile(const std::string &filename) {
 	return contents;
 }
 
-GLuint makeShader(const  std::string &filename, GLenum shaderType) {
-	GLuint shader = glCreateShader(shaderType);
-	std::string sourceStr = readFile(filename);
+void drawViewportQuad(int width, int height)
+{
+    glPushMatrix();
 
-	GLint sourceLen = (GLint) sourceStr.size();
-	const GLchar *source = sourceStr.c_str();
+    glScaled((double) width, (double) height, 1.0);
 
-	glShaderSource(shader, 1, &source, &sourceLen);
-	glCompileShader(shader);
+    // TODO use VBO
+    glBegin(GL_TRIANGLE_STRIP);
+        glTexCoord2d(0.0, 0.0);
+        glVertex2d(-1.0, -1.0);
 
-	int infoLogLen;
+        glTexCoord2d(1.0, 0.0);
+        glVertex2d(1.0, -1.0);
 
-	glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLen);
+        glTexCoord2d(0.0, 1.0);
+        glVertex2d(-1.0, 1.0);
 
-	if (infoLogLen > 0) {
-		int lenWritten;
-		char *infoLog = new char[infoLogLen];
+        glTexCoord2d(1.0, 1.0);
+        glVertex2d(1.0, 1.0);
+    glEnd();
 
-		glGetShaderInfoLog(shader, infoLogLen, &lenWritten, infoLog);
-		puts(infoLog);
-
-		delete infoLog;
-	}
-
-	return shader;
-}
-
-GLuint makeProgram(const std::vector<GLuint> &shaders) {
-	GLuint program = glCreateProgram();
-
-	BOOST_FOREACH(GLuint shader, shaders) {
-		glAttachShader(program, shader);
-	}
-
-	glLinkProgram(program);
-
-	int infoLogLen;
-
-	glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLen);
-
-	if (infoLogLen > 0) {
-		int lenWritten;
-		char *infoLog = new char[infoLogLen];
-
-		glGetProgramInfoLog(program, infoLogLen, &lenWritten, infoLog);
-		puts(infoLog);
-
-		delete infoLog;
-	}
-
-	return program;
+    glPopMatrix();
 }

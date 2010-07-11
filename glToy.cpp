@@ -1,31 +1,25 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
-#include <boost/foreach.hpp>
-
-#include <GL/glew.h>
-
-#ifdef __APPLE__
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
-
+#include "glToy.h"
 #include "utils.h"
-#include "Particle.h"
 
-GLuint cellNoiseProgram;
-
-std::vector<Particle *> particles;
-
-int numParticles = 5000;
-int maxParticleVelocity = 10;
-double particleSize = 100.0;
+#include "ParticleSystem.h"
+#include "TextureRenderPass.h"
+#include "ScreenRenderPass.h"
+#include "CellNoiseRenderer.h"
+#include "FractalRenderer.h"
 
 int windowWidth = 1024;
 int windowHeight = 768;
 
-void reloadShaders();
+ParticleSystem *particles0, *particles1;
+TextureRenderPass *cellNoisePass0, *cellNoisePass1;
+ScreenRenderPass *screenPass;
+
+CellNoiseRenderer *cellNoiseRenderer;
+FractalRenderer *fractalRenderer;
 
 void resize(int w, int h) {
 	windowWidth = w;
@@ -39,13 +33,18 @@ void resize(int w, int h) {
 
 	glMatrixMode(GL_MODELVIEW);
 	//	glLoadIdentity();
+
+	cellNoisePass0->setSize(w, h);
+	cellNoisePass1->setSize(w, h);
+	screenPass->setSize(w, h);
 }
 
 void handleKey(unsigned char key, int x, int y)
 {
 	switch(key) {
 		case 'r':
-			reloadShaders();
+			cellNoiseRenderer->reload();
+			fractalRenderer->reload();
 			break;
 		case 'q':
 			exit(0);
@@ -53,92 +52,25 @@ void handleKey(unsigned char key, int x, int y)
 	}
 }
 
-void initParticles() {
-	for (int i = 0; i < numParticles; ++i) {
-		Particle *p = new Particle();
-
-		p->position.x = randFloat() * windowWidth;
-		p->position.y = randFloat() * windowHeight;
-
-		p->velocity = Vec2d(2.0 * randFloat() - 1.0, 2.0 * randFloat() - 1.0);
-		p->velocity = p->velocity.normalize().mult(maxParticleVelocity);
-
-		particles.push_back(p);
-	}
-}
-
-void moveParticles(double dt) {
-	BOOST_FOREACH(Particle *p, particles) {
-		p->position.x += p->velocity.x * dt;
-		p->position.y += p->velocity.y * dt;
-
-		if (p->position.x < -particleSize)
-			p->position.x = windowWidth + particleSize;
-		else if (p->position.x > windowWidth + particleSize)
-			p->position.x = -particleSize;
-
-		if (p->position.y < -particleSize)
-			p->position.y = windowHeight + particleSize;
-		else if (p->position.y > windowHeight + particleSize)
-			p->position.y = -particleSize;
-	}
-}
-
-void drawParticles() {
-	glUseProgram(cellNoiseProgram);
-
-	BOOST_FOREACH(Particle *p, particles) {
-		glPushMatrix();
-
-		glTranslated(p->position.x, p->position.y, 0.0);
-		glScaled(particleSize, particleSize, 1.0);
-
-		glColor3f(randFloat(), randFloat(), randFloat());
-
-		glBegin(GL_TRIANGLE_STRIP);
-			glTexCoord2d(0.0, 0.0);
-			glVertex2d(-0.5, -0.5);
-
-			glTexCoord2d(1.0, 0.0);
-			glVertex2d(0.5, -0.5);
-
-			glTexCoord2d(0.0, 1.0);
-			glVertex2d(-0.5, 0.5);
-
-			glTexCoord2d(1.0, 1.0);
-			glVertex2d(0.5, 0.5);
-		glEnd();
-
-		glPopMatrix();
-	}
-}
-
-float angle = 0.0;
-
 void draw() {
-	// notice that we're now clearing the depth buffer
-	// as well this is required, otherwise the depth buffer
-	// gets filled and nothing gets rendered.
-	// Try it out, remove the depth buffer part.
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	particles0->update(1.0);
+	particles1->update(1.0);
 
-	moveParticles(1.0);
-	drawParticles();
+    cellNoiseRenderer->setNoiseParticles(particles0);
+	cellNoiseRenderer->render(cellNoisePass0);
 
-	// swapping the buffers causes the rendering above to be
-	// shown
+    cellNoiseRenderer->setNoiseParticles(particles1);
+    cellNoiseRenderer->render(cellNoisePass1);
+
+	fractalRenderer->render(screenPass);
+
 	glutSwapBuffers();
 }
 
-void reloadShaders()
-{
-	std::vector<GLuint> shaders;
-	shaders.push_back(makeShader("cellNoise.fp", GL_FRAGMENT_SHADER));
-	
-	cellNoiseProgram = makeProgram(shaders);
-}
 
 int main(int argc, char **argv) {
+    srandom((unsigned int) time(NULL));
+
 	glutInit(&argc, argv);
 
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
@@ -155,9 +87,22 @@ int main(int argc, char **argv) {
 	glutReshapeFunc(resize);
 	glutKeyboardFunc(handleKey);
 	
-	initParticles();
-	reloadShaders();
-	
+	particles0 = new ParticleSystem(200, 0.01);
+	particles1 = new ParticleSystem(100, 0.01);
+
+	cellNoisePass0 = new TextureRenderPass(windowWidth, windowHeight);
+	cellNoisePass1 = new TextureRenderPass(windowWidth, windowHeight);
+
+	cellNoiseRenderer = new CellNoiseRenderer(particles0, 200.0);
+
+	std::vector<TextureRenderPass *> passes;
+
+	passes.push_back(cellNoisePass0);
+    passes.push_back(cellNoisePass1);
+
+    fractalRenderer = new FractalRenderer(passes);
+	screenPass = new ScreenRenderPass(windowWidth, windowHeight);
+
 	glEnable(GL_DEPTH_TEST);
 	glutMainLoop();
 

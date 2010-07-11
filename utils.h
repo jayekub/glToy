@@ -6,7 +6,7 @@
 
 #include <stdlib.h>
 
-#include <GL/glew.h>
+#include "glToy.h"
 
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #define fwrap(x, m) fmod(fmod((x), (m)) + (m), (m))
@@ -14,8 +14,6 @@
 #define randFloat() ((float) random() / (float) RAND_MAX)
 
 std::string readFile(const std::string &filename);
-
-GLuint makeShader(const  std::string &filename, GLenum shaderType);
-GLuint makeProgram(const std::vector<GLuint> &shaders);
+void drawViewportQuad(int width, int height);
 
 #endif /* _UTILS_H_ */

@@ -1,7 +1,10 @@
 void main()
 {
-    float d = length(vec2(0.5, 0.5) - gl_TexCoord[0].st);
+    // normalize so that the max distance is reached perpendicular to quad
+    // edges, clamp to prevent corners of quad from going over.
     
-    gl_FragColor = vec4(1.0 - d, 1.0 - d, d, 1.0);
+    float d = clamp(length(vec2(0.5, 0.5) - gl_TexCoord[0].st) / 0.5, 0.0, 1.0);
+    
+    gl_FragColor = vec4(d, d, d, 1.0);
     gl_FragDepth = d;
 }
