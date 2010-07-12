@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include <string>
+#include <sstream>
+
 #include "glToy.h"
 #include "utils.h"
 
@@ -14,7 +17,17 @@
 
 int windowWidth = 640;
 int windowHeight = 480;
+
 double invWidth, invHeight;
+
+bool reset = false;
+int lastDrawTime = -1;
+int lastFPSTime = -1;
+int frames = 0;
+
+Vec2d mouse, lastMouse;
+
+////
 
 ParticleSystem *particles0, *particles1;
 TextureRenderPass *cellNoisePass0, *cellNoisePass1;
@@ -24,10 +37,6 @@ CellNoiseRenderer *cellNoiseRenderer;
 FractalRenderer *fractalRenderer;
 
 ofxMSAFluidSolver fluidSolver;
-
-Vec2d mouse, lastMouse;
-
-bool reset = false;
 
 void resize(int w, int h) {
 	windowWidth = w;
@@ -44,15 +53,39 @@ void resize(int w, int h) {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	fluidSolver.setSize(w / 3.0, h / 3.0);
+	fluidSolver.setSize(640, 640.0 * (float) h / (float) w);
 	cellNoisePass0->setSize(w, h);
 	cellNoisePass1->setSize(w, h);
 	screenPass->setSize(w, h);
 }
 
+void toggleFullscreen()
+{
+    static bool fullScreen = false;
+
+    fullScreen = !fullScreen;
+
+    if (fullScreen) {
+        int fullWidth = glutGet(GLUT_SCREEN_WIDTH);
+        int fullHeight = glutGet(GLUT_SCREEN_HEIGHT);
+
+        std::stringstream gameModeSS;
+
+        gameModeSS << fullWidth << "x" << fullHeight;
+
+        glutGameModeString(gameModeSS.str().c_str());
+        glutEnterGameMode();
+    } else {
+        glutLeaveGameMode();
+    }
+}
+
 void handleKey(unsigned char key, int x, int y)
 {
 	switch(key) {
+	    case 'f':
+	        toggleFullscreen();
+	        break;
 		case 'r':
             reset = true;
 			break;
@@ -64,7 +97,13 @@ void handleKey(unsigned char key, int x, int y)
 
 void handleMouseMotion(int x, int y)
 {
-    //printf("Mouse moved at (%d, %d)\n", x, y);
+    // Prevent popping when the button is first pressed
+    if (mouse.x < 0) {
+        mouse.x = x;
+        mouse.y = y;
+        return;
+    }
+
     lastMouse.x = mouse.x;
     lastMouse.y = mouse.y;
     mouse.x = x;
@@ -72,7 +111,10 @@ void handleMouseMotion(int x, int y)
 
     Vec2d vel = mouse - lastMouse;
 
-    vel = vel.normalize().mult(10.0);
+    vel.x *= invWidth;
+    vel.y *= invHeight;
+
+    vel = vel.mult(100.0);
 
     fluidSolver.addForceAtPos((double) x * invWidth,
                               1.0 - (double) y * invHeight, vel.x, -vel.y);
@@ -80,7 +122,13 @@ void handleMouseMotion(int x, int y)
 
 void handleMouse(int button, int state, int x, int y)
 {
-
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+        // Signal that the mouse coords aren't valid
+        mouse.x = -1;
+        mouse.y = -1;
+        lastMouse.x = -1;
+        lastMouse.y = -1;
+    }
 }
 
 void draw() {
@@ -94,9 +142,13 @@ void draw() {
         reset = false;
     }
 
-    fluidSolver.update();
+    int drawTime = glutGet(GLUT_ELAPSED_TIME);
+    double dt = (drawTime - lastDrawTime) / 1000.0;
 
-    //printf("Fluid average speed is %g\n", fluidSolver.getAvgSpeed());
+    lastDrawTime = drawTime;
+
+    fluidSolver.setDeltaT(dt);
+    fluidSolver.update();
 
     BOOST_FOREACH(Particle *p, particles0->getParticles()) {
         ofPoint velocity;
@@ -105,10 +157,6 @@ void draw() {
 
         p->velocity.x += velocity.x;
         p->velocity.y += velocity.y;
-
-        //printf("Velocity at (%g, %g) is (%g, %g)\n",
-        //        p->position.x, p->position.y,
-        //        p->velocity.x, p->velocity.y);
     }
 
     BOOST_FOREACH(Particle *p, particles1->getParticles()) {
@@ -118,23 +166,34 @@ void draw() {
 
         p->velocity.x += velocity.x;
         p->velocity.y += velocity.y;
-
-        //printf("Velocity at (%g, %g) is (%g, %g)\n",
-        //        p->position.x, p->position.y,
-        //        p->velocity.x, p->velocity.y);
     }
 
-	particles0->update(0.5);
-	particles1->update(0.5);
+	particles0->update(dt);
+	particles1->update(dt);
 
-	cellNoiseRenderer->render(cellNoisePass0, particles0, 200.0);
-    cellNoiseRenderer->render(cellNoisePass1, particles1, 100.0);
+	cellNoiseRenderer->render(cellNoisePass0, particles0, 0.3);
+    cellNoiseRenderer->render(cellNoisePass1, particles1, 0.15);
 
 	fractalRenderer->render(screenPass);
 
 	glutSwapBuffers();
+	++frames;
 }
 
+void updateFramerate(int /* ignored */)
+{
+    int time = glutGet(GLUT_ELAPSED_TIME);
+    int elapsed = time - lastFPSTime;
+
+    lastFPSTime = time;
+
+    float framerate = 1000.0 * frames / elapsed;
+    std::stringstream framerateSS;
+
+    framerateSS << "GL Toy " << framerate << " fps";
+
+    glutSetWindowTitle(framerateSS.str().c_str());
+}
 
 int main(int argc, char **argv) {
     srandom((unsigned int) time(NULL));
@@ -160,7 +219,7 @@ int main(int argc, char **argv) {
 	cellNoisePass0 = new TextureRenderPass(windowWidth, windowHeight);
 	cellNoisePass1 = new TextureRenderPass(windowWidth, windowHeight);
 
-	cellNoiseRenderer = new CellNoiseRenderer(particles0, 200.0);
+	cellNoiseRenderer = new CellNoiseRenderer(particles0, 0.3);
 
 	std::vector<TextureRenderPass *> passes;
 
@@ -174,6 +233,8 @@ int main(int argc, char **argv) {
 
     glutDisplayFunc(draw);
     glutIdleFunc(draw);
+    glutTimerFunc(1000, updateFramerate, 0);
+
     glutReshapeFunc(resize);
     glutKeyboardFunc(handleKey);
 

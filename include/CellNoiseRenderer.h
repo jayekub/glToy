@@ -10,7 +10,7 @@ class CellNoiseRenderer : public Renderer
 {
 public:
     CellNoiseRenderer(ParticleSystem *noiseParticles,
-                      double particleSize = 50.0);
+                      double particleSize = 0.1);
 
     void render(RenderPass *renderPass = NULL,
                 ParticleSystem *noiseParticles = NULL,
@@ -24,7 +24,7 @@ private:
     double _particleSize;
 
     virtual void _render(RenderPass *renderPass);
-    void _drawParticle(double x, double y);
+    void _drawParticle(double x, double y, double size);
 };
 
 #endif /* CELLNOISERENDERPASS_H_ */

@@ -43,7 +43,8 @@ void CellNoiseRenderer::_render(RenderPass *renderPass) {
     int rpWidth = renderPass->getWidth();
     int rpHeight = renderPass->getHeight();
 
-    double ps_2 = _particleSize / 2.0;
+    double ps = _particleSize * rpWidth;
+    double ps_2 = ps / 2.0;
 
     glClearColor(1.0, 1.0, 1.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -54,7 +55,7 @@ void CellNoiseRenderer::_render(RenderPass *renderPass) {
         double x = p->position.x * rpWidth;
         double y = p->position.y * rpHeight;
 
-        _drawParticle(x, y);
+        _drawParticle(x, y, ps);
 
         // test if we need to draw a wrapped version of this particle also
         // to make the noise tileable
@@ -62,31 +63,31 @@ void CellNoiseRenderer::_render(RenderPass *renderPass) {
 
         if (x < ps_2) {
             wx = x + rpWidth;
-            _drawParticle(wx, y);
+            _drawParticle(wx, y, ps);
         } else if (x > rpWidth - ps_2) {
             wx = x - rpWidth;
-            _drawParticle(wx, y);
+            _drawParticle(wx, y, ps);
         }
 
         if (y < ps_2) {
             wy = y + rpHeight;
-            _drawParticle(x, wy);
+            _drawParticle(x, wy, ps);
         } else if (y > rpHeight - ps_2) {
             wy = y - rpHeight;
-            _drawParticle(x, wy);
+            _drawParticle(x, wy, ps);
         }
 
         if (wx != x && wy != y)
-            _drawParticle(wx, wy);
+            _drawParticle(wx, wy, ps);
     }
 }
 
-void CellNoiseRenderer::_drawParticle(double x, double y)
+void CellNoiseRenderer::_drawParticle(double x, double y, double size)
 {
     glPushMatrix();
 
     glTranslated(x, y, 0.0);
-    glScaled(_particleSize, _particleSize, 1.0);
+    glScaled(size, size, 1.0);
 
     // TODO use VBO
     glBegin(GL_TRIANGLE_STRIP);
