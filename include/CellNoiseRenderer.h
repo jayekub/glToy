@@ -12,16 +12,16 @@ public:
     CellNoiseRenderer(ParticleSystem *noiseParticles,
                       double particleSize = 50.0);
 
+    void render(RenderPass *renderPass = NULL,
+                ParticleSystem *noiseParticles = NULL,
+                double particleSize = -1.0);
     void reload();
-
-    void setNoiseParticles(ParticleSystem *noiseParticles);
 
 private:
     Program _cellNoiseProgram;
 
     ParticleSystem *_noiseParticles;
     double _particleSize;
-    double _ps_2, _maxD;
 
     virtual void _render(RenderPass *renderPass);
     void _drawParticle(double x, double y);

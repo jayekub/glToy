@@ -27,7 +27,8 @@ void drawViewportQuad(int width, int height)
 {
     glPushMatrix();
 
-    glScaled((double) width, (double) height, 1.0);
+    glTranslated((double) width / 2.0, (double) height / 2.0, 0.0);
+    glScaled((double) width / 2.0, (double) height / 2.0, 1.0);
 
     // TODO use VBO
     glBegin(GL_TRIANGLE_STRIP);

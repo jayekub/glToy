@@ -25,6 +25,14 @@ struct Vec2d {
 	Vec2d normalize() {
 		return mult(1.0 / length());
 	}
+
+	Vec2d operator+(const Vec2d &v) {
+	    return Vec2d(x - v.x, y - v.y);
+	}
+
+	Vec2d operator-(const Vec2d &v) {
+	    return Vec2d(x - v.x, y - v.y);
+	}
 };
 
 class Particle {

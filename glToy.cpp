@@ -10,9 +10,11 @@
 #include "ScreenRenderPass.h"
 #include "CellNoiseRenderer.h"
 #include "FractalRenderer.h"
+#include "ofxMSAFluidSolver.h"
 
-int windowWidth = 1024;
-int windowHeight = 768;
+int windowWidth = 640;
+int windowHeight = 480;
+double invWidth, invHeight;
 
 ParticleSystem *particles0, *particles1;
 TextureRenderPass *cellNoisePass0, *cellNoisePass1;
@@ -21,9 +23,17 @@ ScreenRenderPass *screenPass;
 CellNoiseRenderer *cellNoiseRenderer;
 FractalRenderer *fractalRenderer;
 
+ofxMSAFluidSolver fluidSolver;
+
+Vec2d mouse, lastMouse;
+
+bool reset = false;
+
 void resize(int w, int h) {
 	windowWidth = w;
 	windowHeight = h;
+	invWidth = 1.0 / (double) w;
+	invHeight = 1.0 / (double) h;
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -32,8 +42,9 @@ void resize(int w, int h) {
 	glOrtho(0, w, h, 0, 0, 1);
 
 	glMatrixMode(GL_MODELVIEW);
-	//	glLoadIdentity();
+	glLoadIdentity();
 
+	fluidSolver.setSize(w / 3.0, h / 3.0);
 	cellNoisePass0->setSize(w, h);
 	cellNoisePass1->setSize(w, h);
 	screenPass->setSize(w, h);
@@ -43,8 +54,7 @@ void handleKey(unsigned char key, int x, int y)
 {
 	switch(key) {
 		case 'r':
-			cellNoiseRenderer->reload();
-			fractalRenderer->reload();
+            reset = true;
 			break;
 		case 'q':
 			exit(0);
@@ -52,15 +62,73 @@ void handleKey(unsigned char key, int x, int y)
 	}
 }
 
+void handleMouseMotion(int x, int y)
+{
+    //printf("Mouse moved at (%d, %d)\n", x, y);
+    lastMouse.x = mouse.x;
+    lastMouse.y = mouse.y;
+    mouse.x = x;
+    mouse.y = y;
+
+    Vec2d vel = mouse - lastMouse;
+
+    vel = vel.normalize().mult(10.0);
+
+    fluidSolver.addForceAtPos((double) x * invWidth,
+                              1.0 - (double) y * invHeight, vel.x, -vel.y);
+}
+
+void handleMouse(int button, int state, int x, int y)
+{
+
+}
+
 void draw() {
-	particles0->update(1.0);
-	particles1->update(1.0);
+    if (reset) {
+        particles0->reset();
+        particles1->reset();
+        fluidSolver.reset();
+        cellNoiseRenderer->reload();
+        fractalRenderer->reload();
 
-    cellNoiseRenderer->setNoiseParticles(particles0);
-	cellNoiseRenderer->render(cellNoisePass0);
+        reset = false;
+    }
 
-    cellNoiseRenderer->setNoiseParticles(particles1);
-    cellNoiseRenderer->render(cellNoisePass1);
+    fluidSolver.update();
+
+    //printf("Fluid average speed is %g\n", fluidSolver.getAvgSpeed());
+
+    BOOST_FOREACH(Particle *p, particles0->getParticles()) {
+        ofPoint velocity;
+
+        fluidSolver.getInfoAtPos(p->position.x, p->position.y, &velocity, NULL);
+
+        p->velocity.x += velocity.x;
+        p->velocity.y += velocity.y;
+
+        //printf("Velocity at (%g, %g) is (%g, %g)\n",
+        //        p->position.x, p->position.y,
+        //        p->velocity.x, p->velocity.y);
+    }
+
+    BOOST_FOREACH(Particle *p, particles1->getParticles()) {
+        ofPoint velocity;
+
+        fluidSolver.getInfoAtPos(p->position.x, p->position.y, &velocity, NULL);
+
+        p->velocity.x += velocity.x;
+        p->velocity.y += velocity.y;
+
+        //printf("Velocity at (%g, %g) is (%g, %g)\n",
+        //        p->position.x, p->position.y,
+        //        p->velocity.x, p->velocity.y);
+    }
+
+	particles0->update(0.5);
+	particles1->update(0.5);
+
+	cellNoiseRenderer->render(cellNoisePass0, particles0, 200.0);
+    cellNoiseRenderer->render(cellNoisePass1, particles1, 100.0);
 
 	fractalRenderer->render(screenPass);
 
@@ -82,13 +150,12 @@ int main(int argc, char **argv) {
 
 	glewInit();
 
-	glutDisplayFunc(draw);
-	glutIdleFunc(draw);
-	glutReshapeFunc(resize);
-	glutKeyboardFunc(handleKey);
-	
+	fluidSolver.setup(windowWidth, windowHeight);
+	fluidSolver.enableRGB(false).setFadeSpeed(0).setDeltaT(0.1).setVisc(0.00015)
+	           .setWrap(true, true).setColorDiffusion(0);
+
 	particles0 = new ParticleSystem(200, 0.01);
-	particles1 = new ParticleSystem(100, 0.01);
+	particles1 = new ParticleSystem(1000, 0.01);
 
 	cellNoisePass0 = new TextureRenderPass(windowWidth, windowHeight);
 	cellNoisePass1 = new TextureRenderPass(windowWidth, windowHeight);
@@ -102,6 +169,16 @@ int main(int argc, char **argv) {
 
     fractalRenderer = new FractalRenderer(passes);
 	screenPass = new ScreenRenderPass(windowWidth, windowHeight);
+
+    resize(windowWidth, windowHeight);
+
+    glutDisplayFunc(draw);
+    glutIdleFunc(draw);
+    glutReshapeFunc(resize);
+    glutKeyboardFunc(handleKey);
+
+    glutMotionFunc(handleMouseMotion);
+    glutMouseFunc(handleMouse);
 
 	glEnable(GL_DEPTH_TEST);
 	glutMainLoop();

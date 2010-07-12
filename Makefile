@@ -1,12 +1,14 @@
 OBJS = glToy.o utils.o Particle.o ParticleSystem.o Program.o RenderPass.o \
 	   ScreenRenderPass.o TextureRenderPass.o Renderer.o CellNoiseRenderer.o \
-	   FractalRenderer.o
+	   FractalRenderer.o ofxMSAFluidSolver.o
 TARGET = glToy
 
 UNAME := $(shell uname)
 
-CXXFLAGS =	-O2 -g -Wall -fmessage-length=0
+INCLUDES = -Iinclude/
 LIBS = -lGLEW -lGLU -lglut
+
+CXXFLAGS =	-O2 -g -Wall -fmessage-length=0 $(INCLUDES)
 
 ifeq ($(UNAME),Darwin)
     CXXFLAGS += -I/opt/local/include
