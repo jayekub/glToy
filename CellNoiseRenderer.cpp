@@ -9,12 +9,14 @@ CellNoiseRenderer::CellNoiseRenderer(
         ParticleSystem *noiseParticles,
         double particleSize) :
 
-        _noiseParticles(noiseParticles), _particleSize(particleSize) {
+        _noiseParticles(noiseParticles), _particleSize(particleSize),
+        _particleDisplayList(0) {
 
     std::vector<Program::ShaderSpec> shaders;
     shaders.push_back(Program::ShaderSpec("cellNoise.fp", GL_FRAGMENT_SHADER));
 
     _cellNoiseProgram.setShaders(shaders);
+    reload();
 }
 
 void CellNoiseRenderer::render(
@@ -37,6 +39,32 @@ void CellNoiseRenderer::render(
 void CellNoiseRenderer::reload()
 {
     _cellNoiseProgram.reload();
+
+    //if (glIsList(_particleDisplayList)) {
+    //    glDeleteLists(_particleDisplayList, 1);
+    //}
+
+    _particleDisplayList = 1;
+
+    glNewList(_particleDisplayList, GL_COMPILE);
+
+        glBegin(GL_TRIANGLE_STRIP);
+
+            glTexCoord2d(0.0, 0.0);
+            glVertex2d(-0.5, -0.5);
+
+            glTexCoord2d(1.0, 0.0);
+            glVertex2d(0.5, -0.5);
+
+            glTexCoord2d(0.0, 1.0);
+            glVertex2d(-0.5, 0.5);
+
+            glTexCoord2d(1.0, 1.0);
+            glVertex2d(0.5, 0.5);
+
+        glEnd();
+
+    glEndList();
 }
 
 void CellNoiseRenderer::_render(RenderPass *renderPass) {
@@ -90,7 +118,11 @@ void CellNoiseRenderer::_drawParticle(double x, double y, double size)
     glScaled(size, size, 1.0);
 
     // TODO use VBO
+    glCallList(_particleDisplayList);
+
+/*
     glBegin(GL_TRIANGLE_STRIP);
+
         glTexCoord2d(0.0, 0.0);
         glVertex2d(-0.5, -0.5);
 
@@ -102,7 +134,8 @@ void CellNoiseRenderer::_drawParticle(double x, double y, double size)
 
         glTexCoord2d(1.0, 1.0);
         glVertex2d(0.5, 0.5);
-    glEnd();
 
+    glEnd();
+*/
     glPopMatrix();
 }

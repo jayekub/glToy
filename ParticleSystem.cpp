@@ -5,15 +5,29 @@
 #include "ParticleSystem.h"
 #include "utils.h"
 
-ParticleSystem::ParticleSystem(int size, double maxVelocity, double friction) :
-    _size(size), _maxVelocity(maxVelocity), _friction(friction)
+ParticleSystem::ParticleSystem(int num, double maxVelocity, double friction) :
+    _num(num), _maxVelocity(maxVelocity), _friction(friction)
 {
-    _init();
+    addRandom(num, maxVelocity);
 }
 
 ParticleSystem::~ParticleSystem()
 {
     _destroy();
+}
+
+void ParticleSystem::addRandom(int num, double maxVelocity) {
+    for (int i = 0; i < num; ++i) {
+        Particle *p = new Particle();
+
+        p->position.x = randFloat();
+        p->position.y = randFloat();
+
+        p->velocity = Vec2d(2.0 * randFloat() - 1.0, 2.0 * randFloat() - 1.0);
+        p->velocity = p->velocity.normalize().mult(randFloat() * maxVelocity);
+
+        _particles.push_back(p);
+    }
 }
 
 void ParticleSystem::update(double dt)
@@ -22,40 +36,19 @@ void ParticleSystem::update(double dt)
         p->position.x += p->velocity.x * dt;
         p->position.y += p->velocity.y * dt;
 
-        p->velocity.x *= 1.0 - _friction * dt;
-        p->velocity.y *= 1.0 - _friction * dt;
+        p->velocity.x *= 1.0 - _friction;
+        p->velocity.y *= 1.0 - _friction;
 
-        if (p->position.x < 0.0)
-            p->position.x += 1.0;
-        else if (p->position.x > 1.0)
-            p->position.x -= 1.0;
-
-        if (p->position.y < 0.0)
-            p->position.y += 1.0;
-        else if (p->position.y > 1.0)
-            p->position.y -= 1.0;
+        WRAP_PARTICLE(p);
     }
 }
 
 void ParticleSystem::reset()
 {
     _destroy();
-    _init();
+    addRandom(_num, _maxVelocity);
 }
 
-void ParticleSystem::_init() {
-    for (int i = 0; i < _size; ++i) {
-        Particle *p = new Particle();
-
-        p->position.x = randFloat();
-        p->position.y = randFloat();
-
-        p->velocity = Vec2d(2.0 * randFloat() - 1.0, 2.0 * randFloat() - 1.0);
-        p->velocity = p->velocity.normalize().mult(randFloat() * _maxVelocity);
-
-        _particles.push_back(p);
-    }
-}
 
 void ParticleSystem::_destroy()
 {

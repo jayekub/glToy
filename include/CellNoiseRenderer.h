@@ -23,6 +23,8 @@ private:
     ParticleSystem *_noiseParticles;
     double _particleSize;
 
+    GLuint _particleDisplayList;
+
     virtual void _render(RenderPass *renderPass);
     void _drawParticle(double x, double y, double size);
 };

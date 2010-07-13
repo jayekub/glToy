@@ -8,7 +8,7 @@
 #include "glToy.h"
 #include "utils.h"
 
-#include "ParticleSystem.h"
+#include "FluidParticleSystem.h"
 #include "TextureRenderPass.h"
 #include "ScreenRenderPass.h"
 #include "CellNoiseRenderer.h"
@@ -17,6 +17,8 @@
 
 int windowWidth = 640;
 int windowHeight = 480;
+
+const int fluidSize = 100;
 
 double invWidth, invHeight;
 
@@ -29,7 +31,7 @@ Vec2d mouse, lastMouse;
 
 ////
 
-ParticleSystem *particles0, *particles1;
+FluidParticleSystem *particles0, *particles1;
 TextureRenderPass *cellNoisePass0, *cellNoisePass1;
 ScreenRenderPass *screenPass;
 
@@ -53,39 +55,15 @@ void resize(int w, int h) {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	fluidSolver.setSize(640, 640.0 * (float) h / (float) w);
+	fluidSolver.setSize(fluidSize, (float) fluidSize * (float) h / (float) w);
 	cellNoisePass0->setSize(w, h);
 	cellNoisePass1->setSize(w, h);
 	screenPass->setSize(w, h);
 }
 
-void toggleFullscreen()
-{
-    static bool fullScreen = false;
-
-    fullScreen = !fullScreen;
-
-    if (fullScreen) {
-        int fullWidth = glutGet(GLUT_SCREEN_WIDTH);
-        int fullHeight = glutGet(GLUT_SCREEN_HEIGHT);
-
-        std::stringstream gameModeSS;
-
-        gameModeSS << fullWidth << "x" << fullHeight;
-
-        glutGameModeString(gameModeSS.str().c_str());
-        glutEnterGameMode();
-    } else {
-        glutLeaveGameMode();
-    }
-}
-
 void handleKey(unsigned char key, int x, int y)
 {
-	switch(key) {
-	    case 'f':
-	        toggleFullscreen();
-	        break;
+	switch(key) {;
 		case 'r':
             reset = true;
 			break;
@@ -114,7 +92,7 @@ void handleMouseMotion(int x, int y)
     vel.x *= invWidth;
     vel.y *= invHeight;
 
-    vel = vel.mult(100.0);
+    vel = vel.mult(1000.0);
 
     fluidSolver.addForceAtPos((double) x * invWidth,
                               1.0 - (double) y * invHeight, vel.x, -vel.y);
@@ -150,26 +128,8 @@ void draw() {
     fluidSolver.setDeltaT(dt);
     fluidSolver.update();
 
-    BOOST_FOREACH(Particle *p, particles0->getParticles()) {
-        ofPoint velocity;
-
-        fluidSolver.getInfoAtPos(p->position.x, p->position.y, &velocity, NULL);
-
-        p->velocity.x += velocity.x;
-        p->velocity.y += velocity.y;
-    }
-
-    BOOST_FOREACH(Particle *p, particles1->getParticles()) {
-        ofPoint velocity;
-
-        fluidSolver.getInfoAtPos(p->position.x, p->position.y, &velocity, NULL);
-
-        p->velocity.x += velocity.x;
-        p->velocity.y += velocity.y;
-    }
-
-	particles0->update(dt);
-	particles1->update(dt);
+	particles0->update(dt, &fluidSolver);
+	particles1->update(dt, &fluidSolver);
 
 	cellNoiseRenderer->render(cellNoisePass0, particles0, 0.3);
     cellNoiseRenderer->render(cellNoisePass1, particles1, 0.15);
@@ -184,15 +144,18 @@ void updateFramerate(int /* ignored */)
 {
     int time = glutGet(GLUT_ELAPSED_TIME);
     int elapsed = time - lastFPSTime;
+    float framerate = 1000.0 * (float) frames / (float) elapsed;
 
-    lastFPSTime = time;
-
-    float framerate = 1000.0 * frames / elapsed;
     std::stringstream framerateSS;
 
     framerateSS << "GL Toy " << framerate << " fps";
 
     glutSetWindowTitle(framerateSS.str().c_str());
+
+    lastFPSTime = time;
+    frames = 0;
+
+    glutTimerFunc(1000, updateFramerate, 0);
 }
 
 int main(int argc, char **argv) {
@@ -202,19 +165,31 @@ int main(int argc, char **argv) {
 
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
 
-	glutInitWindowPosition(0, 0);
-	glutInitWindowSize(windowWidth, windowHeight);
+	if (argc > 1 && strcmp(argv[1], "-f") == 0) {
+        int fullWidth = glutGet(GLUT_SCREEN_WIDTH);
+        int fullHeight = glutGet(GLUT_SCREEN_HEIGHT);
 
-	glutCreateWindow("GL Toy");
+        std::stringstream gameModeSS;
+
+        gameModeSS << fullWidth << "x" << fullHeight;
+
+        glutGameModeString(gameModeSS.str().c_str());
+        glutEnterGameMode();
+	} else {
+	    glutInitWindowPosition(0, 0);
+	    glutInitWindowSize(windowWidth, windowHeight);
+
+	    glutCreateWindow("GL Toy");
+	}
 
 	glewInit();
 
-	fluidSolver.setup(windowWidth, windowHeight);
-	fluidSolver.enableRGB(false).setFadeSpeed(0).setDeltaT(0.1).setVisc(0.00015)
-	           .setWrap(true, true).setColorDiffusion(0);
+	fluidSolver.setup();
+	fluidSolver.enableRGB(false).setFadeSpeed(0).setDeltaT(0.1).setVisc(0.002)
+               .setWrap(true, true).setColorDiffusion(0);
 
-	particles0 = new ParticleSystem(200, 0.01);
-	particles1 = new ParticleSystem(1000, 0.01);
+	particles0 = new FluidParticleSystem(200, 0.01, 0.1);
+	particles1 = new FluidParticleSystem(1000, 0.01, 0.1);
 
 	cellNoisePass0 = new TextureRenderPass(windowWidth, windowHeight);
 	cellNoisePass1 = new TextureRenderPass(windowWidth, windowHeight);
