@@ -31,14 +31,10 @@ Vec2d mouse, lastMouse;
 
 ////
 
-FluidParticleSystem *particles0, *particles1;
-TextureRenderPass *cellNoisePass0, *cellNoisePass1;
-ScreenRenderPass *screenPass;
-
-CellNoiseRenderer *cellNoiseRenderer;
-FractalRenderer *fractalRenderer;
-
 ofxMSAFluidSolver fluidSolver;
+FluidParticleSystem *particles0, *particles1;
+CellNoiseRenderer *cellNoiseRenderer;
+ScreenRenderPass *screenPass;
 
 void resize(int w, int h) {
 	windowWidth = w;
@@ -46,18 +42,7 @@ void resize(int w, int h) {
 	invWidth = 1.0 / (double) w;
 	invHeight = 1.0 / (double) h;
 
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-
-	glViewport(0, 0, w, h);
-	glOrtho(0, w, h, 0, 0, 1);
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-
 	fluidSolver.setSize(fluidSize, (float) fluidSize * (float) h / (float) w);
-	cellNoisePass0->setSize(w, h);
-	cellNoisePass1->setSize(w, h);
 	screenPass->setSize(w, h);
 }
 
@@ -111,11 +96,10 @@ void handleMouse(int button, int state, int x, int y)
 
 void draw() {
     if (reset) {
+        fluidSolver.reset();
         particles0->reset();
         particles1->reset();
-        fluidSolver.reset();
         cellNoiseRenderer->reload();
-        fractalRenderer->reload();
 
         reset = false;
     }
@@ -131,10 +115,30 @@ void draw() {
 	particles0->update(dt, &fluidSolver);
 	particles1->update(dt, &fluidSolver);
 
-	cellNoiseRenderer->render(cellNoisePass0, particles0, 0.3);
-    cellNoiseRenderer->render(cellNoisePass1, particles1, 0.15);
+	screenPass->begin();
 
-	fractalRenderer->render(screenPass);
+	glClearAccum(0.0, 0.0, 0.0, 0.0);
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ACCUM_BUFFER_BIT);
+
+    glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_TRUE);
+    cellNoiseRenderer->render(screenPass, particles0, 0.3);
+    glAccum(GL_ACCUM, 0.7);
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glColorMask(GL_FALSE, GL_TRUE, GL_FALSE, GL_TRUE);
+    cellNoiseRenderer->render(screenPass, particles1, 0.1);
+    glAccum(GL_ACCUM, 0.3);
+
+    //glClearColor(0.0, 0.0, 0.0, 1.0);
+    //glClear(GL_COLOR_BUFFER_BIT);
+
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+    glAccum(GL_RETURN, 1.0);
+
+    screenPass->end();
 
 	glutSwapBuffers();
 	++frames;
@@ -163,7 +167,7 @@ int main(int argc, char **argv) {
 
 	glutInit(&argc, argv);
 
-	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
+	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH | GLUT_ACCUM);
 
 	if (argc > 1 && strcmp(argv[1], "-f") == 0) {
         int fullWidth = glutGet(GLUT_SCREEN_WIDTH);
@@ -188,20 +192,11 @@ int main(int argc, char **argv) {
 	fluidSolver.enableRGB(false).setFadeSpeed(0).setDeltaT(0.1).setVisc(0.002)
                .setWrap(true, true).setColorDiffusion(0);
 
-	particles0 = new FluidParticleSystem(200, 0.01, 0.1);
+	particles0 = new FluidParticleSystem(50, 0.01, 0.1);
 	particles1 = new FluidParticleSystem(1000, 0.01, 0.1);
 
-	cellNoisePass0 = new TextureRenderPass(windowWidth, windowHeight);
-	cellNoisePass1 = new TextureRenderPass(windowWidth, windowHeight);
+	cellNoiseRenderer = new CellNoiseRenderer();
 
-	cellNoiseRenderer = new CellNoiseRenderer(particles0, 0.3);
-
-	std::vector<TextureRenderPass *> passes;
-
-	passes.push_back(cellNoisePass0);
-    passes.push_back(cellNoisePass1);
-
-    fractalRenderer = new FractalRenderer(passes);
 	screenPass = new ScreenRenderPass(windowWidth, windowHeight);
 
     resize(windowWidth, windowHeight);

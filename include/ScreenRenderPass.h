@@ -1,5 +1,5 @@
-#ifndef SCREENRENDERPASS_H_
-#define SCREENRENDERPASS_H_
+#ifndef SCREEN2DRENDERPASS_H_
+#define SCREEN2DRENDERPASS_H_
 
 #include "glToy.h"
 
@@ -14,4 +14,4 @@ public:
     void end();
 };
 
-#endif /* SCREENRENDERPASS_H_ */
+#endif /* SCREEN2DRENDERPASS_H_ */

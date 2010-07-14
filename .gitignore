@@ -1,5 +1,6 @@
 glToy
 *.o
+*.d
 
 # Xcode/OSX stuff
 build/*

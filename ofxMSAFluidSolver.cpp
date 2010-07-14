@@ -52,6 +52,7 @@ float ofRandom(float x, float y)	{	return msa_rand.get_ufloat();	}
 
 #include "ofxMSAFluidSolver.h"
 
+#define DBG(msg, ...) // do nothing
 
 #define FLUID_CONDENSED_LOOPS				// doing a lot of the iterations in the same loop is quite faster...
 
@@ -83,12 +84,12 @@ ofxMSAFluidSolver::ofxMSAFluidSolver()
 ,curl(NULL)
 ,_isInited(false)
 {
-	printf("ofxMSAFluidSolver::ofxMSAFluidSolver()\n");	
+	DBG("ofxMSAFluidSolver::ofxMSAFluidSolver()\n");
 }
 
 ofxMSAFluidSolver& ofxMSAFluidSolver::setSize(int NX, int NY)
 {
-	printf("ofxMSAFluidSolver::setSize(%i, %i)\n", NX, NY);
+	DBG("ofxMSAFluidSolver::setSize(%i, %i)\n", NX, NY);
 	
 	_NX = NX;
 	_NY = NY;
@@ -110,7 +111,7 @@ ofxMSAFluidSolver& ofxMSAFluidSolver::setSize(int NX, int NY)
 
 ofxMSAFluidSolver& ofxMSAFluidSolver::setup(int NX, int NY)
 {
-	printf("ofxMSAFluidSolver::init(%i, %i)\n", NX, NY);
+	DBG("ofxMSAFluidSolver::init(%i, %i)\n", NX, NY);
 	
 	setDeltaT();
 	setFadeSpeed();
@@ -167,12 +168,12 @@ bool ofxMSAFluidSolver::isInited() {
 }
 
 ofxMSAFluidSolver::~ofxMSAFluidSolver() {
-	printf("ofxMSAFluidSolver::~ofxMSAFluidSolver()\n");
+	DBG("ofxMSAFluidSolver::~ofxMSAFluidSolver()\n");
 	destroy();
 }
 
 void ofxMSAFluidSolver::destroy() {
-	printf("ofxMSAFluidSolver::destroy()\n");
+	DBG("ofxMSAFluidSolver::destroy()\n");
 	_isInited = false;
 	
 	if(r)		delete []r;
@@ -193,7 +194,7 @@ void ofxMSAFluidSolver::destroy() {
 
 
 void ofxMSAFluidSolver::reset() {
-	printf("ofxMSAFluidSolver::reset()\n");	
+	DBG("ofxMSAFluidSolver::reset()\n");
 	destroy();
 	_isInited = true;
 	

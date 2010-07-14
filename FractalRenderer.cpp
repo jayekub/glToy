@@ -3,10 +3,8 @@
 #include "FractalRenderer.h"
 
 FractalRenderer::FractalRenderer(
-        const std::vector<TextureRenderPass *> &inputPasses,
-        RenderPass *renderPass) :
-
-    Renderer(renderPass), _inputPasses(inputPasses)
+        const std::vector<TextureRenderPass *> &inputPasses) :
+        _inputPasses(inputPasses)
 {
     std::vector<Program::ShaderSpec> shaders;
     shaders.push_back(Program::ShaderSpec("fractal.fp", GL_FRAGMENT_SHADER));
@@ -15,15 +13,7 @@ FractalRenderer::FractalRenderer(
     reload();
 }
 
-void FractalRenderer::reload()
-{
-    _fractalProgram.reload();
-
-
-
-}
-
-void FractalRenderer::_render(RenderPass *renderPass)
+void FractalRenderer::render(RenderPass *renderPass)
 {
     glClearColor(1.0, 1.0, 1.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -39,4 +29,9 @@ void FractalRenderer::_render(RenderPass *renderPass)
     glUniform1i(_fractalProgram.uniform("tex1"), 1);
 
     drawViewportQuad(renderPass->getWidth(), renderPass->getHeight());
+}
+
+void FractalRenderer::reload()
+{
+    _fractalProgram.reload();
 }

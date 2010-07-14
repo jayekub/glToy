@@ -12,16 +12,16 @@
 class FractalRenderer : public Renderer
 {
 public:
-    FractalRenderer(const std::vector<TextureRenderPass *> &inputPasses,
-                    RenderPass *renderPass = NULL);
+    FractalRenderer(const std::vector<TextureRenderPass *> &inputPasses);
 
+    void render(RenderPass *renderPass);
     void reload();
 
 private:
     std::vector<TextureRenderPass *> _inputPasses;
     Program _fractalProgram;
 
-    virtual void _render(RenderPass *renderPass);
+;
 };
 
 #endif /* FRACTALRENDERER_H_ */

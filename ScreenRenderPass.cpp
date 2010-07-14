@@ -7,7 +7,6 @@ ScreenRenderPass::ScreenRenderPass(int width, int height) :
 
 void ScreenRenderPass::begin()
 {
-    glViewport(0.0, 0.0, _width, _height);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 

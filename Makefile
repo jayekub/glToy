@@ -1,6 +1,17 @@
-OBJS = glToy.o utils.o Particle.o ParticleSystem.o FluidParticleSystem.o \
-	   Program.o RenderPass.o ScreenRenderPass.o TextureRenderPass.o \
-	   Renderer.o CellNoiseRenderer.o FractalRenderer.o ofxMSAFluidSolver.o
+OBJS = \
+	glToy.o \
+	utils.o \
+	Particle.o \
+	ParticleSystem.o \
+	FluidParticleSystem.o \
+	Program.o \
+	RenderPass.o \
+	ScreenRenderPass.o \
+	TextureRenderPass.o \
+	CellNoiseRenderer.o \
+	FractalRenderer.o \
+	ofxMSAFluidSolver.o
+
 TARGET = glToy
 
 UNAME := $(shell uname)
@@ -8,7 +19,7 @@ UNAME := $(shell uname)
 INCLUDES = -Iinclude/
 LIBS = -lGLEW -lGLU -lglut
 
-CXXFLAGS =	-O2 -g -Wall -fmessage-length=0 $(INCLUDES)
+CXXFLAGS = -O2 -g -Wall -fmessage-length=0
 
 ifeq ($(UNAME),Darwin)
     CXXFLAGS += -I/opt/local/include
@@ -18,10 +29,16 @@ ifeq ($(UNAME),Darwin)
            -L/opt/local/lib -lGLEW
 endif
 
+all: $(TARGET)
+
 $(TARGET): $(OBJS)
 	$(CXX) -o $(TARGET) $(OBJS) $(LIBS)
 
-all: $(TARGET)
-
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -f $(OBJS) $(OBJS:%.o=%.d) $(TARGET)
+
+%.o : %.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -MM -MP -MD $<
+
+-include $(OBJS:%.o=%.d)
