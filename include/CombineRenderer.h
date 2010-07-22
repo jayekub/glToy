@@ -9,10 +9,10 @@
 #include "Renderer.h"
 #include "Program.h"
 
-class FractalRenderer : public Renderer
+class CombineRenderer : public Renderer
 {
 public:
-    FractalRenderer(const std::vector<TextureRenderPass *> &inputPasses);
+    CombineRenderer(const std::vector<TextureRenderPass *> &inputPasses);
 
     void render(RenderPass *renderPass);
     void reload();

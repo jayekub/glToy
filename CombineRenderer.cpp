@@ -1,8 +1,8 @@
 #include "utils.h"
 
-#include "FractalRenderer.h"
+#include "CombineRenderer.h"
 
-FractalRenderer::FractalRenderer(
+CombineRenderer::CombineRenderer(
         const std::vector<TextureRenderPass *> &inputPasses) :
         _inputPasses(inputPasses)
 {
@@ -13,7 +13,7 @@ FractalRenderer::FractalRenderer(
     reload();
 }
 
-void FractalRenderer::render(RenderPass *renderPass)
+void CombineRenderer::render(RenderPass *renderPass)
 {
     glClearColor(1.0, 1.0, 1.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -31,7 +31,7 @@ void FractalRenderer::render(RenderPass *renderPass)
     drawViewportQuad(renderPass->getWidth(), renderPass->getHeight());
 }
 
-void FractalRenderer::reload()
+void CombineRenderer::reload()
 {
     _fractalProgram.reload();
 }
