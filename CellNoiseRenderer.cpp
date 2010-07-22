@@ -17,13 +17,13 @@ CellNoiseRenderer::CellNoiseRenderer()
 void CellNoiseRenderer::render(
         RenderPass *renderPass,
         ParticleSystem *noiseParticles,
-        double particleSize)
+        float particleSize)
 {
     int rpWidth = renderPass->getWidth();
     int rpHeight = renderPass->getHeight();
 
-    double ps = particleSize * rpWidth;
-    double ps_2 = ps / 2.0;
+    float ps = particleSize * rpWidth;
+    float ps_2 = ps / 2.0;
 
     glMatrixMode(GL_PROJECTION);
 
@@ -34,10 +34,12 @@ void CellNoiseRenderer::render(
     _cellNoiseProgram.use();
 
     BOOST_FOREACH(Particle *p, noiseParticles->getParticles()) {
-        double x = p->position.x * rpWidth;
-        double y = rpHeight - p->position.y * rpHeight;
+        float x = p->position.x * rpWidth;
+        float y = rpHeight - p->position.y * rpHeight;
 
-        _drawParticle(x, y, ps);
+        float velScale = 1.0;
+
+        _drawParticle(x, y, ps * velScale);
 
         // test if we need to draw a wrapped version of this particle also
         // to make the noise tileable
@@ -45,22 +47,22 @@ void CellNoiseRenderer::render(
 
         if (x < ps_2) {
             wx = x + rpWidth;
-            _drawParticle(wx, y, ps);
+            _drawParticle(wx, y, ps * velScale);
         } else if (x > rpWidth - ps_2) {
             wx = x - rpWidth;
-            _drawParticle(wx, y, ps);
+            _drawParticle(wx, y, ps * velScale);
         }
 
         if (y < ps_2) {
             wy = y + rpHeight;
-            _drawParticle(x, wy, ps);
+            _drawParticle(x, wy, ps * velScale);
         } else if (y > rpHeight - ps_2) {
             wy = y - rpHeight;
-            _drawParticle(x, wy, ps);
+            _drawParticle(x, wy, ps * velScale);
         }
 
         if (wx != x && wy != y)
-            _drawParticle(wx, wy, ps);
+            _drawParticle(wx, wy, ps * velScale);
     }
 }
 
@@ -74,29 +76,29 @@ void CellNoiseRenderer::reload()
 
         glBegin(GL_TRIANGLE_STRIP);
 
-            glTexCoord2d(0.0, 0.0);
-            glVertex2d(-0.5, -0.5);
+            glTexCoord2f(0.0, 0.0);
+            glVertex2f(-0.5, -0.5);
 
-            glTexCoord2d(1.0, 0.0);
-            glVertex2d(0.5, -0.5);
+            glTexCoord2f(1.0, 0.0);
+            glVertex2f(0.5, -0.5);
 
-            glTexCoord2d(0.0, 1.0);
-            glVertex2d(-0.5, 0.5);
+            glTexCoord2f(0.0, 1.0);
+            glVertex2f(-0.5, 0.5);
 
-            glTexCoord2d(1.0, 1.0);
-            glVertex2d(0.5, 0.5);
+            glTexCoord2f(1.0, 1.0);
+            glVertex2f(0.5, 0.5);
 
         glEnd();
 
     glEndList();
 }
 
-void CellNoiseRenderer::_drawParticle(double x, double y, double size)
+void CellNoiseRenderer::_drawParticle(float x, float y, float size)
 {
     glPushMatrix();
 
-    glTranslated(x, y, 0.0);
-    glScaled(size, size, 1.0);
+    glTranslatef(x, y, 0.0);
+    glScalef(size, size, 1.0);
 
     // TODO use VBO?
     glCallList(_particleDisplayList);

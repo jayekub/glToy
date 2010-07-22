@@ -12,7 +12,7 @@
 #include "TextureRenderPass.h"
 #include "ScreenRenderPass.h"
 #include "CellNoiseRenderer.h"
-#include "FractalRenderer.h"
+#include "CombineRenderer.h"
 #include "ofxMSAFluidSolver.h"
 
 int windowWidth = 640;
@@ -20,21 +20,40 @@ int windowHeight = 480;
 
 const int fluidSize = 100;
 
-double invWidth, invHeight;
+float invWidth, invHeight;
+//float fluidWidth, fluidHeight;
 
 bool reset = false;
 int lastDrawTime = -1;
 int lastFPSTime = -1;
 int frames = 0;
+double avgDT = -1.0;
 
-Vec2d mouse, lastMouse;
+Vec2 mouse, lastMouse;
 
 ////
 
 ofxMSAFluidSolver fluidSolver;
 FluidParticleSystem *particles0, *particles1;
-CellNoiseRenderer *cellNoiseRenderer;
+
+TextureRenderPass *cellNoisePass0 = NULL, *cellNoisePass1 = NULL;
 ScreenRenderPass *screenPass;
+
+CellNoiseRenderer *cellNoiseRenderer;
+CombineRenderer *combineRenderer;
+
+void dampenFluid(ofxMSAFluidSolver *fluid, float amount)
+{
+    int fw = fluid->getWidth();
+    int fh = fluid->getHeight();
+
+    int maxIndex = (fw - 1) + (fh + 2) * (fh - 1);
+
+    for (int i = 0; i < maxIndex; ++i) {
+        fluid->u[i] *= amount;
+        fluid->v[i] *= amount;
+    }
+}
 
 void resize(int w, int h) {
 	windowWidth = w;
@@ -44,6 +63,9 @@ void resize(int w, int h) {
 
 	fluidSolver.setSize(fluidSize, (float) fluidSize * (float) h / (float) w);
 	screenPass->setSize(w, h);
+
+	if (cellNoisePass0) cellNoisePass0->setSize(w, h);
+	if (cellNoisePass1) cellNoisePass1->setSize(w, h);
 }
 
 void handleKey(unsigned char key, int x, int y)
@@ -72,15 +94,20 @@ void handleMouseMotion(int x, int y)
     mouse.x = x;
     mouse.y = y;
 
-    Vec2d vel = mouse - lastMouse;
+    Vec2 vel = mouse - lastMouse;
 
     vel.x *= invWidth;
     vel.y *= invHeight;
 
     vel = vel.mult(1000.0);
 
+#ifdef USE_ACCUM
     fluidSolver.addForceAtPos((double) x * invWidth,
                               1.0 - (double) y * invHeight, vel.x, -vel.y);
+#else
+    fluidSolver.addForceAtPos((double) x * invWidth,
+                              (double) y * invHeight, vel.x, vel.y);
+#endif
 }
 
 void handleMouse(int button, int state, int x, int y)
@@ -104,41 +131,68 @@ void draw() {
         reset = false;
     }
 
-    int drawTime = glutGet(GLUT_ELAPSED_TIME);
-    double dt = (drawTime - lastDrawTime) / 1000.0;
+    //int drawTime = glutGet(GLUT_ELAPSED_TIME);
+    //double dt = (drawTime - lastDrawTime) / 1000.0;
 
-    lastDrawTime = drawTime;
+    //lastDrawTime = drawTime;
 
+    double dt = avgDT < 0 ? 0.1 : avgDT;
+
+    // TODO average dt
     fluidSolver.setDeltaT(dt);
+
+    //dampenFluid(&fluidSolver, 0.9);
     fluidSolver.update();
 
 	particles0->update(dt, &fluidSolver);
 	particles1->update(dt, &fluidSolver);
 
+#ifdef USE_ACCUM
 	screenPass->begin();
 
 	glClearAccum(0.0, 0.0, 0.0, 0.0);
-    glClearColor(1.0, 1.0, 1.0, 1.0);
+    glClearColor(1.0, 0.0, 1.0, 1.0);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ACCUM_BUFFER_BIT);
 
-    glColorMask(GL_TRUE, GL_FALSE, GL_FALSE, GL_TRUE);
+    glColorMask(GL_TRUE, GL_FALSE, GL_TRUE, GL_TRUE);
     cellNoiseRenderer->render(screenPass, particles0, 0.3);
-    glAccum(GL_ACCUM, 0.7);
+    glAccum(GL_ACCUM, 1.0);
 
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+    glClearColor(0.0, 1.0, 1.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glColorMask(GL_FALSE, GL_TRUE, GL_FALSE, GL_TRUE);
-    cellNoiseRenderer->render(screenPass, particles1, 0.1);
-    glAccum(GL_ACCUM, 0.3);
+    glColorMask(GL_FALSE, GL_TRUE, GL_TRUE, GL_TRUE);
+    cellNoiseRenderer->render(screenPass, particles1, 0.15);
+    glAccum(GL_ACCUM, 1.0);
 
-    //glClearColor(0.0, 0.0, 0.0, 1.0);
-    //glClear(GL_COLOR_BUFFER_BIT);
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+    glClearColor(0.0, 0.0, 0.0, 1.0);    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT);
 
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
     glAccum(GL_RETURN, 1.0);
 
     screenPass->end();
+#else
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+
+    cellNoisePass0->begin();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    cellNoiseRenderer->render(cellNoisePass0, particles0, 0.3);
+    cellNoisePass0->end();
+
+    cellNoisePass1->begin();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    cellNoiseRenderer->render(cellNoisePass1, particles1, 0.15);
+    cellNoisePass0->end();
+
+    screenPass->begin();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    combineRenderer->render(screenPass);
+    screenPass->end();
+#endif
 
 	glutSwapBuffers();
 	++frames;
@@ -149,6 +203,8 @@ void updateFramerate(int /* ignored */)
     int time = glutGet(GLUT_ELAPSED_TIME);
     int elapsed = time - lastFPSTime;
     float framerate = 1000.0 * (float) frames / (float) elapsed;
+
+    avgDT = 1.0 / framerate;
 
     std::stringstream framerateSS;
 
@@ -189,11 +245,23 @@ int main(int argc, char **argv) {
 	glewInit();
 
 	fluidSolver.setup();
-	fluidSolver.enableRGB(false).setFadeSpeed(0).setDeltaT(0.1).setVisc(0.002)
+	fluidSolver.enableRGB(false).setFadeSpeed(0).setDeltaT(0.1).setVisc(0.005)
                .setWrap(true, true).setColorDiffusion(0);
 
-	particles0 = new FluidParticleSystem(50, 0.01, 0.1);
+	particles0 = new FluidParticleSystem(200, 0.01, 0.1);
 	particles1 = new FluidParticleSystem(1000, 0.01, 0.1);
+
+#ifndef USE_ACCUM
+    cellNoisePass0 = new TextureRenderPass(windowWidth, windowHeight);
+    cellNoisePass1 = new TextureRenderPass(windowWidth, windowHeight);
+
+    std::vector<TextureRenderPass *> passes;
+
+    passes.push_back(cellNoisePass0);
+    passes.push_back(cellNoisePass1);
+
+    combineRenderer = new CombineRenderer(passes);
+#endif
 
 	cellNoiseRenderer = new CellNoiseRenderer();
 

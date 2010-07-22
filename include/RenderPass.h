@@ -1,6 +1,9 @@
 #ifndef RENDERPASS_H_
 #define RENDERPASS_H_
 
+#include "glToy.h"
+#include "Vec.h"
+
 class RenderPass
 {
 public:

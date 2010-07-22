@@ -9,7 +9,7 @@ OBJS = \
 	ScreenRenderPass.o \
 	TextureRenderPass.o \
 	CellNoiseRenderer.o \
-	FractalRenderer.o \
+	CombineRenderer.o \
 	ofxMSAFluidSolver.o
 
 TARGET = glToy

@@ -13,7 +13,7 @@ public:
 
     void render(RenderPass *renderPass,
                 ParticleSystem *noiseParticles,
-                double particleSize = -1.0);
+                float particleSize = -1.0);
     void reload();
 
 private:
@@ -21,7 +21,7 @@ private:
 
     GLuint _particleDisplayList;
 
-    void _drawParticle(double x, double y, double size);
+    void _drawParticle(float x, float y, float size);
 };
 
 #endif /* CELLNOISERENDERPASS_H_ */
