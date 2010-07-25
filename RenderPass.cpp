@@ -15,13 +15,12 @@ void RenderPass::setSize(int width, int height)
     _height = height;
 }
 
-void RenderPass::setOrthoProjection()
+void RenderPass::setFlatProjection()
 {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glViewport(0.0, 0.0, _width, _height);
     glOrtho(0, _width, _height, 0, 0, 1);
-    glMatrixMode(GL_MODELVIEW);
 }
 
 void RenderPass::setPerspProjection(float fov, float near, float far)
@@ -30,5 +29,4 @@ void RenderPass::setPerspProjection(float fov, float near, float far)
     glLoadIdentity();
     glViewport(0.0, 0.0, _width, _height);
     gluPerspective(fov, _width / _height, near, far);
-    glMatrixMode(GL_MODELVIEW);
 }

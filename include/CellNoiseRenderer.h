@@ -6,7 +6,7 @@
 #include "Program.h"
 #include "ParticleSystem.h"
 
-class CellNoiseRenderer : public Renderer
+class CellNoiseRenderer : public Renderer, Reloadable
 {
 public:
     CellNoiseRenderer();

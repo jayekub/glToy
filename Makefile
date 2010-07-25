@@ -1,16 +1,18 @@
 OBJS = \
 	glToy.o \
 	utils.o \
+	Reloadable.o \
+	Program.o \
 	Particle.o \
 	ParticleSystem.o \
 	FluidParticleSystem.o \
-	Program.o \
 	RenderPass.o \
 	ScreenRenderPass.o \
 	TextureRenderPass.o \
 	CellNoiseRenderer.o \
 	CombineRenderer.o \
-	SceneRenderer.o \
+	Visitor.o \
+	SceneRenderVisitor.o \
 	Anemone.o \
 	ofxMSAFluidSolver.o
 

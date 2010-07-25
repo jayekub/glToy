@@ -6,16 +6,14 @@ CombineRenderer::CombineRenderer(
         const std::vector<TextureRenderPass *> &inputPasses) :
         _inputPasses(inputPasses)
 {
-    std::vector<Program::ShaderSpec> shaders;
-    shaders.push_back(Program::ShaderSpec("combine.fp", GL_FRAGMENT_SHADER));
-
-    _fractalProgram.setShaders(shaders, false);
-    reload();
+    _fractalProgram.addShader(
+            Program::ShaderSpec("shaders/combine.fp", GL_FRAGMENT_SHADER));
+    _fractalProgram.reload();
 }
 
 void CombineRenderer::render(RenderPass *renderPass)
 {
-    renderPass->setOrthoProjection();
+    renderPass->setFlatProjection();
     _fractalProgram.use();
 
     glClearColor(1.0, 1.0, 1.0, 1.0);
@@ -30,9 +28,4 @@ void CombineRenderer::render(RenderPass *renderPass)
     glUniform1i(_fractalProgram.uniform("tex1"), 1);
 
     drawViewportQuad(renderPass->getWidth(), renderPass->getHeight());
-}
-
-void CombineRenderer::reload()
-{
-    _fractalProgram.reload();
 }

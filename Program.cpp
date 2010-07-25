@@ -10,7 +10,10 @@ Program::Program() {
 Program::Program(const std::vector<ShaderSpec> &shaderSpecs)
 {
     Program::Program();
-    setShaders(shaderSpecs);
+
+    //setShaders(shaderSpecs);
+    _shaderSpecs = shaderSpecs;
+    reload();
 }
 
 Program::~Program()
@@ -29,15 +32,15 @@ void Program::reload()
 
     BOOST_FOREACH(ShaderSpec spec, _shaderSpecs) {
         GLuint shader = Program::makeShader(spec.first, spec.second);
-        printf("%s: %s\n", spec.first.c_str(),
-               Program::getShaderInfoLog(shader).c_str());
+        //printf("%s: %s\n", spec.first.c_str(),
+        //       Program::getShaderInfoLog(shader).c_str());
 
         _shaders.push_back(shader);
     }
 
     _program = Program::makeProgram(_shaders);
 
-    puts(Program::getProgramInfoLog(_program).c_str());
+    //puts(Program::getProgramInfoLog(_program).c_str());
 
     _rebuildParamMaps();
 }
@@ -47,12 +50,18 @@ void Program::use()
     glUseProgram(_program);
 }
 
+void Program::addShader(const ShaderSpec &shaderSpec)
+{
+    _shaderSpecs.push_back(shaderSpec);
+}
+
+/*
 void Program::setShaders(
         const std::vector<ShaderSpec> &shaderSpecs, bool doReload)
 {
     _shaderSpecs = shaderSpecs;
     if (doReload) reload();
-}
+}*/
 
 // static
 GLuint Program::makeShader(const std::string &filename, GLuint type)
@@ -66,6 +75,12 @@ GLuint Program::makeShader(const std::string &filename, GLuint type)
     glShaderSource(shader, 1, &source, &sourceLen);
     glCompileShader(shader);
 
+    GLint compileStatus;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
+
+    if (compileStatus != GL_TRUE) {
+        printf("%s: %s\n", filename.c_str(), getShaderInfoLog(shader).c_str());
+    }
 
     return shader;
 }
@@ -80,6 +95,13 @@ GLuint Program::makeProgram(const std::vector<GLuint> &shaders)
     }
 
     glLinkProgram(program);
+
+    GLint linkStatus;
+    glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
+
+    if (linkStatus != GL_TRUE) {
+        puts(getProgramInfoLog(program).c_str());
+    }
 
     return program;
 }

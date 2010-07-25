@@ -7,7 +7,10 @@
 
 #include <boost/foreach.hpp>
 
-class Program
+#include "glToy.h"
+#include "Reloadable.h"
+
+class Program : public Reloadable
 {
 public:
     typedef std::pair<std::string, GLuint> ShaderSpec;
@@ -22,8 +25,9 @@ public:
     GLuint uniform(const std::string &name) { return _uniforms[name]; };
     GLuint attribute(const std::string &name) { return _attributes[name]; };
 
-    void setShaders(const std::vector<ShaderSpec> &shaderSpecs,
-                    bool doReload = true);
+    void addShader(const ShaderSpec &shaderSpec);
+    //void setShaders(const std::vector<ShaderSpec> &shaderSpecs,
+    //                bool doReload = true);
 
     static GLuint makeShader(const std::string &filename, GLenum shaderType);
     static GLuint makeProgram(const std::vector<GLuint> &shaders);

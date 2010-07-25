@@ -1,13 +1,15 @@
 #ifndef ANEMONE_H_
 #define ANEMONE_H_
 
-#include "Vec.h"
 #include "Prim.h"
+#include "Program.h"
+#include "Vec.h"
 
 class Anemone : public Prim
 {
 public:
-    Anemone(int numTentacles, int numSegments, double wiggle = 0.03);
+    Anemone(const char *name,
+            int numTentacles, int numSegments, double wiggle = 0.03);
     virtual ~Anemone();
 
     void update(double dt);
@@ -20,6 +22,9 @@ private:
     Vec3 _currentDir;
     double **_currentOffsets;
     double _time;
+
+    // XXX make static?
+    Program _anemoneProgram;
 
     void _destroy();
 

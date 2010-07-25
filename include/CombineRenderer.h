@@ -15,7 +15,6 @@ public:
     CombineRenderer(const std::vector<TextureRenderPass *> &inputPasses);
 
     void render(RenderPass *renderPass);
-    void reload();
 
 private:
     std::vector<TextureRenderPass *> _inputPasses;

@@ -7,10 +7,8 @@
 
 CellNoiseRenderer::CellNoiseRenderer()
 {
-    std::vector<Program::ShaderSpec> shaders;
-    shaders.push_back(Program::ShaderSpec("cellNoise.fp", GL_FRAGMENT_SHADER));
-
-    _cellNoiseProgram.setShaders(shaders, false);
+    _cellNoiseProgram.addShader(
+            Program::ShaderSpec("shaders/cellNoise.fp", GL_FRAGMENT_SHADER));
     reload();
 }
 
@@ -19,7 +17,7 @@ void CellNoiseRenderer::render(
         ParticleSystem *noiseParticles,
         float particleSize)
 {
-    renderPass->setOrthoProjection();
+    renderPass->setFlatProjection();
     _cellNoiseProgram.use();
 
     int rpWidth = renderPass->getWidth();
@@ -63,8 +61,6 @@ void CellNoiseRenderer::render(
 
 void CellNoiseRenderer::reload()
 {
-    _cellNoiseProgram.reload();
-
     _particleDisplayList = 1;
 
     glNewList(_particleDisplayList, GL_COMPILE);

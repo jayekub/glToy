@@ -1,7 +1,12 @@
+#include <stdio.h>
+
 #include "Noise.h"
 #include "Anemone.h"
 
-Anemone::Anemone(int numTentacles, int numSegments, double wiggle) :
+Anemone::Anemone(
+        const char *name,
+        int numTentacles, int numSegments, double wiggle) :
+    Prim(name),
     _numTentacles(numTentacles), _numSegments(numSegments), _time(0.0)
 {
     _currentDir = Vec3::randVec(-1., 1.);
@@ -21,6 +26,10 @@ Anemone::Anemone(int numTentacles, int numSegments, double wiggle) :
             _currentOffsets[t][s] = 0.0;
         }
     }
+
+   _anemoneProgram.addShader(
+           Program::ShaderSpec("shaders/anemone.fp", GL_FRAGMENT_SHADER));
+    _anemoneProgram.reload();
 }
 
 Anemone::~Anemone()
@@ -57,6 +66,8 @@ void Anemone::render()
     glScalef(5., 5., 5.);
 
     glColor3f(1., 1., 0.8);
+
+    _anemoneProgram.use();
 
     for (int t = 0; t < _numTentacles; ++t) {
         //glBegin(GL_LINE_STRIP);

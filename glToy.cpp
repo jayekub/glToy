@@ -8,14 +8,21 @@
 #include "glToy.h"
 #include "utils.h"
 
+#include "Reloadable.h"
+
+#include "Scene.h"
+#include "Camera.h"
+#include "Transform.h"
 #include "Anemone.h"
+#include "SceneRenderVisitor.h"
+
 #include "ofxMSAFluidSolver.h"
 #include "FluidParticleSystem.h"
 #include "TextureRenderPass.h"
 #include "ScreenRenderPass.h"
 #include "CellNoiseRenderer.h"
 #include "CombineRenderer.h"
-#include "SceneRenderer.h"
+
 
 int windowWidth = 640;
 int windowHeight = 480;
@@ -35,7 +42,9 @@ Vec2 mouse, lastMouse;
 
 ////
 
+Scene *anemoneScene;
 Anemone *anemone;
+SceneRenderVisitor *sceneRenderVisitor;
 
 ofxMSAFluidSolver fluidSolver;
 FluidParticleSystem *particles0, *particles1;
@@ -45,7 +54,7 @@ ScreenRenderPass *screenPass;
 
 CellNoiseRenderer *cellNoiseRenderer;
 CombineRenderer *combineRenderer;
-SceneRenderer *sceneRenderer;
+SceneRenderVisitor *sceneRenderer;
 
 void resize(int w, int h) {
 	windowWidth = w;
@@ -118,7 +127,8 @@ void draw() {
         fluidSolver.reset();
         particles0->reset();
         particles1->reset();
-        cellNoiseRenderer->reload();
+
+        Reloadable::reloadAll();
 
         reset = false;
     }
@@ -190,9 +200,9 @@ void draw() {
 
     anemone->update(dt);
 
-    screenPass->begin();
-    sceneRenderer->render(screenPass);
-    screenPass->end();
+    sceneRenderVisitor->setRenderPass(screenPass);
+    sceneRenderVisitor->setCameraName("anemoneCamera");
+    sceneRenderVisitor->render(anemoneScene);
 
 	glutSwapBuffers();
 	++frames;
@@ -216,6 +226,32 @@ void updateFramerate(int /* ignored */)
     frames = 0;
 
     glutTimerFunc(1000, updateFramerate, 0);
+}
+
+Scene *buildAnemoneScene()
+{
+    Scene *scene = new Scene("sceneRoot");
+
+    Camera *camera = new Camera("anemoneCamera");
+
+    camera->position = Vec3(0., 0., -10.);
+    camera->center = Vec3(0., 0., 0.);
+    camera->up = Vec3(0., 1., 0.);
+    camera->farClip = 20.;
+
+    scene->addChild(camera);
+
+    Transform *anemoneTransform = new Transform("anemone_transform");
+
+    anemoneTransform->translation.z = 0;
+
+    scene->addChild(anemoneTransform);
+
+    anemone = new Anemone("anemone", 100, 10);
+
+    anemoneTransform->addChild(anemone);
+
+    return scene;
 }
 
 int main(int argc, char **argv) {
@@ -265,14 +301,9 @@ int main(int argc, char **argv) {
 
 	cellNoiseRenderer = new CellNoiseRenderer();
 
-	////
-
-	anemone = new Anemone(100, 10);
-
-	sceneRenderer = new SceneRenderer();
-	sceneRenderer->addPrim(anemone);
-
+	anemoneScene = buildAnemoneScene();
 	screenPass = new ScreenRenderPass(windowWidth, windowHeight);
+	sceneRenderVisitor = new SceneRenderVisitor(screenPass);
 
     resize(windowWidth, windowHeight);
 
