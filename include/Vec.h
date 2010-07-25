@@ -3,86 +3,103 @@
 
 #include <math.h>
 
+#include "utils.h"
+
+typedef float vec_t;
+
 struct Vec2 {
     union {
         struct {
-            float x;
-            float y;
+            vec_t x;
+            vec_t y;
         };
-        float v[2];
+        vec_t v[2];
     };
 
-    Vec2() {
+    Vec2() : x(0), y(0) {
     }
 
     Vec2(double x_, double y_) :
         x(x_), y(y_) {
     }
 
-    double length() {
+    vec_t length() const {
         return sqrt(x * x + y * y);
     }
 
-    Vec2 mult(float a) {
+    Vec2 normalize() const {
+        return *this * (1. / length());
+    }
+
+    Vec2 operator+(const Vec2 &v) const {
+        return Vec2(x - v.x, y - v.y);
+    }
+
+    Vec2 operator-(const Vec2 &v) const {
+        return Vec2(x - v.x, y - v.y);
+    }
+
+    Vec2 operator*(const vec_t &a) const {
         return Vec2(a * x, a * y);
     }
-
-    Vec2 normalize() {
-        return mult(1.0 / length());
-    }
-
-    Vec2 operator+(const Vec2 &v) {
-        return Vec2(x - v.x, y - v.y);
-    }
-
-    Vec2 operator-(const Vec2 &v) {
-        return Vec2(x - v.x, y - v.y);
-    }
 };
 
-struct Vec4 {
+inline Vec2 operator*(const vec_t &a, const Vec2 &v) {
+    return v * a;
+}
+
+struct Vec3 {
     union {
         struct {
-            float x;
-            float y;
-            float z;
-            float w;
+            vec_t x;
+            vec_t y;
+            vec_t z;
         };
         struct {
-            float r;
-            float g;
-            float b;
-            float a;
+            vec_t r;
+            vec_t g;
+            vec_t b;
         };
-        float v[4];
+        vec_t v[3];
     };
 
-    Vec4() {
+    Vec3() : x(0), y(0), z(0) {
     }
 
-    Vec4(double x_, double y_, double z_, double w_) :
-        x(x_), y(y_), z(z_), w(w_) {
+    Vec3(double x_, double y_, double z_) :
+        x(x_), y(y_), z(z_) {
     }
 
-    float length() {
-        return sqrt(x * x + y * y + z * z + w * w);
+    vec_t length() const {
+        return sqrt(x * x + y * y + z * z);
     }
 
-    Vec4 mult(float a) {
-        return Vec4(a * x, a * y, a * z, a * w);
+    Vec3 normalize() {
+        return *this * (1.0 / length());
     }
 
-    Vec4 normalize() {
-        return mult(1.0 / length());
+    Vec3 operator+(const Vec3 &v) const {
+        return Vec3(x + v.x, y + v.y, z + v.z);
     }
 
-    Vec4 operator+(const Vec4 &v) {
-        return Vec4(x + v.x, y + v.y, z + v.z, w + v.w);
+    Vec3 operator-(const Vec3 &v) const {
+        return Vec3(x - v.x, y - v.y, z - v.z);
     }
 
-    Vec4 operator-(const Vec4 &v) {
-        return Vec4(x - v.x, y - v.y, z - v.z, w - v.w);
+    Vec3 operator*(const vec_t &a) const {
+        return Vec3(a * x, a * y, a * z);
+    }
+
+    static Vec3 randVec(float min = 0., float max = 1.) {
+        float range = max - min;
+        return Vec3(range * randFloat() + min,
+                    range * randFloat() + min,
+                    range * randFloat() + min);
     }
 };
+
+inline Vec3 operator*(const vec_t &a, const Vec3 &v) {
+    return v * a;
+}
 
 #endif /* VEC_H_ */

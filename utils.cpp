@@ -17,6 +17,7 @@ std::string readFile(const std::string &filename) {
 			contents += line + '\n';
 		}
 	} else {
+	    fprintf(stderr, "Unable to open file %s\n", filename.c_str());
 		throw "Unable to open file";
 	}
 

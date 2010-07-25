@@ -10,6 +10,8 @@ OBJS = \
 	TextureRenderPass.o \
 	CellNoiseRenderer.o \
 	CombineRenderer.o \
+	SceneRenderer.o \
+	Anemone.o \
 	ofxMSAFluidSolver.o
 
 TARGET = glToy

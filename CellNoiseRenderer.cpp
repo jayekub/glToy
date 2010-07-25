@@ -19,19 +19,14 @@ void CellNoiseRenderer::render(
         ParticleSystem *noiseParticles,
         float particleSize)
 {
+    renderPass->setOrthoProjection();
+    _cellNoiseProgram.use();
+
     int rpWidth = renderPass->getWidth();
     int rpHeight = renderPass->getHeight();
 
     float ps = particleSize * rpWidth;
     float ps_2 = ps / 2.0;
-
-    glMatrixMode(GL_PROJECTION);
-
-    glLoadIdentity();
-    glViewport(0.0, 0.0, rpWidth, rpHeight);
-    glOrtho(0, rpWidth, rpHeight, 0, 0, 1);
-
-    _cellNoiseProgram.use();
 
     BOOST_FOREACH(Particle *p, noiseParticles->getParticles()) {
         float x = p->position.x * rpWidth;

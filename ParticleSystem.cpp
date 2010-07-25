@@ -24,7 +24,7 @@ void ParticleSystem::addRandom(int num, double maxVelocity) {
         p->position.y = randFloat();
 
         p->velocity = Vec2(2.0 * randFloat() - 1.0, 2.0 * randFloat() - 1.0);
-        p->velocity = p->velocity.normalize().mult(randFloat() * maxVelocity);
+        p->velocity = p->velocity.normalize() * (randFloat() * maxVelocity);
 
         _particles.push_back(p);
     }

@@ -8,12 +8,14 @@
 #include "glToy.h"
 #include "utils.h"
 
+#include "Anemone.h"
+#include "ofxMSAFluidSolver.h"
 #include "FluidParticleSystem.h"
 #include "TextureRenderPass.h"
 #include "ScreenRenderPass.h"
 #include "CellNoiseRenderer.h"
 #include "CombineRenderer.h"
-#include "ofxMSAFluidSolver.h"
+#include "SceneRenderer.h"
 
 int windowWidth = 640;
 int windowHeight = 480;
@@ -33,6 +35,8 @@ Vec2 mouse, lastMouse;
 
 ////
 
+Anemone *anemone;
+
 ofxMSAFluidSolver fluidSolver;
 FluidParticleSystem *particles0, *particles1;
 
@@ -41,19 +45,7 @@ ScreenRenderPass *screenPass;
 
 CellNoiseRenderer *cellNoiseRenderer;
 CombineRenderer *combineRenderer;
-
-void dampenFluid(ofxMSAFluidSolver *fluid, float amount)
-{
-    int fw = fluid->getWidth();
-    int fh = fluid->getHeight();
-
-    int maxIndex = (fw - 1) + (fh + 2) * (fh - 1);
-
-    for (int i = 0; i < maxIndex; ++i) {
-        fluid->u[i] *= amount;
-        fluid->v[i] *= amount;
-    }
-}
+SceneRenderer *sceneRenderer;
 
 void resize(int w, int h) {
 	windowWidth = w;
@@ -99,7 +91,7 @@ void handleMouseMotion(int x, int y)
     vel.x *= invWidth;
     vel.y *= invHeight;
 
-    vel = vel.mult(1000.0);
+    vel = vel * 1000.0;
 
 #ifdef USE_ACCUM
     fluidSolver.addForceAtPos((double) x * invWidth,
@@ -136,9 +128,10 @@ void draw() {
 
     //lastDrawTime = drawTime;
 
-    double dt = avgDT < 0 ? 0.1 : avgDT;
+    double dt = avgDT < 0 ? 0.01 : avgDT;
 
-    // TODO average dt
+#if 0
+    // TODO average dt?
     fluidSolver.setDeltaT(dt);
 
     //dampenFluid(&fluidSolver, 0.9);
@@ -193,6 +186,13 @@ void draw() {
     combineRenderer->render(screenPass);
     screenPass->end();
 #endif
+#endif
+
+    anemone->update(dt);
+
+    screenPass->begin();
+    sceneRenderer->render(screenPass);
+    screenPass->end();
 
 	glutSwapBuffers();
 	++frames;
@@ -264,6 +264,13 @@ int main(int argc, char **argv) {
 #endif
 
 	cellNoiseRenderer = new CellNoiseRenderer();
+
+	////
+
+	anemone = new Anemone(100, 10);
+
+	sceneRenderer = new SceneRenderer();
+	sceneRenderer->addPrim(anemone);
 
 	screenPass = new ScreenRenderPass(windowWidth, windowHeight);
 
