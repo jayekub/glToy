@@ -11,49 +11,89 @@ Anemone::Anemone(
 {
     _currentDir = Vec3::randVec(-1., 1.);
 
-    _tentacles = new Vec3*[_numTentacles];
-    _currentOffsets = new double*[_numTentacles];
+    _numPts = (_numSegments + 1) * _numTentacles;
+    _numLines = _numSegments * _numTentacles;
+
+    _tentacles = new Vec3[_numPts];
+//    _indices = new uint[2 * _numLines];
+
+
+    glGenBuffers(1, &_vertexBuffer);
+    glGenBuffers(1, &_indexBuffer);
+
+    // allocate vertex buffer. will be mapped and filled in update()
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
+    glBufferData(GL_ARRAY_BUFFER, _numPts * sizeof(Vec3),
+                 0, GL_DYNAMIC_DRAW);
+
+    // allocate and then map index buffer
+    glBindBuffer(GL_ARRAY_BUFFER, _indexBuffer);
+
+    glBufferData(GL_ARRAY_BUFFER, 2 * _numLines * sizeof(uint),
+                 0, GL_STATIC_DRAW);
+    uint *indices = (uint *) glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+
+    // generate rest pose points and also fill index buffer
+    Vec3 tentacleDirs[_numTentacles];
+    for (int i = 0; i < _numTentacles; ++i) {
+        tentacleDirs[i] =  Vec3::randVec(-1., 1.);
+    }
 
     for (int t = 0; t < _numTentacles; ++t) {
-        _tentacles[t] = new Vec3[_numSegments];
-        _currentOffsets[t] = new double[_numSegments];
+        for (int s = 0; s < _numSegments + 1; ++s) {
+            int index = s * _numTentacles + t;
 
-        Vec3 dir = Vec3::randVec(-1., 1.);
+            _tentacles[index] =
+                    ((float) s / (float) _numSegments) * tentacleDirs[t] +
+                    wiggle * Vec3::randVec(-1., 1.);
 
-        for (int s = 0; s < _numSegments; ++s) {
-            _tentacles[t][s] = ((float) s / (float) _numSegments) * dir +
-                               wiggle * Vec3::randVec(-1., 1.);
-            _currentOffsets[t][s] = 0.0;
+            if (s < _numSegments) {
+                indices[2 * index] = index;
+                indices[2 * index + 1] = index + _numTentacles;
+            }
         }
     }
 
-   _anemoneProgram.addShader(
+    glUnmapBuffer(GL_ARRAY_BUFFER);
+
+    _anemoneProgram.addShader(
            Program::ShaderSpec("shaders/anemone.fp", GL_FRAGMENT_SHADER));
     _anemoneProgram.reload();
 }
 
 Anemone::~Anemone()
 {
-    for (int t = 0; t < _numTentacles; ++t) {
-        delete [] _tentacles[t];
-    }
-
     delete [] _tentacles;
+    //delete [] _vertices;
+//    delete [] _indices;
+
+    glDeleteBuffers(1, &_vertexBuffer);
+    glDeleteBuffers(1, &_indexBuffer);
 }
 
 void Anemone::update(double dt)
 {
     _time += dt;
-    Vec3 offset = Vec3(1., 1., 1.) * (_time / 2.);
+    Vec3 timeOffset = Vec3(1., 1., 1.) * (_time / 2.);
 
-    for (int t = 0; t < _numTentacles; ++t) {
-        for (int s = 0; s < _numSegments; ++s) {
-            _currentOffsets[t][s] = 0.5 * PerlinNoise::noise3(
-                _tentacles[t][s].x + offset.x,
-                _tentacles[t][s].y + offset.y,
-                _tentacles[t][s].z + offset.z);
-        }
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
+    _vertices = (Vec3 *) glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+
+    for (int i = 0; i < _numPts; ++i) {
+        double offset = 0.5 * PerlinNoise::noise3(
+                _tentacles[i].x + timeOffset.x,
+                _tentacles[i].y + timeOffset.y,
+                _tentacles[i].z + timeOffset.z);
+
+        _vertices[i] = _tentacles[i] + offset * _currentDir;
     }
+
+    glUnmapBuffer(GL_ARRAY_BUFFER);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+/*
+    glBufferData(GL_ARRAY_BUFFER, _numPts * sizeof(Vec3),
+                 _vertices, GL_DYNAMIC_DRAW);*/
 }
 
 void Anemone::render()
@@ -63,29 +103,29 @@ void Anemone::render()
     glPushMatrix();
 
     glRotatef(fmod(10. * _time, 360.), 0., 1., 0.);
-    glScalef(5., 5., 5.);
+    glScalef(1., 1., 1.);
 
     glColor3f(1., 1., 0.8);
 
     _anemoneProgram.use();
 
-    for (int t = 0; t < _numTentacles; ++t) {
-        //glBegin(GL_LINE_STRIP);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBuffer);
 
-        for (int s = 0; s < _numSegments - 1; ++s) {
-            glLineWidth((float) (_numSegments - s) * 5. / (float) _numSegments);
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, 0);
 
-            Vec3 p0 = _tentacles[t][s] + _currentOffsets[t][s] * _currentDir,
-                 p1 = _tentacles[t][s + 1] + _currentOffsets[t][s + 1] * _currentDir;
+    for (int s = 0; s < _numSegments; ++s) {
+        glLineWidth((float) (_numSegments - s) * 5. / (float) _numSegments);
 
-            glBegin(GL_LINES);
-            glVertex3f(p0.x, p0.y, p0.z);
-            glVertex3f(p1.x, p1.y, p1.z);
-            glEnd();
-        }
-
-        //glEnd();
+       // int offset = 2 * s * _numTentacles;
+        glDrawElements(GL_LINES, 2 * _numTentacles, GL_UNSIGNED_INT,
+                       BUFFER_OFFSET(s * 2 * _numTentacles * sizeof(uint)));
     }
+
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     glPopMatrix();
 }

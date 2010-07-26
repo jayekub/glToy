@@ -16,18 +16,19 @@ public:
     void render();
 
 private:
-    int _numTentacles, _numSegments;
-    Vec3 **_tentacles;
+    int _numTentacles, _numSegments, _numPts, _numLines;
+
+    Vec3 *_tentacles, *_vertices;
 
     Vec3 _currentDir;
-    double **_currentOffsets;
     double _time;
 
     // XXX make static?
     Program _anemoneProgram;
 
-    void _destroy();
+    GLuint _vertexBuffer, _indexBuffer;
 
+    void _destroy();
 };
 
 #endif /* ANEMONE_H_ */

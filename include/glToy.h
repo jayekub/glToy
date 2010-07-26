@@ -9,4 +9,6 @@
 #include <GL/glut.h>
 #endif
 
+#define BUFFER_OFFSET(i) ((char *) NULL + (i))
+
 #endif /* GLTOY_H_ */

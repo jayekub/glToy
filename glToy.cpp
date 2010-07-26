@@ -237,17 +237,17 @@ Scene *buildAnemoneScene()
     camera->position = Vec3(0., 0., -10.);
     camera->center = Vec3(0., 0., 0.);
     camera->up = Vec3(0., 1., 0.);
-    camera->farClip = 20.;
+    camera->farClip = 1000.;
 
     scene->addChild(camera);
 
     Transform *anemoneTransform = new Transform("anemone_transform");
 
-    anemoneTransform->translation.z = 0;
+    anemoneTransform->translation.z = -8;
 
     scene->addChild(anemoneTransform);
 
-    anemone = new Anemone("anemone", 100, 10);
+    anemone = new Anemone("anemone", 100, 5);
 
     anemoneTransform->addChild(anemone);
 
