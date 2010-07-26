@@ -78,9 +78,9 @@ GLuint Program::makeShader(const std::string &filename, GLuint type)
     GLint compileStatus;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
 
-    if (compileStatus != GL_TRUE) {
+    //if (compileStatus != GL_TRUE) {
         printf("%s: %s\n", filename.c_str(), getShaderInfoLog(shader).c_str());
-    }
+    //}
 
     return shader;
 }
@@ -99,9 +99,9 @@ GLuint Program::makeProgram(const std::vector<GLuint> &shaders)
     GLint linkStatus;
     glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
 
-    if (linkStatus != GL_TRUE) {
-        puts(getProgramInfoLog(program).c_str());
-    }
+    //if (linkStatus != GL_TRUE) {
+        printf("%s\n", getProgramInfoLog(program).c_str());
+    //}
 
     return program;
 }

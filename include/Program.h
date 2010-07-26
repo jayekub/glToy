@@ -36,6 +36,7 @@ public:
     static std::string getProgramInfoLog(GLuint program);
 
 private:
+    // XXX use hash_map!!!
     std::map<std::string, GLuint> _uniforms;
     std::map<std::string, GLuint> _attributes;
 

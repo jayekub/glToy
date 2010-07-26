@@ -1,5 +1,7 @@
 #include "RenderPass.h"
 
+RenderPass* RenderPass::_currentPass = NULL;
+
 RenderPass::RenderPass(int width, int height)
 {
     setSize(width, height);
@@ -7,6 +9,16 @@ RenderPass::RenderPass(int width, int height)
 
 RenderPass::~RenderPass()
 {
+}
+
+void RenderPass::begin()
+{
+    _currentPass = this;
+}
+
+void RenderPass::end()
+{
+    _currentPass = NULL;
 }
 
 void RenderPass::setSize(int width, int height)

@@ -20,11 +20,15 @@ void TextureRenderPass::begin()
 {
     glViewport(0.0, 0.0, _width, _height);
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBuffer);
+
+    RenderPass::begin();
 }
 
 void TextureRenderPass::end()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    RenderPass::end();
 }
 
 void TextureRenderPass::setSize(int width, int height)
