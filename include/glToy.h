@@ -1,6 +1,8 @@
 #ifndef GLTOY_H_
 #define GLTOY_H_
 
+#include <sys/types.h>
+
 #include <GL/glew.h>
 
 #ifdef __APPLE__

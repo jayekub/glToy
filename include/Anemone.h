@@ -1,6 +1,8 @@
 #ifndef ANEMONE_H_
 #define ANEMONE_H_
 
+#include "glToy.h"
+
 #include "Prim.h"
 #include "Program.h"
 #include "Vec.h"
