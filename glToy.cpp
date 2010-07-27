@@ -247,7 +247,7 @@ Scene *buildAnemoneScene()
 
     scene->addChild(anemoneTransform);
 
-    anemone = new Anemone("anemone", 100, 5);
+    anemone = new Anemone("anemone", 10, 10);
 
     anemoneTransform->addChild(anemone);
 

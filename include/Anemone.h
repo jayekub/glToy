@@ -27,11 +27,11 @@ private:
 
     // XXX make static?
     Program _anemoneProgram;
-    GLuint _p0Loc, _p1Loc, _lineWidthLoc, _cameraPosLoc, _viewportLoc, _fragToWorldLoc;
+
+    GLuint _p0Loc, _p1Loc, _lineWidthLoc,
+           _cameraPosLoc, _viewportLoc, _fragToWorldLoc;
 
     GLuint _vertexBuffer, _indexBuffer, _p0Buffer, _p1Buffer;
-
-    void _destroy();
 };
 
 #endif /* ANEMONE_H_ */

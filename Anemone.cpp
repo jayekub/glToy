@@ -174,10 +174,15 @@ void Anemone::render()
 
     RenderPass *rp = RenderPass::getCurrent();
 
+
+    glUniform3f(_cameraPosLoc, 0., 0., -10.);
+
     glUniform4f(_viewportLoc, 0., 0.,
             1. / (float) rp->getWidth(), 1. / (float) rp->getHeight());
+
     glUniformMatrix4fv(_fragToWorldLoc, 1, GL_FALSE, fragToWorld.v);
     //glUniformMatrix4fv(_projectionLoc, 1, GL_FALSE, projection.v);
+
 
     glEnableClientState(GL_VERTEX_ARRAY);
 
@@ -196,17 +201,16 @@ void Anemone::render()
     glVertexPointer(3, GL_FLOAT, 0, 0);
 
     for (int s = 0; s < _numSegments; ++s) {
-        float lineWidth =
-                (float) (_numSegments - s) * 5. / (float) _numSegments;
+        float lineWidthHint =
+                (float) (_numSegments - s) * 15. / (float) _numSegments;
 
-        glLineWidth(lineWidth);
-        glUniform1f(_lineWidthLoc, lineWidth);
+        glLineWidth(lineWidthHint);
+
+        float lineWidth;
+        glGetFloatv(GL_LINE_WIDTH, &lineWidth);
+        glUniform1f(_lineWidthLoc, lineWidth / 15.);
 
         glDrawArrays(GL_LINES, s * 2 * _numTentacles, 2 * _numTentacles);
-
-        /*
-        glDrawElements(GL_LINES, 2 * _numTentacles, GL_UNSIGNED_INT,
-                       BUFFER_OFFSET(s * 2 * _numTentacles * sizeof(uint)));*/
     }
 
     glDisableVertexAttribArray(_p0Loc);
