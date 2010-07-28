@@ -202,13 +202,13 @@ void Anemone::render()
 
     for (int s = 0; s < _numSegments; ++s) {
         float lineWidthHint =
-                (float) (_numSegments - s) * 15. / (float) _numSegments;
+                (float) (_numSegments - s) * 50. / (float) _numSegments;
 
         glLineWidth(lineWidthHint);
 
         float lineWidth;
         glGetFloatv(GL_LINE_WIDTH, &lineWidth);
-        glUniform1f(_lineWidthLoc, lineWidth / 15.);
+        glUniform1f(_lineWidthLoc, lineWidth / 50.);
 
         glDrawArrays(GL_LINES, s * 2 * _numTentacles, 2 * _numTentacles);
     }

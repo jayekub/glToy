@@ -1,12 +1,9 @@
-#version 150
+#version 120
 
 attribute vec3 p0, p1;
-
-varying vec3 vp0, vp1;
+out vec3 fp0, fp1;
 
 void main()  {
-    vp0 = p0;
-    vp1 = p1;
-
+    fp0 = p0; fp1 = p1;
     gl_Position = ftransform();
 }
