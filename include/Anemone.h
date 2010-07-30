@@ -11,14 +11,15 @@ class Anemone : public Prim
 {
 public:
     Anemone(const char *name,
-            int numTentacles, int numSegments, double wiggle = 0.03);
+            int numTentacles, int numSegments,
+            int maxWidth = 5., double wiggle = 0.03);
     virtual ~Anemone();
 
     void update(double dt);
     void render();
 
 private:
-    int _numTentacles, _numSegments, _numPts, _numLines;
+    int _numTentacles, _numSegments, _maxWidth, _numPts, _numLines;
 
     Vec3 *_tentacles, *_posed;
 

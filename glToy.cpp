@@ -243,11 +243,16 @@ Scene *buildAnemoneScene()
 
     Transform *anemoneTransform = new Transform("anemone_transform");
 
-    anemoneTransform->translation.z = -8;
+    anemoneTransform->translation.z = -5;
+    anemoneTransform->scale = 2. * Vec3(1., 1., 1.);
 
     scene->addChild(anemoneTransform);
 
-    anemone = new Anemone("anemone", 10, 10);
+    anemone = new Anemone("anemone",
+                          /* numTentacles */ 100,
+                          /* numSegments */ 4,
+                          /* maxWidth */ 7.,
+                          /* wiggle */ .06);
 
     anemoneTransform->addChild(anemone);
 

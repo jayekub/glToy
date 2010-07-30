@@ -8,9 +8,10 @@
 
 Anemone::Anemone(
         const char *name,
-        int numTentacles, int numSegments, double wiggle) :
+        int numTentacles, int numSegments, int maxWidth, double wiggle) :
     Prim(name),
-    _numTentacles(numTentacles), _numSegments(numSegments), _time(0.0)
+    _numTentacles(numTentacles), _numSegments(numSegments),
+    _maxWidth(maxWidth), _time(0.0)
 {
     _currentDir = Vec3::randVec(-1., 1.);
 
@@ -153,13 +154,14 @@ void Anemone::render()
 
     glPushMatrix();
 
-    //glRotatef(fmod(10. * _time, 360.), 0., 1., 0.);
+    glRotatef(fmod(10. * _time, 360.), 0., 1., 0.);
     //glScalef(1., 1., 1.);
 
     glColor3f(1., 1., 0.8);
 
     Mat4x4 modelView, projection;
 
+    // model space is world space (for now)
     glGetFloatv(GL_MODELVIEW_MATRIX, modelView.v);
     glGetFloatv(GL_PROJECTION_MATRIX, projection.v);
 
@@ -201,9 +203,9 @@ void Anemone::render()
     glVertexPointer(3, GL_FLOAT, 0, 0);
 
     for (int s = 0; s < _numSegments; ++s) {
-        float lineWidthHint =
-                (float) (_numSegments - s) * 50. / (float) _numSegments;
-
+        float segFrac =
+                (float) (_numSegments - s) / (float) _numSegments;
+        float lineWidthHint = pow(segFrac, 1.) * _maxWidth;
         glLineWidth(lineWidthHint);
 
         float lineWidth;

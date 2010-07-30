@@ -68,7 +68,11 @@ void main()
     vec4 worldCoord = fragToWorld * vec4(screenCoord, gl_FragCoord.z, 1.0);
     worldCoord /= worldCoord.w;
 
-    vec3 V = normalize(worldCoord.xyz - cameraPos);
+    vec3 V = worldCoord.xyz - cameraPos;
+    float worldDist = length(V);
+
+    V = normalize(V);
+
     float t = cylinder_intersect(cameraPos, V, fp0, fp1, lineWidth);
     
     if (t < 0) {
@@ -83,6 +87,24 @@ void main()
     //gl_FragColor = vec4(NdotL * NdotL, NdotL, NdotL + 0.1, 1.);
     //gl_FragDepth = (Phit.z - gl_DepthRange.near) / 5.;
     
-       gl_FragColor = vec4(abs(N).xyz, 1.);
-    }  
+       float NdotE = dot(N, -V);
+       //float OmNdotE = 1. - NdotE;
+       
+       // lighting + fog
+       float intensity = 
+            dot(N, -V) + /* forward illum */
+            dot(N, V) /* back illum */;
+       float omi = 1. - intensity;
+    
+       vec4 baseColor = mix(vec4(1., 1., 0.56, 1.), vec4(.8, .8, .6, 1.),
+                            omi * omi);
+       vec4 fogColor = mix(vec4(0.03, .0, .07, 1.),
+                           vec4(0.08, 0.05, 0.06, 1.), sqrt(intensity));
+           
+        //if (worldDist > 9)
+        //    gl_FragColor = vec4(10., 0., 0., 1.);
+        //else
+            gl_FragColor = mix(baseColor, fogColor, (worldDist - 9.));
+           
+    } 
  }
