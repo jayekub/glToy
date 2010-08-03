@@ -6,7 +6,13 @@
 void
 Visitor::_visitChildren(Node *node)
 {
-    BOOST_FOREACH(Node *child, node->children) {
-        child->accept(this);
+    _visitNodes(node->children);
+}
+
+void
+Visitor::_visitNodes(const std::vector<Node *> &nodes)
+{
+    BOOST_FOREACH(Node *node, nodes) {
+        node->accept(this);
     }
 }

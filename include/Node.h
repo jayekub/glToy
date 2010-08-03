@@ -3,6 +3,8 @@
 
 #include <vector>
 
+#include <boost/foreach.hpp>
+
 class Visitor;
 
 struct Node
@@ -15,6 +17,11 @@ struct Node
     virtual void addChild(Node *child) { children.push_back(child); }
 
     Node(const char *name_) : name(name_) {};
+    virtual ~Node() {
+        BOOST_FOREACH(Node *child, children) {
+            delete child;
+        }
+    }
 };
 
 #endif // NODE_H_

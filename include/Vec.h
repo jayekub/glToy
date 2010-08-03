@@ -31,16 +31,23 @@ struct Vec2 {
         return *this * (1. / length());
     }
 
-    Vec2 operator+(const Vec2 &v) const {
-        return Vec2(x - v.x, y - v.y);
+    Vec2 operator+(const Vec2 &vec) const {
+        return Vec2(x - vec.x, y - vec.y);
     }
 
-    Vec2 operator-(const Vec2 &v) const {
-        return Vec2(x - v.x, y - v.y);
+    Vec2 operator-(const Vec2 &vec) const {
+        return Vec2(x - vec.x, y - vec.y);
     }
 
     Vec2 operator*(const vec_t &a) const {
         return Vec2(a * x, a * y);
+    }
+
+    Vec2 &operator+=(const Vec2 &vec) {
+        x += vec.x;
+        y += vec.y;
+
+        return *this;
     }
 };
 
@@ -78,16 +85,24 @@ struct Vec3 {
         return *this * (1.0 / length());
     }
 
-    Vec3 operator+(const Vec3 &v) const {
-        return Vec3(x + v.x, y + v.y, z + v.z);
+    Vec3 operator+(const Vec3 &vec) const {
+        return Vec3(x + vec.x, y + vec.y, z + vec.z);
     }
 
-    Vec3 operator-(const Vec3 &v) const {
-        return Vec3(x - v.x, y - v.y, z - v.z);
+    Vec3 operator-(const Vec3 &vec) const {
+        return Vec3(x - vec.x, y - vec.y, z - vec.z);
     }
 
     Vec3 operator*(const vec_t &a) const {
         return Vec3(a * x, a * y, a * z);
+    }
+
+    Vec3 &operator+=(const Vec3 &vec) {
+        x += vec.x;
+        y += vec.y;
+        z += vec.z;
+
+        return *this;
     }
 
     static Vec3 randVec(float min = 0., float max = 1.) {

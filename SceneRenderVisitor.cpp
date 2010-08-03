@@ -5,14 +5,16 @@
 
 #include "Scene.h"
 #include "Camera.h"
+#include "Light.h"
 #include "Transform.h"
 #include "Prim.h"
+#include "Mat.h"
 
 #include "SceneRenderVisitor.h"
 
 SceneRenderVisitor::SceneRenderVisitor(
         RenderPass *renderPass, const std::string &cameraName) :
-    _renderPass(renderPass), _cameraName(cameraName)
+    _renderPass(renderPass), _cameraName(cameraName), _currentScene(NULL)
 {
 }
 
@@ -22,6 +24,11 @@ SceneRenderVisitor::~SceneRenderVisitor()
 
 void SceneRenderVisitor::render(Scene *scene)
 {
+    _currentScene = scene;
+
+    _currentScene->state.reset();
+    _currentScene->state.renderPass = _renderPass;
+
     _renderPass->begin();
 
     glClearColor(0., 0., 0., 1.0);
@@ -30,31 +37,62 @@ void SceneRenderVisitor::render(Scene *scene)
     scene->accept(this);
 
     _renderPass->end();
+
+    _currentScene = NULL;
 }
 
 void SceneRenderVisitor::visitScene(Scene *scene)
 {
+    _visitNodes(scene->globals);
     _visitChildren(scene);
 }
 
 void SceneRenderVisitor::visitCamera(Camera *camera)
 {
     if (strcmp(_cameraName.c_str(), camera->name) == 0) {
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+
         if (camera->projection == Camera::FLAT) {
             _renderPass->setFlatProjection();
         } else {
             _renderPass->setPerspProjection(
                 camera->fov, camera->nearClip, camera->farClip);
+
+            gluLookAt(camera->position.x, camera->position.y, camera->position.z,
+                      camera->center.x, camera->center.y, camera->center.z,
+                      camera->up.x, camera->up.y, camera->up.z);
         }
 
-        glMatrixMode(GL_MODELVIEW);
-        glLoadIdentity();
-        gluLookAt(camera->position.x, camera->position.y, camera->position.z,
-                  camera->center.x, camera->center.y, camera->center.z,
-                  camera->up.x, camera->up.y, camera->up.z);
+        // build shadow matrix and update light
+        if (camera->isShadowCamera) {
+            // XXX find some way to cache this?
+
+            // move from [-1, 1] to [0, 1]
+            const Mat4x4 bias(0.5, 0.0, 0.0, 0.0,
+                              0.0, 0.5, 0.0, 0.0,
+                              0.0, 0.0, 0.5, 0.0,
+                              0.5, 0.5, 0.5, 1.0);
+
+            Mat4x4 modelView, projection;
+
+            glGetFloatv(GL_MODELVIEW_MATRIX, modelView.v);
+            glGetFloatv(GL_PROJECTION_MATRIX, projection.v);
+
+            camera->light->shadowMatrix = bias * projection * modelView;
+        }
+
+        _currentScene->state.camera = camera;
     }
 
     _visitChildren(camera);
+}
+
+void SceneRenderVisitor::visitLight(Light *light)
+{
+    _currentScene->state.lights[light->name] = light;
+    _currentScene->state.lightPositions[light->name] =
+            _getCurrentTransform().getTranslation();
 }
 
 void SceneRenderVisitor::visitTransform(Transform *transform)
@@ -83,7 +121,15 @@ void SceneRenderVisitor::visitTransform(Transform *transform)
 
 void SceneRenderVisitor::visitPrim(Prim *prim)
 {
-    prim->render();
+    prim->render(&(_currentScene->state));
 
     _visitChildren(prim);
+}
+
+Mat4x4 SceneRenderVisitor::_getCurrentTransform() const
+{
+    Mat4x4 lightTrans;
+    glGetFloatv(GL_MODELVIEW_MATRIX, lightTrans.v);
+
+    return lightTrans;
 }

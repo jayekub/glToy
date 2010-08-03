@@ -5,6 +5,8 @@
 #include "Visitor.h"
 #include "Vec.h"
 
+class Light;
+
 struct Camera : public Node
 {
     enum ProjectionType { FLAT, PERSP };
@@ -16,12 +18,16 @@ struct Camera : public Node
 
     Vec3 position, center, up;
 
+    bool isShadowCamera;
+    Light *light;
+
     void accept(Visitor *visitor) { visitor->visitCamera(this); }
 
     Camera(const char *name_) :
         Node(name_),
         projection(PERSP), fov(45.), nearClip(1.), farClip(1000.),
-        position(0., 0., 0.), center(0., 0., 1.), up(0., 1., 0.) {};
+        position(0., 0., 0.), center(0., 0., 1.), up(0., 1., 0.),
+        isShadowCamera(false), light(NULL) {};
 };
 
 #endif /* CAMERA_H_ */

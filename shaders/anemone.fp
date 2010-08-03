@@ -4,6 +4,9 @@ uniform vec3 cameraPos;
 uniform vec4 viewport;
 uniform mat4 fragToWorld;
 uniform float lineWidth;
+uniform vec3 lightPos;
+uniform sampler2D shadowMap;
+uniform mat4 shadowMatrix;
 
 varying vec3 fp0, fp1;
 
@@ -63,6 +66,9 @@ vec3 cylinder_normal(vec3 T, vec3 P, vec3 Q)
 
 void main()
 {
+ //   gl_FragColor = vec4(1., 0., 0., 1.);
+    
+#if 1
     vec2 screenCoord = 
         (vec2(gl_FragCoord.x, gl_FragCoord.y) - viewport.xy) * viewport.zw;
     vec4 worldCoord = fragToWorld * vec4(screenCoord, gl_FragCoord.z, 1.0);
@@ -73,27 +79,33 @@ void main()
 
     V = normalize(V);
 
+    vec3 L = lightPos - worldCoord.xyz;
+
+
     float t = cylinder_intersect(cameraPos, V, fp0, fp1, lineWidth);
     
     if (t < 0) {
         gl_FragColor = vec4(1, 0., 0., 1.);
         //discard;
     } else {
-    
         vec3 Phit = cameraPos + t * V;
         vec3 N = cylinder_normal(Phit, fp0, fp1);
-        float NdotL = clamp(dot(N, vec3(-1., 0., 0.)), 0., 1.);
+        
+        vec4 shadowCoord = shadowMatrix * vec4(Phit, 1.);
+        //shadowCoord /= shadowCoord.w;
+        
+        float shadowLookupDepth = texture2D(shadowMap, shadowCoord.st).z;
 
-    //gl_FragColor = vec4(NdotL * NdotL, NdotL, NdotL + 0.1, 1.);
-    //gl_FragDepth = (Phit.z - gl_DepthRange.near) / 5.;
+        float shadowAtten = shadowLookupDepth < shadowCoord.z ? 0.05 : 1.;
+        
+        float NdotL = clamp(dot(N, L), 0., 1.);
+
     
        float NdotE = dot(N, -V);
        //float OmNdotE = 1. - NdotE;
        
        // lighting + fog
-       float intensity = 
-            dot(N, -V) + /* forward illum */
-            dot(N, V) /* back illum */;
+       float intensity = shadowAtten + 0.0001 * NdotL;
        float omi = 1. - intensity;
     
        vec4 baseColor = mix(vec4(1., 1., 0.56, 1.), vec4(.8, .8, .6, 1.),
@@ -104,7 +116,10 @@ void main()
         //if (worldDist > 9)
         //    gl_FragColor = vec4(10., 0., 0., 1.);
         //else
-            gl_FragColor = mix(baseColor, fogColor, (worldDist - 9.));
-           
-    } 
+            //gl_FragColor = mix(baseColor, fogColor, (worldDist - 9.));
+            
+        gl_FragColor = mix(fogColor, baseColor, intensity);
+        gl_FragDepth = Phit.z;
+    }
+#endif
  }

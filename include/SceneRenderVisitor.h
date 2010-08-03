@@ -2,16 +2,12 @@
 #define SCENERENDERVISITOR_H_
 
 #include <string>
-#include <vector>
+#include <map>
 
 #include "Visitor.h"
+#include "Mat.h"
 
 class RenderPass;
-
-class Scene;
-class Camera;
-class Transform;
-class Prim;
 
 class SceneRenderVisitor : public Visitor
 {
@@ -20,20 +16,25 @@ public:
                        const std::string &cameraName = "");
     virtual ~SceneRenderVisitor();
 
-    void render(Scene *scene);
+    virtual void render(Scene *scene);
 
-    void visitScene(Scene *scene);
-    void visitCamera(Camera *camera);
-    void visitTransform(Transform *transform);
-    void visitPrim(Prim *prim);
+    virtual void visitScene(Scene *scene);
+    virtual void visitCamera(Camera *camera);
+    virtual void visitLight(Light *light);
+    virtual void visitTransform(Transform *transform);
+    virtual void visitPrim(Prim *prim);
 
     void setRenderPass(RenderPass *renderPass) { _renderPass = renderPass; }
     void setCameraName(const std::string &cameraName) {
         _cameraName = cameraName; }
 
-private:
+
+protected:
     RenderPass *_renderPass;
     std::string _cameraName;
+    Scene *_currentScene;
+
+    virtual Mat4x4 _getCurrentTransform() const;
 };
 
 #endif /* SCENERENDERVISITOR_H_ */

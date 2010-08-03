@@ -74,6 +74,10 @@ public:
        return mI;
     }
 
+    Vec3 getTranslation() const {
+        return Vec3(v[12], v[13], v[14]);
+    }
+
     Mat4x4 operator*=(const float &a) {
         Mat4x4 old = *this;
 

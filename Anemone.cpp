@@ -1,9 +1,11 @@
 #include <stdio.h>
 
 #include "RenderPass.h"
-
 #include "Mat.h"
 #include "Noise.h"
+#include "Camera.h"
+#include "Light.h"
+
 #include "Anemone.h"
 
 Anemone::Anemone(
@@ -11,7 +13,7 @@ Anemone::Anemone(
         int numTentacles, int numSegments, int maxWidth, double wiggle) :
     Prim(name),
     _numTentacles(numTentacles), _numSegments(numSegments),
-    _maxWidth(maxWidth), _time(0.0)
+    _maxWidth(maxWidth), _time(0.0), _magnetStrength(0.)
 {
     _currentDir = Vec3::randVec(-1., 1.);
 
@@ -88,6 +90,10 @@ Anemone::Anemone(
     _viewportLoc = _anemoneProgram.uniform("viewport");
     _fragToWorldLoc = _anemoneProgram.uniform("fragToWorld");
     //_projectionLoc = _anemoneProgram.uniform("projection");
+
+    _lightPosLoc = _anemoneProgram.uniform("lightPos");
+    _shadowMapLoc = _anemoneProgram.uniform("shadowMap");
+    _shadowMatrixLoc = _anemoneProgram.uniform("shadowMatrix");
 }
 
 Anemone::~Anemone()
@@ -103,18 +109,30 @@ Anemone::~Anemone()
 
 void Anemone::update(double dt)
 {
+    // calculate new offsets
     _time += dt;
     Vec3 timeOffset = Vec3(1., 1., 1.) * (_time / 2.);
 
-    for (int i = 0; i < _numPts; ++i) {
-        double offset = 0.5 * PerlinNoise::noise3(
+    //for (int i = 0; i < _numPts; ++i) {
+    for (int s = 0; s < _numSegments + 1; ++s) {
+        for (int t = 0; t < _numTentacles; ++t) {
+
+        int i = s * _numTentacles + t;
+
+        double currentOffset = 0.5 * PerlinNoise::noise3(
                 _tentacles[i].x + timeOffset.x,
                 _tentacles[i].y + timeOffset.y,
                 _tentacles[i].z + timeOffset.z);
 
-        _posed[i] = _tentacles[i] + offset * _currentDir;
+        Vec3 magnetVec = _magnetPosition - _posed[i];
+
+        _posed[i] = _tentacles[i] + currentOffset * _currentDir +
+                    (s / (float) _numSegments) * _magnetStrength * magnetVec;
+
+        }
     }
 
+    // update vbos
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
     Vec3 *vertices = (Vec3 *) glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 
@@ -148,7 +166,7 @@ void Anemone::update(double dt)
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void Anemone::render()
+void Anemone::render(const Scene::State *state)
 {
     glEnable(GL_LINE_SMOOTH);
 
@@ -174,17 +192,35 @@ void Anemone::render()
 
     _anemoneProgram.use();
 
-    RenderPass *rp = RenderPass::getCurrent();
+   // glUniform3f(_cameraPosLoc, 0., 0., -10.);
 
-
-    glUniform3f(_cameraPosLoc, 0., 0., -10.);
+    glUniform3f(_cameraPosLoc,
+                state->camera->position.x,
+                state->camera->position.y,
+                state->camera->position.z);
 
     glUniform4f(_viewportLoc, 0., 0.,
-            1. / (float) rp->getWidth(), 1. / (float) rp->getHeight());
+            1. / (float) state->renderPass->getWidth(),
+            1. / (float) state->renderPass->getHeight());
 
     glUniformMatrix4fv(_fragToWorldLoc, 1, GL_FALSE, fragToWorld.v);
     //glUniformMatrix4fv(_projectionLoc, 1, GL_FALSE, projection.v);
 
+
+    // XXX fragile
+    const Light *firstLight = state->lights.begin()->second;
+    const Vec3 &firstLightPos = state->lightPositions.begin()->second;
+
+    glUniform3f(_lightPosLoc,
+                firstLightPos.x, firstLightPos.y, firstLightPos.z);
+
+    glUniformMatrix4fv(_shadowMatrixLoc, 1, GL_FALSE,
+                       firstLight->shadowMatrix.v);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, firstLight->shadowTexture);
+
+    glUniform1i(_shadowMapLoc, 1);
 
     glEnableClientState(GL_VERTEX_ARRAY);
 
@@ -214,6 +250,8 @@ void Anemone::render()
 
         glDrawArrays(GL_LINES, s * 2 * _numTentacles, 2 * _numTentacles);
     }
+
+    //glBindTexture(GL_TEXTURE_2D, 0);
 
     glDisableVertexAttribArray(_p0Loc);
     glDisableVertexAttribArray(_p1Loc);

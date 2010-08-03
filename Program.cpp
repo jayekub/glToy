@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+#include <sstream>
+
 #include "utils.h"
 #include "Program.h"
 
@@ -48,6 +50,28 @@ void Program::reload()
 void Program::use()
 {
     glUseProgram(_program);
+}
+
+GLuint Program::uniform(const std::string &name)
+{
+    if (_uniforms.count(name) > 0)
+        return _uniforms[name];
+
+    std::stringstream err;
+    err << "The uniform " << name << " doesn't exist";
+
+    throw err.str().c_str();
+}
+
+GLuint Program::attribute(const std::string &name)
+{
+    if (_attributes.count(name) > 0)
+        return _attributes[name];
+
+    std::stringstream err;
+    err << "The attribute " << name << " doesn't exist";
+
+    throw err.str().c_str();
 }
 
 void Program::addShader(const ShaderSpec &shaderSpec)

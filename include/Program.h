@@ -8,9 +8,9 @@
 #include <boost/foreach.hpp>
 
 #include "glToy.h"
-#include "Reloadable.h"
+#include "Listener.h"
 
-class Program : public Reloadable
+class Program : public Listener
 {
 public:
     typedef std::pair<std::string, GLuint> ShaderSpec;
@@ -22,8 +22,8 @@ public:
     void reload();
     void use();
 
-    GLuint uniform(const std::string &name) { return _uniforms[name]; };
-    GLuint attribute(const std::string &name) { return _attributes[name]; };
+    GLuint uniform(const std::string &name);
+    GLuint attribute(const std::string &name);
 
     void addShader(const ShaderSpec &shaderSpec);
     //void setShaders(const std::vector<ShaderSpec> &shaderSpecs,

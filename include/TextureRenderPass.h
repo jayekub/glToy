@@ -20,6 +20,9 @@ public:
 
 protected:
     GLuint _frameBuffer, _depthBuffer, _texture;
+
+    // For use by subclasses
+    TextureRenderPass() {};
 };
 
 #endif /* TEXTURERENDERPASS_H_ */

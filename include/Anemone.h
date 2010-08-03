@@ -4,6 +4,7 @@
 #include "glToy.h"
 
 #include "Prim.h"
+#include "Scene.h"
 #include "Program.h"
 #include "Vec.h"
 
@@ -16,7 +17,12 @@ public:
     virtual ~Anemone();
 
     void update(double dt);
-    void render();
+    virtual void render(const Scene::State *state);
+
+    void setMagnet(Vec3 position, float strength) {
+        _magnetPosition = position;
+        _magnetStrength = strength;
+    }
 
 private:
     int _numTentacles, _numSegments, _maxWidth, _numPts, _numLines;
@@ -26,6 +32,9 @@ private:
     Vec3 _currentDir;
     double _time;
 
+    Vec3 _magnetPosition;
+    float _magnetStrength;
+
     // XXX make static?
     Program _anemoneProgram;
 
@@ -33,6 +42,8 @@ private:
            _cameraPosLoc, _viewportLoc, _fragToWorldLoc;
 
     GLuint _vertexBuffer, _indexBuffer, _p0Buffer, _p1Buffer;
+
+    GLuint _lightPosLoc, _shadowMapLoc, _shadowMatrixLoc;
 };
 
 #endif /* ANEMONE_H_ */

@@ -37,7 +37,7 @@ void TextureRenderPass::setSize(int width, int height)
 
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBuffer);
 
-    //glDeleteTextures(1, &_texture);
+    glDeleteTextures(1, &_texture);
     glGenTextures(1, &_texture);
 
     glActiveTexture(GL_TEXTURE0);

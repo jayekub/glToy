@@ -1,7 +1,7 @@
 OBJS = \
 	glToy.o \
 	utils.o \
-	Reloadable.o \
+	Listener.o \
 	Program.o \
 	Particle.o \
 	ParticleSystem.o \
@@ -9,6 +9,7 @@ OBJS = \
 	RenderPass.o \
 	ScreenRenderPass.o \
 	TextureRenderPass.o \
+	DepthRenderPass.o \
 	CellNoiseRenderer.o \
 	CombineRenderer.o \
 	Visitor.o \

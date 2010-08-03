@@ -8,10 +8,11 @@
 #include "glToy.h"
 #include "utils.h"
 
-#include "Reloadable.h"
+#include "Listener.h"
 
 #include "Scene.h"
 #include "Camera.h"
+#include "Light.h"
 #include "Transform.h"
 #include "Anemone.h"
 #include "SceneRenderVisitor.h"
@@ -19,6 +20,7 @@
 #include "ofxMSAFluidSolver.h"
 #include "FluidParticleSystem.h"
 #include "TextureRenderPass.h"
+#include "DepthRenderPass.h"
 #include "ScreenRenderPass.h"
 #include "CellNoiseRenderer.h"
 #include "CombineRenderer.h"
@@ -44,6 +46,7 @@ Vec2 mouse, lastMouse;
 
 Scene *anemoneScene;
 Anemone *anemone;
+DepthRenderPass *anemoneShadowPass;
 SceneRenderVisitor *sceneRenderVisitor;
 
 ofxMSAFluidSolver fluidSolver;
@@ -63,10 +66,8 @@ void resize(int w, int h) {
 	invHeight = 1.0 / (double) h;
 
 	fluidSolver.setSize(fluidSize, (float) fluidSize * (float) h / (float) w);
-	screenPass->setSize(w, h);
 
-	if (cellNoisePass0) cellNoisePass0->setSize(w, h);
-	if (cellNoisePass1) cellNoisePass1->setSize(w, h);
+	Listener::resizeAll(w, h);
 }
 
 void handleKey(unsigned char key, int x, int y)
@@ -119,6 +120,14 @@ void handleMouse(int button, int state, int x, int y)
         mouse.y = -1;
         lastMouse.x = -1;
         lastMouse.y = -1;
+
+        // XXX blech
+        Vec3 pos = Vec3(2. * x / (float) windowWidth - 1,
+                        2. * (windowHeight - y) / (float) windowHeight - 1, 0.);
+
+        anemone->setMagnet(pos, .3);
+    } else if (button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
+        anemone->setMagnet(Vec3(), 0.);
     }
 }
 
@@ -128,7 +137,7 @@ void draw() {
         particles0->reset();
         particles1->reset();
 
-        Reloadable::reloadAll();
+        Listener::reloadAll();
 
         reset = false;
     }
@@ -200,6 +209,10 @@ void draw() {
 
     anemone->update(dt);
 
+    sceneRenderVisitor->setRenderPass(anemoneShadowPass);
+    sceneRenderVisitor->setCameraName("keyLightShadowCam");
+    sceneRenderVisitor->render(anemoneScene);
+
     sceneRenderVisitor->setRenderPass(screenPass);
     sceneRenderVisitor->setCameraName("anemoneCamera");
     sceneRenderVisitor->render(anemoneScene);
@@ -232,6 +245,7 @@ Scene *buildAnemoneScene()
 {
     Scene *scene = new Scene("sceneRoot");
 
+    // Camera
     Camera *camera = new Camera("anemoneCamera");
 
     camera->position = Vec3(0., 0., -10.);
@@ -239,9 +253,37 @@ Scene *buildAnemoneScene()
     camera->up = Vec3(0., 1., 0.);
     camera->farClip = 1000.;
 
-    scene->addChild(camera);
+    scene->addGlobal(camera);
 
-    Transform *anemoneTransform = new Transform("anemone_transform");
+    // Light
+    Transform *keyLightTransform = new Transform("keyLightTransform");
+
+    keyLightTransform->translation = Vec3(5., 5., -10);
+
+    scene->addGlobal(keyLightTransform);
+
+    Light *keyLight = new Light("keyLight");
+
+    keyLight->type = Light::POINT;
+    keyLight->color = Vec3(1., 1., 1.);
+
+    keyLightTransform->addChild(keyLight);
+
+    // Shadow
+    Camera *keyLightShadowCam = new Camera("keyLightShadowCam");
+
+    keyLightShadowCam->position = Vec3(5., 5., -10);
+    keyLightShadowCam->center = Vec3(0., 0., 0.);
+    keyLightShadowCam->up = Vec3(0., 1., 0.);
+    keyLightShadowCam->light = keyLight;
+
+    scene->addGlobal(keyLightShadowCam);
+
+    keyLight->hasShadow = true;
+    keyLight->shadowTexture = anemoneShadowPass->getTexture();
+
+    // Anemone
+    Transform *anemoneTransform = new Transform("anemoneTransform");
 
     anemoneTransform->translation.z = -5;
     anemoneTransform->scale = 2. * Vec3(1., 1., 1.);
@@ -260,6 +302,8 @@ Scene *buildAnemoneScene()
 }
 
 int main(int argc, char **argv) {
+    try {
+
     srandom((unsigned int) time(NULL));
 
 	glutInit(&argc, argv);
@@ -306,7 +350,9 @@ int main(int argc, char **argv) {
 
 	cellNoiseRenderer = new CellNoiseRenderer();
 
-	anemoneScene = buildAnemoneScene();
+	anemoneShadowPass = new DepthRenderPass(windowWidth, windowHeight);
+    anemoneScene = buildAnemoneScene();
+
 	screenPass = new ScreenRenderPass(windowWidth, windowHeight);
 	sceneRenderVisitor = new SceneRenderVisitor(screenPass);
 
@@ -323,7 +369,14 @@ int main(int argc, char **argv) {
     glutMouseFunc(handleMouse);
 
 	glEnable(GL_DEPTH_TEST);
+
 	glutMainLoop();
+
+	} catch(const char *err) {
+	    fprintf(stderr, "Error: %s\n", err);
+
+        return 1;
+	}
 
 	return 0;
 }
