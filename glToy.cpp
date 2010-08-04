@@ -286,9 +286,11 @@ Scene *buildAnemoneScene()
     keyLightShadowCam->position = Vec3(0., 10., 0.);
     keyLightShadowCam->center = Vec3(0., 0., 0.);
     keyLightShadowCam->up = Vec3(0., 1., 0.);
-    keyLightShadowCam->light = keyLight;
     keyLightShadowCam->nearClip = 1.;
     keyLightShadowCam->farClip = 10.;
+
+    keyLightShadowCam->isShadowCamera = true;
+    keyLightShadowCam->light = keyLight;
 
     scene->addGlobal(keyLightShadowCam);
 
