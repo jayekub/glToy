@@ -64,6 +64,12 @@ vec3 cylinder_normal(vec3 T, vec3 P, vec3 Q)
     return normalize(cross(cross(PQ, PT), PQ));
 }
 
+float linearize(float z)
+{
+    return (2. * gl_DepthRange.near) / 
+           (gl_DepthRange.far + gl_DepthRange.near - z * gl_DepthRange.diff);
+}
+
 void main()
 {
  //   gl_FragColor = vec4(1., 0., 0., 1.);
@@ -81,7 +87,6 @@ void main()
 
     vec3 L = lightPos - worldCoord.xyz;
 
-
     float t = cylinder_intersect(cameraPos, V, fp0, fp1, lineWidth);
     
     if (t < 0) {
@@ -91,35 +96,37 @@ void main()
         vec3 Phit = cameraPos + t * V;
         vec3 N = cylinder_normal(Phit, fp0, fp1);
         
+        vec4 PhitProj = gl_ModelViewProjectionMatrix * vec4(Phit, 1.);
+        PhitProj.z /= PhitProj.w;
+        
+        float hitDepth = (PhitProj.z + 1.) / 2;
+        
         vec4 shadowCoord = shadowMatrix * vec4(Phit, 1.);
-        //shadowCoord /= shadowCoord.w;
+        shadowCoord /= shadowCoord.w;
         
         float shadowLookupDepth = texture2D(shadowMap, shadowCoord.st).z;
-
         float shadowAtten = shadowLookupDepth < shadowCoord.z ? 0.05 : 1.;
         
         float NdotL = clamp(dot(N, L), 0., 1.);
-
-    
-       float NdotE = dot(N, -V);
-       //float OmNdotE = 1. - NdotE;
+        
+        //float NdotE = dot(N, -V);
+        //float OmNdotE = 1. - NdotE;
        
-       // lighting + fog
-       float intensity = shadowAtten + 0.0001 * NdotL;
-       float omi = 1. - intensity;
+        // lighting + fog
+        float intensity = 1. + 0.001 * shadowAtten + 0.001 * NdotL;
+        float omi = 1. - intensity;
     
-       vec4 baseColor = mix(vec4(1., 1., 0.56, 1.), vec4(.8, .8, .6, 1.),
-                            omi * omi);
-       vec4 fogColor = mix(vec4(0.03, .0, .07, 1.),
-                           vec4(0.08, 0.05, 0.06, 1.), sqrt(intensity));
+        /* vec4 baseColor = mix(vec4(1., 1., 0.56, 1.), vec4(.8, .8, .6, 1.),
+                             omi * omi);
+        vec4 fogColor = mix(vec4(0.03, .0, .07, 1.),
+                            vec4(0.08, 0.05, 0.06, 1.), sqrt(intensity));
            
-        //if (worldDist > 9)
-        //    gl_FragColor = vec4(10., 0., 0., 1.);
-        //else
-            //gl_FragColor = mix(baseColor, fogColor, (worldDist - 9.));
-            
-        gl_FragColor = mix(fogColor, baseColor, intensity);
-        gl_FragDepth = Phit.z;
+        gl_FragColor = mix(fogColor, baseColor, intensity);*/
+        
+        gl_FragColor = vec4(0.5, 0.5, 1., 1.) * intensity;
+        gl_FragColor.r = shadowCoord.z;
+        
+        gl_FragDepth = hitDepth;
     }
 #endif
  }

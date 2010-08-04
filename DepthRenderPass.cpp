@@ -3,6 +3,7 @@
 DepthRenderPass::DepthRenderPass(int width, int height, float resMult)
 {
     glGenFramebuffers(1, &_frameBuffer);
+    glGenTextures(1, &_texture);
 
     setSize(width, height, resMult);
 }
@@ -15,23 +16,28 @@ DepthRenderPass::~DepthRenderPass()
 
 void DepthRenderPass::begin()
 {
-    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+    //glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+    //glClearDepth(0.5);
+
+    glViewport(0.0, 0.0, _width, _height);
+    glBindFramebuffer(GL_FRAMEBUFFER, _frameBuffer);
+
+    RenderPass::begin();
 }
 
 void DepthRenderPass::end()
 {
-    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+    //glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    RenderPass::end();
 }
 
 void DepthRenderPass::setSize(int width, int height, float resMult)
 {
     _resMult = resMult;
     RenderPass::setSize(width * _resMult, height * _resMult);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, _frameBuffer);
-
-    glDeleteTextures(1, &_texture);
-    glGenTextures(1, &_texture);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, _texture);

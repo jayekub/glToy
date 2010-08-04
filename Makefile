@@ -12,6 +12,7 @@ OBJS = \
 	DepthRenderPass.o \
 	CellNoiseRenderer.o \
 	CombineRenderer.o \
+	TextureRenderer.o \
 	Visitor.o \
 	SceneRenderVisitor.o \
 	Anemone.o \

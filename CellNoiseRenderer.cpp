@@ -17,7 +17,7 @@ void CellNoiseRenderer::render(
         ParticleSystem *noiseParticles,
         float particleSize)
 {
-    renderPass->setFlatProjection();
+//    renderPass->setFlatProjection();
     _cellNoiseProgram.use();
 
     int rpWidth = renderPass->getWidth();

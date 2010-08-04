@@ -16,6 +16,7 @@
 #include "Transform.h"
 #include "Anemone.h"
 #include "SceneRenderVisitor.h"
+#include "TextureRenderer.h"
 
 #include "ofxMSAFluidSolver.h"
 #include "FluidParticleSystem.h"
@@ -24,6 +25,7 @@
 #include "ScreenRenderPass.h"
 #include "CellNoiseRenderer.h"
 #include "CombineRenderer.h"
+
 
 
 int windowWidth = 640;
@@ -48,6 +50,7 @@ Scene *anemoneScene;
 Anemone *anemone;
 DepthRenderPass *anemoneShadowPass;
 SceneRenderVisitor *sceneRenderVisitor;
+TextureRenderer *textureRenderer;
 
 ofxMSAFluidSolver fluidSolver;
 FluidParticleSystem *particles0, *particles1;
@@ -210,12 +213,19 @@ void draw() {
     anemone->update(dt);
 
     sceneRenderVisitor->setRenderPass(anemoneShadowPass);
+    //sceneRenderVisitor->setRenderPass(screenPass);
     sceneRenderVisitor->setCameraName("keyLightShadowCam");
     sceneRenderVisitor->render(anemoneScene);
+
+//    textureRenderer->setTexture(anemoneShadowPass->getTexture());
+//    textureRenderer->render(screenPass);
 
     sceneRenderVisitor->setRenderPass(screenPass);
     sceneRenderVisitor->setCameraName("anemoneCamera");
     sceneRenderVisitor->render(anemoneScene);
+
+    //textureRenderer->setTexture(cellNoisePass0->getTexture());
+    //textureRenderer->render(screenPass);
 
 	glutSwapBuffers();
 	++frames;
@@ -248,17 +258,18 @@ Scene *buildAnemoneScene()
     // Camera
     Camera *camera = new Camera("anemoneCamera");
 
-    camera->position = Vec3(0., 0., -10.);
+    camera->position = Vec3(0., 0., -3.);
     camera->center = Vec3(0., 0., 0.);
     camera->up = Vec3(0., 1., 0.);
-    camera->farClip = 1000.;
+    camera->nearClip = 2.;
+    camera->farClip = 4.;
 
     scene->addGlobal(camera);
 
     // Light
     Transform *keyLightTransform = new Transform("keyLightTransform");
 
-    keyLightTransform->translation = Vec3(5., 5., -10);
+    keyLightTransform->translation = Vec3(5., 5., -5.);
 
     scene->addGlobal(keyLightTransform);
 
@@ -272,10 +283,12 @@ Scene *buildAnemoneScene()
     // Shadow
     Camera *keyLightShadowCam = new Camera("keyLightShadowCam");
 
-    keyLightShadowCam->position = Vec3(5., 5., -10);
+    keyLightShadowCam->position = Vec3(0., 10., 0.);
     keyLightShadowCam->center = Vec3(0., 0., 0.);
     keyLightShadowCam->up = Vec3(0., 1., 0.);
     keyLightShadowCam->light = keyLight;
+    keyLightShadowCam->nearClip = 1.;
+    keyLightShadowCam->farClip = 10.;
 
     scene->addGlobal(keyLightShadowCam);
 
@@ -285,8 +298,7 @@ Scene *buildAnemoneScene()
     // Anemone
     Transform *anemoneTransform = new Transform("anemoneTransform");
 
-    anemoneTransform->translation.z = -5;
-    anemoneTransform->scale = 2. * Vec3(1., 1., 1.);
+    // Leave it at the origin for now
 
     scene->addChild(anemoneTransform);
 
@@ -308,7 +320,7 @@ int main(int argc, char **argv) {
 
 	glutInit(&argc, argv);
 
-	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH | GLUT_ACCUM);
+	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH /*| GLUT_ACCUM*/);
 
 	if (argc > 1 && strcmp(argv[1], "-f") == 0) {
         int fullWidth = glutGet(GLUT_SCREEN_WIDTH);
@@ -351,6 +363,10 @@ int main(int argc, char **argv) {
 	cellNoiseRenderer = new CellNoiseRenderer();
 
 	anemoneShadowPass = new DepthRenderPass(windowWidth, windowHeight);
+
+	// for debugging
+	textureRenderer = new TextureRenderer(anemoneShadowPass->getTexture());
+
     anemoneScene = buildAnemoneScene();
 
 	screenPass = new ScreenRenderPass(windowWidth, windowHeight);

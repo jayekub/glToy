@@ -31,15 +31,15 @@ Anemone::Anemone(
     // allocate vertex buffer. will be mapped and filled in update()
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, 2 * _numLines * sizeof(Vec3),
-                 0, GL_DYNAMIC_DRAW);
+                 0, GL_STREAM_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, _p0Buffer);
     glBufferData(GL_ARRAY_BUFFER, 2 * _numLines * sizeof(Vec3),
-                 0, GL_DYNAMIC_DRAW);
+                 0, GL_STREAM_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, _p1Buffer);
     glBufferData(GL_ARRAY_BUFFER, 2 * _numLines * sizeof(Vec3),
-                 0, GL_DYNAMIC_DRAW);
+                 0, GL_STREAM_DRAW);
 
 /*
     // allocate and then map index buffer
@@ -172,7 +172,7 @@ void Anemone::render(const Scene::State *state)
 
     glPushMatrix();
 
-    glRotatef(fmod(10. * _time, 360.), 0., 1., 0.);
+    //glRotatef(fmod(10. * _time, 360.), 0., 1., 0.);
     //glScalef(1., 1., 1.);
 
     glColor3f(1., 1., 0.8);

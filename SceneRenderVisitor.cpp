@@ -50,14 +50,26 @@ void SceneRenderVisitor::visitScene(Scene *scene)
 void SceneRenderVisitor::visitCamera(Camera *camera)
 {
     if (strcmp(_cameraName.c_str(), camera->name) == 0) {
-        glMatrixMode(GL_MODELVIEW);
-        glLoadIdentity();
+        int vpWidth = _renderPass->getWidth();
+        int vpHeight = _renderPass->getHeight();
 
         if (camera->projection == Camera::FLAT) {
-            _renderPass->setFlatProjection();
-        } else {
-            _renderPass->setPerspProjection(
-                camera->fov, camera->nearClip, camera->farClip);
+            glMatrixMode(GL_PROJECTION);
+            glLoadIdentity();
+
+            glViewport(0.0, 0.0, vpWidth, vpHeight);
+            glOrtho(0, vpWidth, vpHeight, 0, 0, 1);
+        } else { // camera->projection == Camera::PERSP
+            glMatrixMode(GL_PROJECTION);
+            glLoadIdentity();
+
+            glViewport(0.0, 0.0, vpWidth, vpHeight);
+            gluPerspective(camera->fov, (float) vpWidth / (float) vpHeight,
+                           camera->nearClip, camera->farClip);
+
+
+            glMatrixMode(GL_MODELVIEW);
+            glLoadIdentity();
 
             gluLookAt(camera->position.x, camera->position.y, camera->position.z,
                       camera->center.x, camera->center.y, camera->center.z,

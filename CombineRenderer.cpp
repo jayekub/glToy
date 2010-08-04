@@ -13,7 +13,16 @@ CombineRenderer::CombineRenderer(
 
 void CombineRenderer::render(RenderPass *renderPass)
 {
-    renderPass->setFlatProjection();
+    int vpWidth = renderPass->getWidth();
+    int vpHeight = renderPass->getHeight();
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+
+    glViewport(0.0, 0.0, vpWidth, vpHeight);
+    glOrtho(0, vpWidth, vpHeight, 0, 0, 1);
+
+//    renderPass->setFlatProjection();
     _fractalProgram.use();
 
     glClearColor(1.0, 1.0, 1.0, 1.0);
