@@ -46,6 +46,7 @@ Vec2 mouse, lastMouse;
 
 ////
 
+GLuint testTexture;
 Scene *anemoneScene;
 Anemone *anemone;
 DepthRenderPass *anemoneShadowPass;
@@ -212,20 +213,26 @@ void draw() {
 
     anemone->update(dt);
 
-    sceneRenderVisitor->setRenderPass(anemoneShadowPass);
+    //sceneRenderVisitor->setRenderPass(anemoneShadowPass);
     //sceneRenderVisitor->setRenderPass(screenPass);
-    sceneRenderVisitor->setCameraName("keyLightShadowCam");
-    sceneRenderVisitor->render(anemoneScene);
+    //sceneRenderVisitor->setCameraName("keyLightShadowCam");
+    //sceneRenderVisitor->render(anemoneScene);
 
 //    textureRenderer->setTexture(anemoneShadowPass->getTexture());
 //    textureRenderer->render(screenPass);
 
-    sceneRenderVisitor->setRenderPass(screenPass);
+/*
+    sceneRenderVisitor->setRenderPass(cellNoisePass0);
+    //sceneRenderVisitor->setRenderPass(screenPass);
     sceneRenderVisitor->setCameraName("anemoneCamera");
     sceneRenderVisitor->render(anemoneScene);
+    */
 
-    //textureRenderer->setTexture(cellNoisePass0->getTexture());
-    //textureRenderer->render(screenPass);
+
+    textureRenderer->setTexture(testTexture);
+    textureRenderer->render(screenPass);
+
+
 
 	glutSwapBuffers();
 	++frames;
@@ -367,9 +374,10 @@ int main(int argc, char **argv) {
 	anemoneShadowPass = new DepthRenderPass(windowWidth, windowHeight);
 
 	// for debugging
+        testTexture = makeTestTexture();
 	textureRenderer = new TextureRenderer(anemoneShadowPass->getTexture());
 
-    anemoneScene = buildAnemoneScene();
+        anemoneScene = buildAnemoneScene();
 
 	screenPass = new ScreenRenderPass(windowWidth, windowHeight);
 	sceneRenderVisitor = new SceneRenderVisitor(screenPass);

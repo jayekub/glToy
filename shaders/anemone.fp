@@ -124,7 +124,7 @@ void main()
         gl_FragColor = mix(fogColor, baseColor, intensity);*/
         
         gl_FragColor = vec4(0.5, 0.5, 1., 1.) * intensity;
-        gl_FragColor.r = shadowCoord.z;
+        gl_FragColor.r = 1.;
         
         gl_FragDepth = hitDepth;
     }
