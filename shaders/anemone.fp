@@ -57,8 +57,8 @@ float cylinder_intersect(vec3 O, vec3 V, vec3 P, vec3 Q, float r)
 // Returns the normal at point T on the cylinder with end points P and Q
 vec3 cylinder_normal(vec3 T, vec3 P, vec3 Q)
 {
-    vec3 PQ = Q - P;
-    vec3 PT = T - P;
+    vec3 PQ = normalize(Q - P);
+    vec3 PT = normalize(T - P);
 
     // XXX something's wrong here...
     return normalize(cross(cross(PQ, PT), PQ));
@@ -72,9 +72,6 @@ float linearize(float z)
 
 void main()
 {
- //   gl_FragColor = vec4(1., 0., 0., 1.);
-    
-#if 1
     vec2 screenCoord = 
         (vec2(gl_FragCoord.x, gl_FragCoord.y) - viewport.xy) * viewport.zw;
     vec4 worldCoord = fragToWorld * vec4(screenCoord, gl_FragCoord.z, 1.0);
@@ -83,37 +80,38 @@ void main()
     vec3 V = worldCoord.xyz - cameraPos;
     float worldDist = length(V);
 
-    V = normalize(V);
+    //V = normalize(V);
 
-    vec3 L = lightPos - worldCoord.xyz;
-
-    float t = cylinder_intersect(cameraPos, V, fp0, fp1, lineWidth);
+    float t = cylinder_intersect(cameraPos, V, fp0, fp1, lineWidth / 15.);
     
     if (t < 0) {
-        gl_FragColor = vec4(1, 0., 0., 1.);
+        gl_FragColor = vec4(1, 1., 1., 1.);
         //discard;
     } else {
         vec3 Phit = cameraPos + t * V;
         vec3 N = cylinder_normal(Phit, fp0, fp1);
-        
+        vec3 L = lightPos - worldCoord.xyz;
+       
+       gl_FragColor = vec4(N.xyz, 1.);
+       
         vec4 PhitProj = gl_ModelViewProjectionMatrix * vec4(Phit, 1.);
         PhitProj.z /= PhitProj.w;
         
         float hitDepth = (PhitProj.z + 1.) / 2;
         
-        vec4 shadowCoord = shadowMatrix * vec4(Phit, 1.);
+        vec4 shadowCoord = shadowMatrix * vec4(Phit + 3. * N, 1.);
         shadowCoord /= shadowCoord.w;
         
-        float shadowLookupDepth = texture2D(shadowMap, shadowCoord.st).z;
-        float shadowAtten = shadowLookupDepth < shadowCoord.z ? 0.05 : 1.;
+        float shadowLookupDepth = texture2D(shadowMap, shadowCoord.st).r;
+        float shadowAtten = shadowCoord.z < shadowLookupDepth ? 0.25 : 1.;
         
-        float NdotL = clamp(dot(N, L), 0., 1.);
+        float NdotL = clamp(dot(N, L), 0.1, 1.);
         
         //float NdotE = dot(N, -V);
         //float OmNdotE = 1. - NdotE;
        
         // lighting + fog
-        float intensity = 1. + 0.001 * shadowAtten + 0.001 * NdotL;
+        float intensity = NdotL + 0.01 * shadowAtten;
         float omi = 1. - intensity;
     
         /* vec4 baseColor = mix(vec4(1., 1., 0.56, 1.), vec4(.8, .8, .6, 1.),
@@ -121,12 +119,11 @@ void main()
         vec4 fogColor = mix(vec4(0.03, .0, .07, 1.),
                             vec4(0.08, 0.05, 0.06, 1.), sqrt(intensity));
            
-        gl_FragColor = mix(fogColor, baseColor, intensity);*/
+        //gl_FragColor = mix(fogColor, baseColor, intensity);*/
         
-        gl_FragColor = vec4(0.5, 0.5, 1., 1.) * intensity;
-        gl_FragColor.r = 1.;
+        //gl_FragColor = vec4(0.5, 0.5, 1., 1.) * intensity;
         
-        gl_FragDepth = hitDepth;
+        //gl_FragDepth = hitDepth;
+
     }
-#endif
  }

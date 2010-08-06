@@ -11,7 +11,6 @@ OBJS = \
 	TextureRenderPass.o \
 	DepthRenderPass.o \
 	CellNoiseRenderer.o \
-	CombineRenderer.o \
 	TextureRenderer.o \
 	Visitor.o \
 	SceneRenderVisitor.o \

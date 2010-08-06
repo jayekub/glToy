@@ -24,9 +24,6 @@
 #include "DepthRenderPass.h"
 #include "ScreenRenderPass.h"
 #include "CellNoiseRenderer.h"
-#include "CombineRenderer.h"
-
-
 
 int windowWidth = 640;
 int windowHeight = 480;
@@ -46,11 +43,11 @@ Vec2 mouse, lastMouse;
 
 ////
 
-GLuint testTexture;
 Scene *anemoneScene;
 Anemone *anemone;
 DepthRenderPass *anemoneShadowPass;
-SceneRenderVisitor *sceneRenderVisitor;
+SceneRenderVisitor *sceneRenderer;
+TextureRenderPass *testRenderPass;
 TextureRenderer *textureRenderer;
 
 ofxMSAFluidSolver fluidSolver;
@@ -60,8 +57,7 @@ TextureRenderPass *cellNoisePass0 = NULL, *cellNoisePass1 = NULL;
 ScreenRenderPass *screenPass;
 
 CellNoiseRenderer *cellNoiseRenderer;
-CombineRenderer *combineRenderer;
-SceneRenderVisitor *sceneRenderer;
+TextureRenderer *combineRenderer;
 
 void resize(int w, int h) {
 	windowWidth = w;
@@ -137,9 +133,9 @@ void handleMouse(int button, int state, int x, int y)
 
 void draw() {
     if (reset) {
-        fluidSolver.reset();
-        particles0->reset();
-        particles1->reset();
+        //fluidSolver.reset();
+        //particles0->reset();
+        //particles1->reset();
 
         Listener::reloadAll();
 
@@ -213,18 +209,13 @@ void draw() {
 
     anemone->update(dt);
 
-    sceneRenderVisitor->setRenderPass(anemoneShadowPass);
-//    sceneRenderVisitor->setRenderPass(screenPass);
-    sceneRenderVisitor->setCameraName("keyLightShadowCam");
-    sceneRenderVisitor->render(anemoneScene);
+    sceneRenderer->setRenderPass(testRenderPass);
+    sceneRenderer->setCameraName("keyLightShadowCam");
+    sceneRenderer->render(anemoneScene);
 
-//    textureRenderer->setTexture(anemoneShadowPass->getTexture());
-//    textureRenderer->render(screenPass);
-
-//    sceneRenderVisitor->setRenderPass(cellNoisePass0);
-    sceneRenderVisitor->setRenderPass(screenPass);
-    sceneRenderVisitor->setCameraName("anemoneCamera");
-    sceneRenderVisitor->render(anemoneScene);
+    sceneRenderer->setRenderPass(screenPass);
+    sceneRenderer->setCameraName("anemoneCamera");
+    sceneRenderer->render(anemoneScene);
 
 	glutSwapBuffers();
 	++frames;
@@ -282,11 +273,13 @@ Scene *buildAnemoneScene()
     // Shadow
     Camera *keyLightShadowCam = new Camera("keyLightShadowCam");
 
-    keyLightShadowCam->position = Vec3(0., 10., 0.);
+    Vec3 OtoShad = Vec3(5., 5., -5.).normalize();
+
+    keyLightShadowCam->position = -4. * OtoShad;//Vec3(5., 5., -5.);
     keyLightShadowCam->center = Vec3(0., 0., 0.);
     keyLightShadowCam->up = Vec3(0., 1., 0.);
-    keyLightShadowCam->nearClip = 1.;
-    keyLightShadowCam->farClip = 10.;
+    keyLightShadowCam->nearClip = 3.;
+    keyLightShadowCam->farClip = 5.;
 
     keyLightShadowCam->isShadowCamera = true;
     keyLightShadowCam->light = keyLight;
@@ -294,7 +287,7 @@ Scene *buildAnemoneScene()
     scene->addGlobal(keyLightShadowCam);
 
     keyLight->hasShadow = true;
-    keyLight->shadowTexture = anemoneShadowPass->getTexture();
+    keyLight->shadowTexture = testRenderPass->getDepthTexture();
 
     // Anemone
     Transform *anemoneTransform = new Transform("anemoneTransform");
@@ -304,14 +297,46 @@ Scene *buildAnemoneScene()
     scene->addChild(anemoneTransform);
 
     anemone = new Anemone("anemone",
-                          /* numTentacles */ 100,
+                          /* numTentacles */ 10, //100,
                           /* numSegments */ 4,
-                          /* maxWidth */ 7.,
+                          /* maxWidth */ 25, //7.,
                           /* wiggle */ .06);
 
     anemoneTransform->addChild(anemone);
 
     return scene;
+}
+
+void buildCellNoiseScene()
+{
+    fluidSolver.setup();
+    fluidSolver.enableRGB(false).setFadeSpeed(0).setDeltaT(0.1).setVisc(0.005)
+               .setWrap(true, true).setColorDiffusion(0);
+
+    particles0 = new FluidParticleSystem(200, 0.01, 0.1);
+    particles1 = new FluidParticleSystem(1000, 0.01, 0.1);
+
+#ifndef USE_ACCUM
+    cellNoisePass0 = new TextureRenderPass(windowWidth, windowHeight);
+    cellNoisePass1 = new TextureRenderPass(windowWidth, windowHeight);
+
+    std::vector<Program::ShaderSpec> shaders;
+
+    shaders.push_back(
+            Program::ShaderSpec("shaders/combine.fp", GL_FRAGMENT_SHADER));
+
+    Program *combineProgram = new Program(shaders);
+
+    std::vector<GLuint> passes;
+
+    passes.push_back(cellNoisePass0->getTexture());
+    passes.push_back(cellNoisePass1->getTexture());
+
+    combineRenderer = new TextureRenderer(passes);
+    combineRenderer->setProgram(combineProgram);
+#endif
+
+    cellNoiseRenderer = new CellNoiseRenderer();
 }
 
 int main(int argc, char **argv) {
@@ -342,37 +367,22 @@ int main(int argc, char **argv) {
 
 	glewInit();
 
-	fluidSolver.setup();
-	fluidSolver.enableRGB(false).setFadeSpeed(0).setDeltaT(0.1).setVisc(0.005)
-               .setWrap(true, true).setColorDiffusion(0);
-
-	particles0 = new FluidParticleSystem(200, 0.01, 0.1);
-	particles1 = new FluidParticleSystem(1000, 0.01, 0.1);
-
-#ifndef USE_ACCUM
-    cellNoisePass0 = new TextureRenderPass(windowWidth, windowHeight);
-    cellNoisePass1 = new TextureRenderPass(windowWidth, windowHeight);
-
-    std::vector<TextureRenderPass *> passes;
-
-    passes.push_back(cellNoisePass0);
-    passes.push_back(cellNoisePass1);
-
-    combineRenderer = new CombineRenderer(passes);
-#endif
-
-	cellNoiseRenderer = new CellNoiseRenderer();
-
 	anemoneShadowPass = new DepthRenderPass(windowWidth, windowHeight);
+    screenPass = new ScreenRenderPass(windowWidth, windowHeight);
 
-	// for debugging
-        testTexture = makeTestTexture(256);
+	// for debuggin
+    testRenderPass = new TextureRenderPass(windowWidth, windowHeight);
+
 	textureRenderer = new TextureRenderer(anemoneShadowPass->getTexture());
+	textureRenderer->setProgram(new Program(
+	    Program::ShaderSpec("shaders/test.fp", GL_FRAGMENT_SHADER)))
+                    .setTexture(testRenderPass->getTexture())
+                    .setRenderPass(screenPass);
 
-        anemoneScene = buildAnemoneScene();
+	anemoneScene = buildAnemoneScene();
 
-	screenPass = new ScreenRenderPass(windowWidth, windowHeight);
-	sceneRenderVisitor = new SceneRenderVisitor(screenPass);
+
+	sceneRenderer = new SceneRenderVisitor(screenPass);
 
     resize(windowWidth, windowHeight);
 

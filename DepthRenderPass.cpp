@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "DepthRenderPass.h"
 
 DepthRenderPass::DepthRenderPass(int width, int height, float resMult)
@@ -50,8 +52,15 @@ void DepthRenderPass::setSize(int width, int height, float resMult)
                  GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
 
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBuffer);
+
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,
                            _texture, 0);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        fprintf(stderr, "WTF!!!\n");
 
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

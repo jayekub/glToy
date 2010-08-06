@@ -1,13 +1,35 @@
-#include "utils.h"
+#include <boost/foreach.hpp>
+#include <boost/format.hpp>
 
+#include "utils.h"
 #include "TextureRenderer.h"
 
-void TextureRenderer::render(RenderPass *renderPass)
+TextureRenderer::TextureRenderer()
 {
-    int vpWidth = renderPass->getWidth();
-    int vpHeight = renderPass->getHeight();
+    glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &_maxTextures);
+}
 
-    glUseProgram(0);
+TextureRenderer::TextureRenderer(GLuint texture)
+{
+    TextureRenderer();
+    setTexture(texture);
+}
+
+TextureRenderer::TextureRenderer(const std::vector<GLuint> &textures)
+{
+    TextureRenderer();
+    setTextures(textures);
+}
+
+void TextureRenderer::render()
+{
+    int vpWidth = _renderPass->getWidth();
+    int vpHeight = _renderPass->getHeight();
+
+    if (_program)
+        _program->use();
+    else
+        glUseProgram(0);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -22,10 +44,46 @@ void TextureRenderer::render(RenderPass *renderPass)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, _texture);
 
-    drawViewportQuad(renderPass->getWidth(), renderPass->getHeight());
+    int tex = 0;
+    BOOST_FOREACH(GLuint texture, _textures) {
+        glActiveTexture(GL_TEXTURE0 + tex);
+        glBindTexture(GL_TEXTURE_2D, texture);
 
-    glBindTexture(GL_TEXTURE_2D, 0);
+        if (_program) {
+            std::string argName = (boost::format("tex%1%") % tex).str();
+
+            if (_program->hasUniform(argName)) {
+                glUniform1i(_program->uniform(argName), tex);
+            }
+        }
+
+        if (++tex >= _maxTextures)
+            break;
+    }
+
+    drawViewportQuad(vpWidth, vpHeight);
+
     glDisable(GL_TEXTURE_2D);
+}
+
+TextureRenderer &TextureRenderer::setTextures(
+    const std::vector<GLuint> &textures)
+{
+    _textures = textures;
+    return *this;
+}
+
+TextureRenderer &TextureRenderer::setTexture(GLuint texture)
+{
+    std::vector<GLuint> tmp;
+
+    tmp.push_back(texture);
+    return setTextures(tmp);
+}
+
+TextureRenderer &TextureRenderer::setProgram(Program *program)
+{
+    _program = program;
+    return *this;
 }

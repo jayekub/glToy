@@ -1,21 +1,32 @@
 #ifndef TEXTURERENDERER_H_
 #define TEXTURERENDERER_H_
 
+#include <vector>
+
 #include "glToy.h"
 #include "RenderPass.h"
 #include "Renderer.h"
+#include "Program.h"
 
 class TextureRenderer : public Renderer
 {
 public:
-    TextureRenderer(GLuint texture) : _texture(texture) {};
+    TextureRenderer();
+    TextureRenderer(GLuint texture);
+    TextureRenderer(const std::vector<GLuint> &textures);
 
-    void render(RenderPass *renderPass);
+    virtual void render();
 
-    void setTexture(GLuint texture) { _texture = texture; }
+    TextureRenderer &setTextures(const std::vector<GLuint> &textures);
+    TextureRenderer &setTexture(GLuint texture);
+
+    TextureRenderer &setProgram(Program *program);
 
 private:
-    GLuint _texture;
+    std::vector<GLuint> _textures;
+    Program *_program;
+
+    int _maxTextures;
 };
 
 #endif /* TEXTURERENDERER_H_ */

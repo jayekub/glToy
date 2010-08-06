@@ -9,11 +9,18 @@ Program::Program() {
     _program = glCreateProgram();
 }
 
+Program::Program(const ShaderSpec &shaderSpec)
+{
+    Program();
+
+    _shaderSpecs.push_back(shaderSpec);
+    reload();
+}
+
 Program::Program(const std::vector<ShaderSpec> &shaderSpecs)
 {
-    Program::Program();
+    Program();
 
-    //setShaders(shaderSpecs);
     _shaderSpecs = shaderSpecs;
     reload();
 }
@@ -47,31 +54,43 @@ void Program::reload()
     _rebuildParamMaps();
 }
 
-void Program::use()
+void Program::use() const
 {
     glUseProgram(_program);
 }
 
+bool Program::hasUniform(const std::string &name) const
+{
+    return _uniforms.count(name) > 0;
+}
+
+bool Program::hasAttribute(const std::string &name) const
+{
+    return _attributes.count(name) > 0;
+}
+
 GLuint Program::uniform(const std::string &name)
 {
-    if (_uniforms.count(name) > 0)
+    if (hasUniform(name))
         return _uniforms[name];
 
     std::stringstream err;
     err << "The uniform " << name << " doesn't exist";
 
-    throw err.str().c_str();
+    //throw err.str().c_str();
+    return 9999;
 }
 
 GLuint Program::attribute(const std::string &name)
 {
-    if (_attributes.count(name) > 0)
+    if (hasAttribute(name))
         return _attributes[name];
 
     std::stringstream err;
     err << "The attribute " << name << " doesn't exist";
 
-    throw err.str().c_str();
+    //throw err.str().c_str();
+    return 9999;
 }
 
 void Program::addShader(const ShaderSpec &shaderSpec)

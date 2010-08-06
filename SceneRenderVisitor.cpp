@@ -24,10 +24,6 @@ SceneRenderVisitor::~SceneRenderVisitor()
 
 void SceneRenderVisitor::render(Scene *scene)
 {
-    _currentScene = scene;
-
-    _currentScene->state.reset();
-    _currentScene->state.renderPass = _renderPass;
 
     _renderPass->begin();
 
@@ -43,12 +39,25 @@ void SceneRenderVisitor::render(Scene *scene)
 
 void SceneRenderVisitor::visitScene(Scene *scene)
 {
+    _currentScene = scene;
+
+    _currentScene->state.reset();
+    _currentScene->state.renderPass = _renderPass;
+
     _visitNodes(scene->globals);
+
+    if (!_currentScene->state.camera) {
+        fprintf(stderr, "Couldn't find camera %s. Aborting.\n",
+                _cameraName.c_str());
+        return;
+    }
+
     _visitChildren(scene);
 }
 
 void SceneRenderVisitor::visitCamera(Camera *camera)
 {
+    // XXX find a faster way to do this!
     if (strcmp(_cameraName.c_str(), camera->name) == 0) {
         int vpWidth = _renderPass->getWidth();
         int vpHeight = _renderPass->getHeight();
@@ -81,10 +90,10 @@ void SceneRenderVisitor::visitCamera(Camera *camera)
             // XXX find some way to cache this?
 
             // move from [-1, 1] to [0, 1]
-            const Mat4x4 bias(0.5, 0.0, 0.0, 0.0,
-                              0.0, 0.5, 0.0, 0.0,
-                              0.0, 0.0, 0.5, 0.0,
-                              0.5, 0.5, 0.5, 1.0);
+            const Mat4x4 bias(0.5, 0.0, 0.0, 0.5,
+                              0.0, 0.5, 0.0, 0.5,
+                              0.0, 0.0, 0.5, 0.5,
+                              0.0, 0.0, 0.0, 1.0);
 
             Mat4x4 modelView, projection;
 

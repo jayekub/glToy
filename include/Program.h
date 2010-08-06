@@ -16,11 +16,15 @@ public:
     typedef std::pair<std::string, GLuint> ShaderSpec;
 
     Program();
+    Program(const ShaderSpec &shaderSpec);
     Program(const std::vector<ShaderSpec> &shaderSpecs);
     virtual ~Program();
 
     void reload();
-    void use();
+    void use() const;
+
+    bool hasUniform(const std::string &name) const;
+    bool hasAttribute(const std::string &name) const;
 
     GLuint uniform(const std::string &name);
     GLuint attribute(const std::string &name);

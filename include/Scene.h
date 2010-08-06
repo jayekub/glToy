@@ -24,7 +24,10 @@ struct Scene : public Node
 
         void reset() {
             renderPass = NULL;
+            camera = NULL;
+
             lights.clear();
+            lightPositions.clear();
         };
     };
 

@@ -17,9 +17,10 @@ public:
     virtual void setSize(int width, int height);
 
     GLuint getTexture() { return _texture; }
+    GLuint getDepthTexture() { return _depthTexture; }
 
 protected:
-    GLuint _frameBuffer, _depthBuffer, _texture;
+    GLuint _frameBuffer, _depthBuffer, _texture, _depthTexture;
 
     // For use by subclasses
     TextureRenderPass() {};
