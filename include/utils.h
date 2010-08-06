@@ -16,7 +16,7 @@
 #define randFloat() ((float) random() / (float) RAND_MAX)
 
 std::string readFile(const std::string &filename);
-GLuint makeTestTexture();
+GLuint makeTestTexture(int size);
 void drawViewportQuad(int width, int height);
 
 // XXX yoink

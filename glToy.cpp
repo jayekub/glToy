@@ -213,26 +213,18 @@ void draw() {
 
     anemone->update(dt);
 
-    //sceneRenderVisitor->setRenderPass(anemoneShadowPass);
-    //sceneRenderVisitor->setRenderPass(screenPass);
-    //sceneRenderVisitor->setCameraName("keyLightShadowCam");
-    //sceneRenderVisitor->render(anemoneScene);
+    sceneRenderVisitor->setRenderPass(anemoneShadowPass);
+//    sceneRenderVisitor->setRenderPass(screenPass);
+    sceneRenderVisitor->setCameraName("keyLightShadowCam");
+    sceneRenderVisitor->render(anemoneScene);
 
 //    textureRenderer->setTexture(anemoneShadowPass->getTexture());
 //    textureRenderer->render(screenPass);
 
-/*
-    sceneRenderVisitor->setRenderPass(cellNoisePass0);
-    //sceneRenderVisitor->setRenderPass(screenPass);
+//    sceneRenderVisitor->setRenderPass(cellNoisePass0);
+    sceneRenderVisitor->setRenderPass(screenPass);
     sceneRenderVisitor->setCameraName("anemoneCamera");
     sceneRenderVisitor->render(anemoneScene);
-    */
-
-
-    textureRenderer->setTexture(testTexture);
-    textureRenderer->render(screenPass);
-
-
 
 	glutSwapBuffers();
 	++frames;
@@ -374,7 +366,7 @@ int main(int argc, char **argv) {
 	anemoneShadowPass = new DepthRenderPass(windowWidth, windowHeight);
 
 	// for debugging
-        testTexture = makeTestTexture();
+        testTexture = makeTestTexture(256);
 	textureRenderer = new TextureRenderer(anemoneShadowPass->getTexture());
 
         anemoneScene = buildAnemoneScene();
@@ -395,6 +387,7 @@ int main(int argc, char **argv) {
     glutMouseFunc(handleMouse);
 
 	glEnable(GL_DEPTH_TEST);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	glutMainLoop();
 

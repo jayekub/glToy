@@ -24,14 +24,43 @@ std::string readFile(const std::string &filename) {
 	return contents;
 }
 
-GLuint makeTestTexture()
+GLuint makeTestTexture(int size)
 {
-    uint t[12]; // 2 x 2 image with 3 color components for each pixel
+    int size_2 = size / 2;
+    GLubyte tex[size][size][3];
 
-    t[0] = 1; t[1] = 0; t[2] = 0;
-    t[3] = 0; t[4] = 1; t[5] = 0;
-    t[6] = 0; t[7] = 0; t[8] = 1;
-    t[9] = 1; t[10] = 1; t[11] = 1;
+    // red, green, blue, and white quadrants
+    for (int x = 0; x < size; ++x) {
+        for (int y = 0; y < size; ++y) {
+            if (x < size_2) {
+                // upper
+                if (y < size_2) {
+                    // left
+                    tex[x][y][0] = 255;
+                    tex[x][y][1] = 0;
+                    tex[x][y][2] = 0;
+                } else {
+                    // right
+                    tex[x][y][0] = 0;
+                    tex[x][y][1] = 255;
+                    tex[x][y][2] = 0;
+                }
+            } else {
+                // lower
+                if (y < size_2) {
+                    // left
+                    tex[x][y][0] = 0;
+                    tex[x][y][1] = 0;
+                    tex[x][y][2] = 255;
+                } else {
+                    // right
+                    tex[x][y][0] = 255;
+                    tex[x][y][1] = 255;
+                    tex[x][y][2] = 255;
+                }
+            }
+        }
+    }
 
     // create texture and read in data
     GLuint texture;
@@ -44,9 +73,10 @@ GLuint makeTestTexture()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     //glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, 2, 2, 0, GL_RGB,
-                 GL_UNSIGNED_INT, t);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size, size, 0, GL_RGB,
+                 GL_UNSIGNED_BYTE, tex);
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -61,23 +91,26 @@ void drawViewportQuad(int width, int height)
     glTranslated((double) width / 2.0, (double) height / 2.0, 0.0);
     glScaled((double) width / 2.0, (double) height / 2.0, 1.0);
 
-    // TODO use VBO
-    glBegin(GL_TRIANGLE_STRIP);
-        glColor3f(1.0, 0.0, 0.0);
-        glTexCoord2d(0.0, 0.0);
-        glVertex2d(-1.0, -1.0);
+    glBegin(GL_QUADS);
+        // ul
+        //glColor3f(1., 0., 0.);
+        glTexCoord2f(0., 1.);
+        glVertex2f(-1., 1.);
 
-        glColor3f(0.0, 1.0, 0.0);
-        glTexCoord2d(1.0, 0.0);
-        glVertex2d(1.0, -1.0);
+        // ur
+        //glColor3f(0., 1., 0.);
+        glTexCoord2f(1., 1.);
+        glVertex2f(1., 1.);
 
-        glColor3f(0.0, 0.0, 1.0);
-        glTexCoord2d(0.0, 1.0);
-        glVertex2d(-1.0, 1.0);
+        // lr
+        //glColor3f(1., 1., 1.);
+        glTexCoord2f(1., 0.);
+        glVertex2f(1., -1.);
 
-        glColor3f(0.0, 0.0, 0.0);
-        glTexCoord2d(1.0, 1.0);
-        glVertex2d(1.0, 1.0);
+        // ll
+        //glColor3f(0., 0., 1.);
+        glTexCoord2f(0., 0.);
+        glVertex2f(-1., -1.);
     glEnd();
 
     glPopMatrix();
