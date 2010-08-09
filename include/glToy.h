@@ -13,4 +13,8 @@
 
 #define BUFFER_OFFSET(i) ((char *) NULL + (i))
 
+#include <stdio.h>
+#define PRINT_GLERROR(pfx) \
+    fprintf(stderr, "%s: %s\n", pfx, gluErrorString(glGetError()))
+
 #endif /* GLTOY_H_ */

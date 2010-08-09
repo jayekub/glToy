@@ -14,6 +14,7 @@ OBJS = \
 	TextureRenderer.o \
 	Visitor.o \
 	SceneRenderVisitor.o \
+	Noise.o \
 	Anemone.o \
 	ofxMSAFluidSolver.o
 
@@ -24,7 +25,7 @@ UNAME := $(shell uname)
 INCLUDES = -Iinclude/
 LIBS = -lGLEW -lGLU -lglut
 
-CXXFLAGS = -O2 -g -Wall -fmessage-length=0
+CXXFLAGS = -O2 -g -Wall -fmessage-length=0 -std=c++0x
 
 ifeq ($(UNAME),Darwin)
     CXXFLAGS += -I/opt/local/include

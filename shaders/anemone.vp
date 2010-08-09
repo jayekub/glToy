@@ -1,9 +1,0 @@
-#version 120
-
-attribute vec3 p0, p1;
-varying vec3 fp0, fp1;
-
-void main()  {
-    fp0 = p0; fp1 = p1;
-    gl_Position = ftransform();
-}

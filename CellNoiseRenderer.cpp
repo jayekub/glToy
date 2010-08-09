@@ -8,7 +8,7 @@
 CellNoiseRenderer::CellNoiseRenderer()
 {
     _cellNoiseProgram.addShader(
-            Program::ShaderSpec("shaders/cellNoise.fp", GL_FRAGMENT_SHADER));
+            new Program::Shader("shaders/cellNoise.fp", GL_FRAGMENT_SHADER));
     reload();
 }
 

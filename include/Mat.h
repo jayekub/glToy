@@ -127,4 +127,6 @@ public:
     };
 };
 
+typedef Mat4x4 Mat4;
+
 #endif // MAT_H_

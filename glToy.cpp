@@ -252,7 +252,7 @@ Scene *buildAnemoneScene()
     camera->center = Vec3(0., 0., 0.);
     camera->up = Vec3(0., 1., 0.);
     camera->nearClip = 2.;
-    camera->farClip = 4.;
+    camera->farClip = 100.;//4.;
 
     scene->addGlobal(camera);
 
@@ -297,7 +297,7 @@ Scene *buildAnemoneScene()
     scene->addChild(anemoneTransform);
 
     anemone = new Anemone("anemone",
-                          /* numTentacles */ 10, //100,
+                          /* numTentacles */ 1, //100,
                           /* numSegments */ 4,
                           /* maxWidth */ 25, //7.,
                           /* wiggle */ .06);
@@ -320,12 +320,8 @@ void buildCellNoiseScene()
     cellNoisePass0 = new TextureRenderPass(windowWidth, windowHeight);
     cellNoisePass1 = new TextureRenderPass(windowWidth, windowHeight);
 
-    std::vector<Program::ShaderSpec> shaders;
-
-    shaders.push_back(
-            Program::ShaderSpec("shaders/combine.fp", GL_FRAGMENT_SHADER));
-
-    Program *combineProgram = new Program(shaders);
+    Program *combineProgram = new Program(
+            new Program::Shader("shaders/combine.fs", GL_FRAGMENT_SHADER));
 
     std::vector<GLuint> passes;
 
@@ -367,20 +363,23 @@ int main(int argc, char **argv) {
 
 	glewInit();
 
-	anemoneShadowPass = new DepthRenderPass(windowWidth, windowHeight);
+	checkExtension(GL_VERSION_3_2);
+	checkExtension(GLEW_ARB_geometry_shader4);
+
+	//anemoneShadowPass = new DepthRenderPass(windowWidth, windowHeight);
     screenPass = new ScreenRenderPass(windowWidth, windowHeight);
 
-	// for debuggin
-    testRenderPass = new TextureRenderPass(windowWidth, windowHeight);
+	// for debugging
 
-	textureRenderer = new TextureRenderer(anemoneShadowPass->getTexture());
+    testRenderPass = new TextureRenderPass(windowWidth, windowHeight);
+/*
+    textureRenderer = new TextureRenderer(anemoneShadowPass->getTexture());
 	textureRenderer->setProgram(new Program(
-	    Program::ShaderSpec("shaders/test.fp", GL_FRAGMENT_SHADER)))
+	    new Program::Shader("shaders/test.fs", GL_FRAGMENT_SHADER)))
                     .setTexture(testRenderPass->getTexture())
-                    .setRenderPass(screenPass);
+                    .setRenderPass(screenPass);*/
 
 	anemoneScene = buildAnemoneScene();
-
 
 	sceneRenderer = new SceneRenderVisitor(screenPass);
 
@@ -397,7 +396,7 @@ int main(int argc, char **argv) {
     glutMouseFunc(handleMouse);
 
 	glEnable(GL_DEPTH_TEST);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	glutMainLoop();
 

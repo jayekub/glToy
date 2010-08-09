@@ -27,8 +27,6 @@ public:
 private:
     int _numTentacles, _numSegments, _maxWidth, _numPts, _numLines;
 
-    Vec3 *_tentacles, *_posed;
-
     Vec3 _currentDir;
     double _time;
 
@@ -37,13 +35,9 @@ private:
 
     // XXX make static?
     Program _anemoneProgram;
+    GLuint _permTexture, _gradTexture;
 
-    GLuint _p0Loc, _p1Loc, _lineWidthLoc,
-           _cameraPosLoc, _viewportLoc, _fragToWorldLoc;
-
-    GLuint _vertexBuffer, _indexBuffer, _p0Buffer, _p1Buffer;
-
-    GLuint _lightPosLoc, _shadowMapLoc, _shadowMatrixLoc;
+    GLuint _vertexBuffer, _pointNumBuffer;
 };
 
 #endif /* ANEMONE_H_ */
