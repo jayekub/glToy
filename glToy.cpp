@@ -297,7 +297,7 @@ Scene *buildAnemoneScene()
     scene->addChild(anemoneTransform);
 
     anemone = new Anemone("anemone",
-                          /* numTentacles */ 1, //100,
+                          /* numTentacles */ 25, //100,
                           /* numSegments */ 4,
                           /* maxWidth */ 25, //7.,
                           /* wiggle */ .06);

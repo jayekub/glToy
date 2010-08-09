@@ -15,15 +15,20 @@ out float radius;
 
 void main()
 {
-    vec3 tubeDir = randVec(vertexId[0], -1., 1.);
+    vec3 tubeDir = randVec(vertexId[0] + 1, -1., 1.);
     
-    tubeDir = rotateVec(tubeDir, mod(time, 2. * PI), vec3(0., 1., 0.));
+    //tubeDir = rotateVec(tubeDir, mod(time, 2. * PI), vec3(0., 1., 0.));
+    
+    vec3 currentDir = vec3(1., 1., 0.);
+    vec3 timeOffset = time * vec3(1., 1., 1.) / 4.;
     
     vec3 tubePts[5];
     for (int s = 0; s < tubeNumSegments + 1; ++s) {
         tubePts[s] = 
             (float(s) / float(tubeNumSegments)) * tubeDir + 
-            0.03 * randVec(vertexId[0] * s, -1., 1.);
+            0.05 * randVec((vertexId[0] + 1) * s, -1., 1.);
+            
+        tubePts[s] += 0.15 * snoise(tubePts[s] + timeOffset) * currentDir;
             
         //gl_Position = vec4(tubePts[s], 1.);
         //EmitVertex();
@@ -33,7 +38,7 @@ void main()
     // line vertices
     float botRad, topRad;
      
-    botRad = 0.05;
+    botRad = 0.02;
     for (int n = 1; n < tubeNumSegments + 1; ++n) {
         p0 = tubePts[n - 1];
         p1 = tubePts[n];
