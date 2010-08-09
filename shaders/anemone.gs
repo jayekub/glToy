@@ -38,7 +38,7 @@ void main()
     // line vertices
     float botRad, topRad;
      
-    botRad = 0.02;
+    botRad = 0.015;
     for (int n = 1; n < tubeNumSegments + 1; ++n) {
         p0 = tubePts[n - 1];
         p1 = tubePts[n];

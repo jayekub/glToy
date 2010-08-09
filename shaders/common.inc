@@ -8,14 +8,25 @@ float hash(int n)
     return float(n);
 }
 
+float rand(vec2 v)
+{
+    return fract(sin(dot(v.xy, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
 vec3 randVec(int seed, float min, float max)
 {
     vec3 v;
     
+    /*
     v.x = hash(seed * 57 * 113);
     v.y = hash(seed * seed * 113);
     v.z = hash(seed * seed * seed);
     v /= 1073741824.;
+    */
+    
+    v.x = rand(seed * vec2(1., 1.));
+    v.y = rand((seed + v.x) * vec2(1., 1.));
+    v.z = rand((seed + v.y) * vec2(1., 1.));
     
     v = (max - min) * v + min;
     

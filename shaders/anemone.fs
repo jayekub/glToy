@@ -15,9 +15,6 @@ in vec3 N;
 
 void main()
 {
-    gl_FragColor = vec4(1., 0., 0., 1.);
-
-#if 0
     vec4 viewport = vec4(0., 0., 1. / viewportWidth, 1. / viewportHeight);
     vec2 screenCoord = 
         (vec2(gl_FragCoord.x, gl_FragCoord.y) - viewport.xy) * viewport.zw;
@@ -29,7 +26,7 @@ void main()
 
     //V = normalize(V);
 
-    float t = tube_intersect(cameraPos, V, p0, p1, 100.);
+    float t = tube_intersect(cameraPos, V, p0, p1, radius);
     
     if (t < 0) {
         gl_FragColor = vec4(1, 0., 1., 1.);
@@ -73,5 +70,4 @@ void main()
         //gl_FragDepth = hitDepth;
 
     }
-#endif
 }
