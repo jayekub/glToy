@@ -1,7 +1,11 @@
+// one point per tentacle in
 layout(points) in;
-//layout(points, max_vertices = 60) out;
-//layout(line_strip, max_vertices = 60) out;
+
+// num vertices out is 6 * numSegments * numSides
 layout(triangle_strip, max_vertices = 60) out;
+
+const float startRadius = 0.03;
+const float wiggle = 0.05;
 
 uniform float time;
 uniform int tubeNumSegments;
@@ -10,7 +14,7 @@ uniform int tubeNumSides;
 in int vertexId[];
 
 out vec3 p0, p1;
-out vec3 N;
+out vec3 Pw, Nw;
 out float radius;
 
 void main()
@@ -20,16 +24,15 @@ void main()
     //tubeDir = rotateVec(tubeDir, mod(time, 2. * PI), vec3(0., 1., 0.));
     
     vec3 currentDir = vec3(1., 1., 0.);
-    vec3 timeOffset = time * vec3(1., 1., 1.) / 4.;
     
     vec3 tubePts[5];
     for (int s = 0; s < tubeNumSegments + 1; ++s) {
         tubePts[s] = 
             (float(s) / float(tubeNumSegments)) * tubeDir + 
-            0.05 * randVec((vertexId[0] + 1) * s, -1., 1.);
+            wiggle * randVec((vertexId[0] + 1) * s, -1., 1.);
             
-        tubePts[s] += 0.15 * snoise(tubePts[s] + timeOffset) * currentDir;
-            
+        tubePts[s] += 0.3 * noise(vec4(tubePts[s], time / 2.)) * currentDir;
+
         //gl_Position = vec4(tubePts[s], 1.);
         //EmitVertex();
     }
@@ -38,7 +41,7 @@ void main()
     // line vertices
     float botRad, topRad;
      
-    botRad = 0.015;
+    botRad = startRadius;
     for (int n = 1; n < tubeNumSegments + 1; ++n) {
         p0 = tubePts[n - 1];
         p1 = tubePts[n];
@@ -54,14 +57,18 @@ void main()
             
             radius = botRad;
             gl_Position = vec4(p0 + radius * Prot, 1.);
-            N = tube_normal(gl_Position.xyz, p0, p1);
+            
+            Pw = gl_Position.xyz;
+            Nw = tube_normal(Pw, p0, p1);
             
             EmitVertex(); 
             //EndPrimitive();
             
             radius = topRad;
             gl_Position = vec4(p1 + radius * Prot, 1.);
-            N = tube_normal(gl_Position.xyz, p0, p1);
+            
+            Pw = gl_Position.xyz;
+            Nw = tube_normal(Pw, p0, p1);
             
             EmitVertex();
             //EndPrimitive();

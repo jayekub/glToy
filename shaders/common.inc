@@ -1,12 +1,14 @@
 #define PI 3.1415926535897
 
-// Some commonly used PRNG hash function. Where does it come from?
-float hash(int n)
+/*
+// Some commonly used PRNG function. Where does it come from?
+float rand(int n)
 {
     n = (n << 13) ^ n;
     n = (n * (n * n * 15731 + 789221) + 1376312589) & 0x7fffffff;
     return float(n);
 }
+*/
 
 float rand(vec2 v)
 {

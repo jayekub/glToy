@@ -43,17 +43,20 @@ void TextureRenderer::render()
     glClearColor(0.0, 1.0, 0.0, 0.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glEnable(GL_TEXTURE_2D);
+    //glEnable(GL_TEXTURE_2D);
 
     int tex = 0;
     BOOST_FOREACH(GLuint texture, _textures) {
         glActiveTexture(GL_TEXTURE0 + tex);
         glBindTexture(GL_TEXTURE_2D, texture);
 
+        //printf("binding texture %d to unit %d\n", (int) texture, tex);
+
         if (_program) {
             std::string argName = (boost::format("tex%1%") % tex).str();
 
             if (_program->hasUniform(argName)) {
+                //printf("attaching unit %d to uniform %s\n", tex, argName.c_str());
                 glUniform1i(_program->uniform(argName), tex);
             }
         }
@@ -62,9 +65,11 @@ void TextureRenderer::render()
             break;
     }
 
+    //PRINT_GLERROR("tr1");
+
     drawViewportQuad(vpWidth, vpHeight);
 
-    glDisable(GL_TEXTURE_2D);
+    //glDisable(GL_TEXTURE_2D);
 }
 
 TextureRenderer &TextureRenderer::setTextures(

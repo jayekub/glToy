@@ -113,30 +113,20 @@ void Anemone::render(const Scene::State *state)
     _anemoneProgram.use();
     //_anemoneProgram.setDebug(true);
 
-    _anemoneProgram.setUniform("time", (float) _time);
-    _anemoneProgram.setUniform("tubeNumSegments", _numSegments);
-    _anemoneProgram.setUniform("tubeNumSides", 6);
-
     Mat4x4 modelView, projection;
 
     // model space is world space (for now)
     glGetFloatv(GL_MODELVIEW_MATRIX, modelView.v);
     glGetFloatv(GL_PROJECTION_MATRIX, projection.v);
 
-    static Mat4x4 remap(2., 0., 0., -1.,
-                        0., 2., 0., -1.,
-                        0., 0., 2., -1.,
-                        0., 0., 0., 1.);
+    _anemoneProgram.setUniform("modelViewMat", modelView);
+    _anemoneProgram.setUniform("projMat", projection);
 
-    Mat4x4 fragToWorld = (projection * modelView).inverse() * remap;
+    _anemoneProgram.setUniform("time", (float) _time);
+    _anemoneProgram.setUniform("tubeNumSegments", _numSegments);
+    _anemoneProgram.setUniform("tubeNumSides", 6);
 
     _anemoneProgram.setUniform("cameraPos", state->camera->position);
-    _anemoneProgram.setUniform("fragToWorld", fragToWorld);
-
-    // XXX use vec4 instead--uses fewer inputs than two floats
-    _anemoneProgram.setUniform("viewportWidth", state->renderPass->getWidth());
-    _anemoneProgram.setUniform("viewportHeight",
-            state->renderPass->getHeight());
 
     // XXX fragile
     const Light *firstLight = state->lights.begin()->second;

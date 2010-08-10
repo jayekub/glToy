@@ -14,9 +14,19 @@
 //
 // and t^2 * (Y . Y) + 2*t*(X . Y) + (X . X) - d = 0
 //
-// This function solves for t.
+// This function solves for t and returns true if there's at least
+// one solution.
+//
+// XXX still isn't always correct...wtf??
 
-float tube_intersect(vec3 O, vec3 V, vec3 P, vec3 Q, float r)
+bool tube_intersect(
+    in vec3 O,      // ray origin
+    in vec3 V,      // ray direction
+    in vec3 P,      // cylinder axis point 1
+    in vec3 Q,      // cylinder axis point 2
+    in float r,     // cylinder radius
+    out float t1,   // intersection parameter 1
+    out float t2)   // intersection parameter 2
 {
     vec3 PO = O - P;
     vec3 PQ = Q - P;
@@ -27,27 +37,31 @@ float tube_intersect(vec3 O, vec3 V, vec3 P, vec3 Q, float r)
     float d = r * r * pq2;
     
     float A = dot(Y, Y);
-    float B = 2 * dot(X, Y);
+    float B = 2. * dot(X, Y);
     float C = dot(X, X) - d;
     
     float desc = B * B - 4. * A * C;
     
     if (desc >= 0.) {
-        float t1 = (-B + desc) / (2. * A);
-        float t2 = (-B - desc) / (2. * A);
-        
-        return t1 < t2 ? t1 : t2;
+        desc = sqrt(desc);
+    
+        t1 = (-B + desc) / (2. * A);
+        t2 = (-B - desc) / (2. * A);
+
+        return true;
     } else {
-        return -9999.;
+        return false;
     }
 }
 
 // Returns the normal at point T on the cylinder with end points P and Q
-vec3 tube_normal(vec3 T, vec3 P, vec3 Q)
+vec3 tube_normal(
+    in vec3 T,      // point on cylinder 
+    in vec3 P,      // cylinder axis point 1
+    in vec3 Q)      // cylinder axis point 2
 {
     vec3 PQ = normalize(Q - P);
     vec3 PT = normalize(T - P);
 
-    // XXX something's wrong here...maybe?
     return normalize(cross(cross(PQ, PT), PQ));
 }

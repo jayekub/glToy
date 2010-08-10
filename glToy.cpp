@@ -209,9 +209,14 @@ void draw() {
 
     anemone->update(dt);
 
+    /*
     sceneRenderer->setRenderPass(testRenderPass);
     sceneRenderer->setCameraName("keyLightShadowCam");
     sceneRenderer->render(anemoneScene);
+
+    textureRenderer->setTexture(testRenderPass->getTexture());
+    textureRenderer->render();
+    */
 
     sceneRenderer->setRenderPass(screenPass);
     sceneRenderer->setCameraName("anemoneCamera");
@@ -372,12 +377,12 @@ int main(int argc, char **argv) {
 	// for debugging
 
     testRenderPass = new TextureRenderPass(windowWidth, windowHeight);
-/*
-    textureRenderer = new TextureRenderer(anemoneShadowPass->getTexture());
+
+    textureRenderer = new TextureRenderer();
 	textureRenderer->setProgram(new Program(
 	    new Program::Shader("shaders/test.fs", GL_FRAGMENT_SHADER)))
                     .setTexture(testRenderPass->getTexture())
-                    .setRenderPass(screenPass);*/
+                    .setRenderPass(screenPass);
 
 	anemoneScene = buildAnemoneScene();
 
@@ -396,7 +401,7 @@ int main(int argc, char **argv) {
     glutMouseFunc(handleMouse);
 
 	glEnable(GL_DEPTH_TEST);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	glutMainLoop();
 
