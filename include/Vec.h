@@ -81,7 +81,7 @@ struct Vec3 {
         return sqrt(x * x + y * y + z * z);
     }
 
-    Vec3 normalize() {
+    Vec3 normalize() const {
         return *this * (1.0 / length());
     }
 

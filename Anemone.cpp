@@ -115,6 +115,7 @@ void Anemone::render(const Scene::State *state)
 
     Mat4x4 modelView, projection;
 
+    // XXX switch to using own matrices!!!
     // model space is world space (for now)
     glGetFloatv(GL_MODELVIEW_MATRIX, modelView.v);
     glGetFloatv(GL_PROJECTION_MATRIX, projection.v);

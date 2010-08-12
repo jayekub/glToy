@@ -64,6 +64,8 @@ void main()
         color = vec4(1, 0., 0., 1.);
         //discard;
     } else {
+        color = vec4(abs(Pw), 1.);
+#if 0
         // XXX assumes t1 < t2 and t2 is always inside hit. does this hold??
 
         vec4 hitColors[4]; // = vec4[4](0.);
@@ -103,5 +105,6 @@ void main()
         //vec4 PhitProj = projMat * modelViewMat * vec4(Pw, 1.);
         //PhitProj.z /= PhitProj.w;
         //gl_FragDepth = (PhitProj.z + 1.) / 2;
+#endif
     }
 }

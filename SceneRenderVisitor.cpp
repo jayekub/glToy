@@ -62,6 +62,7 @@ void SceneRenderVisitor::visitCamera(Camera *camera)
         int vpWidth = _renderPass->getWidth();
         int vpHeight = _renderPass->getHeight();
 
+        // XXX switch to Mat4 methods rather than gl builtins
         if (camera->projection == Camera::FLAT) {
             glMatrixMode(GL_PROJECTION);
             glLoadIdentity();
@@ -118,9 +119,16 @@ void SceneRenderVisitor::visitLight(Light *light)
 
 void SceneRenderVisitor::visitTransform(Transform *transform)
 {
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
+    //glMatrixMode(GL_MODELVIEW);
+    //glPushMatrix();
+    _pushTransform();
 
+    _multTransform(Mat4::translate(transform->translation));
+    _multTransform(Mat4::rotate(transform->rotationAngle,
+                                transform->rotationAxis));
+    _multTransform(Mat4::scale(transform->scale));
+
+    /*
     // XXX cache transform node matrix!!
     glTranslatef(transform->translation.x,
                  transform->translation.y,
@@ -134,10 +142,12 @@ void SceneRenderVisitor::visitTransform(Transform *transform)
     glScalef(transform->scale.x,
              transform->scale.y,
              transform->scale.z);
+    */
 
     _visitChildren(transform);
 
-    glPopMatrix();
+    //glPopMatrix();
+    _popTransform();
 }
 
 void SceneRenderVisitor::visitPrim(Prim *prim)
@@ -145,12 +155,4 @@ void SceneRenderVisitor::visitPrim(Prim *prim)
     prim->render(&(_currentScene->state));
 
     _visitChildren(prim);
-}
-
-Mat4x4 SceneRenderVisitor::_getCurrentTransform() const
-{
-    Mat4x4 lightTrans;
-    glGetFloatv(GL_MODELVIEW_MATRIX, lightTrans.v);
-
-    return lightTrans;
 }

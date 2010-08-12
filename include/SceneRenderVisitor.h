@@ -28,14 +28,11 @@ public:
     void setCameraName(const std::string &cameraName) {
         _cameraName = cameraName; }
 
-
 protected:
     RenderPass *_renderPass;
     std::string _cameraName;
 
     Scene *_currentScene;
-
-    virtual Mat4x4 _getCurrentTransform() const;
 };
 
 #endif /* SCENERENDERVISITOR_H_ */
