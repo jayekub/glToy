@@ -12,10 +12,12 @@ OBJS = \
 	DepthRenderPass.o \
 	CellNoiseRenderer.o \
 	TextureRenderer.o \
+	Graph.o \
 	Visitor.o \
 	SceneRenderVisitor.o \
 	Noise.o \
 	Anemone.o \
+	Bubble.o \
 	ofxMSAFluidSolver.o
 
 TARGET = glToy

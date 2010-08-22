@@ -3,6 +3,10 @@
 
 #include <math.h>
 
+#include <string>
+
+#include <boost/format.hpp>
+
 #include "utils.h"
 
 typedef float vec_t;
@@ -85,6 +89,16 @@ struct Vec3 {
         return *this * (1.0 / length());
     }
 
+    vec_t dot(const Vec3 &vec) const {
+        return x * vec.x + y * vec.y + z * vec.z;
+    }
+
+    Vec3 cross(const Vec3 &vec) const {
+        return Vec3(y * vec.z - vec.y * z,
+                    z * vec.x - vec.z * x,
+                    x * vec.y - vec.x * y);
+    }
+
     Vec3 operator+(const Vec3 &vec) const {
         return Vec3(x + vec.x, y + vec.y, z + vec.z);
     }
@@ -103,6 +117,13 @@ struct Vec3 {
         z += vec.z;
 
         return *this;
+    }
+
+    std::string toString() const {
+        boost::format vecFmt("[%1%, %2%, %3%]");
+
+        vecFmt = vecFmt % v[0] % v[1] % v[2];
+        return vecFmt.str();
     }
 
     static Vec3 randVec(float min = 0., float max = 1.) {

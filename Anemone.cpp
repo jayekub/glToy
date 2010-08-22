@@ -33,7 +33,7 @@ Anemone::Anemone(
     Vec3 *vertices = (Vec3 *) glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 
     for (int i = 0; i < _numTentacles; ++i)
-        vertices[i] = 5. * Vec3::randVec(-1., 1.); //Vec3(0., 0., 0.);
+        vertices[i] = Vec3(0., 0., 0.);
 
     glUnmapBuffer(GL_ARRAY_BUFFER);
 
@@ -99,39 +99,37 @@ void Anemone::update(double dt)
 
             vertices[i] = _restPoints[i] + currentOffset * _currentDir;
                 //(s / (float) _numSegments) * _magnetStrength * magnetVec;
-        }
+        }at
     }
 
     glUnmapBuffer(GL_ARRAY_BUFFER);
     glBindBuffer(GL_ARRAY_BUFFER, 0);*/
 }
 
-void Anemone::render(const Scene::State *state)
+void Anemone::render(const RenderState &state)
 {
-    glPushMatrix();
-
     _anemoneProgram.use();
     //_anemoneProgram.setDebug(true);
 
-    Mat4x4 modelView, projection;
+    _anemoneProgram.setUniform("modelMat", state.getTransformMat());
+    _anemoneProgram.setUniform("viewMat", state.viewMat);
+    _anemoneProgram.setUniform("projMat", state.projectionMat);
 
-    // XXX switch to using own matrices!!!
-    // model space is world space (for now)
-    glGetFloatv(GL_MODELVIEW_MATRIX, modelView.v);
-    glGetFloatv(GL_PROJECTION_MATRIX, projection.v);
-
-    _anemoneProgram.setUniform("modelViewMat", modelView);
-    _anemoneProgram.setUniform("projMat", projection);
+//    fprintf(stderr, "model: %s\nview: %s\nproj: %s\nmvp: %s\n\n",
+//            state.getTransformMat().toString().c_str(),
+//            state.viewMat.toString().c_str(),
+//            state.projectionMat.toString().c_str(),
+//            (state.getTransformMat() * state.viewMat * state.projectionMat).toString().c_str());
 
     _anemoneProgram.setUniform("time", (float) _time);
     _anemoneProgram.setUniform("tubeNumSegments", _numSegments);
-    _anemoneProgram.setUniform("tubeNumSides", 6);
+    _anemoneProgram.setUniform("tubeNumSides", 20); // XXX fix to work with odd
 
-    _anemoneProgram.setUniform("cameraPos", state->camera->position);
+    _anemoneProgram.setUniform("cameraPos", state.camera->position);
 
     // XXX fragile
-    const Light *firstLight = state->lights.begin()->second;
-    const Vec3 &firstLightPos = state->lightPositions.begin()->second;
+    const Light *firstLight = state.lights.begin()->second;
+    const Vec3 &firstLightPos = state.lightPositions.begin()->second;
 
     _anemoneProgram.setUniform("lightPos", firstLightPos);
     _anemoneProgram.setUniform("shadowMatrix", firstLight->shadowMatrix);

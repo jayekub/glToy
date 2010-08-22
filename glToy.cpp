@@ -10,11 +10,12 @@
 
 #include "Listener.h"
 
-#include "Scene.h"
+#include "Graph.h"
 #include "Camera.h"
 #include "Light.h"
 #include "Transform.h"
 #include "Anemone.h"
+#include "Bubble.h"
 #include "SceneRenderVisitor.h"
 #include "TextureRenderer.h"
 
@@ -43,8 +44,9 @@ Vec2 mouse, lastMouse;
 
 ////
 
-Scene *anemoneScene;
+Graph *anemoneScene;
 Anemone *anemone;
+Bubble *bubble;
 DepthRenderPass *anemoneShadowPass;
 SceneRenderVisitor *sceneRenderer;
 TextureRenderPass *testRenderPass;
@@ -70,6 +72,21 @@ void resize(int w, int h) {
 	Listener::resizeAll(w, h);
 }
 
+void translate(const Vec3 &t)
+{
+    /*
+    Transform *transform =
+            (Transform * ) anemoneScene->getNode("anemoneTransform");
+
+    transform->translation += 0.25 * t;
+*/
+
+    Camera *camera = (Camera *) anemoneScene->getNode("anemoneCamera");
+
+    camera->position += 0.25 * t;
+    camera->center += 0.25 * t;
+}
+
 void handleKey(unsigned char key, int x, int y)
 {
 	switch(key) {;
@@ -79,6 +96,18 @@ void handleKey(unsigned char key, int x, int y)
 		case 'q':
 			exit(0);
 			break;
+		case 'w':
+		    translate(Vec3(0., 0., 1.));
+		    break;
+		case 's':
+		    translate(Vec3(0., 0., -1.));
+		    break;
+		case 'a':
+		    translate(Vec3(1., 0., 0.));
+		    break;
+		case 'd':
+		    translate(Vec3(-1., 0., 0.));
+		    break;
 	}
 }
 
@@ -207,7 +236,17 @@ void draw() {
 #endif
 #endif
 
-    anemone->update(dt);
+//    anemone->update(dt);
+
+    Transform *anemoneTransform =
+            (Transform * ) anemoneScene->getNode("anemoneTransform");
+
+    anemoneTransform->rotationAxis = Vec3(0., 1., 0.);
+    anemoneTransform->rotationAngle =
+            fmod(anemoneTransform->rotationAngle + 0.25 * dt, 360.);
+
+//    fprintf(stderr, "anemoneTransform angle = %g\n",
+//            anemoneTransform->rotationAngle);
 
     /*
     sceneRenderer->setRenderPass(testRenderPass);
@@ -246,17 +285,17 @@ void updateFramerate(int /* ignored */)
     glutTimerFunc(1000, updateFramerate, 0);
 }
 
-Scene *buildAnemoneScene()
+Graph *buildAnemoneScene()
 {
-    Scene *scene = new Scene("sceneRoot");
+    Graph *scene = new Graph("sceneRoot");
 
     // Camera
     Camera *camera = new Camera("anemoneCamera");
 
-    camera->position = Vec3(0., 0., -3.);
-    camera->center = Vec3(0., 0., 0.);
+    camera->position = Vec3(0., 0., 0.);
+    camera->center = Vec3(0., 0., 1.);
     camera->up = Vec3(0., 1., 0.);
-    camera->nearClip = 2.;
+    camera->nearClip = .1;
     camera->farClip = 100.;//4.;
 
     scene->addGlobal(camera);
@@ -297,17 +336,24 @@ Scene *buildAnemoneScene()
     // Anemone
     Transform *anemoneTransform = new Transform("anemoneTransform");
 
+    anemoneTransform->translation = Vec3(0., 0., 3);
+    //anemoneTransform->scale = Vec3(2., 2., 2.);
     // Leave it at the origin for now
 
-    scene->addChild(anemoneTransform);
+    scene->root->addChild(anemoneTransform);
 
+    /*
     anemone = new Anemone("anemone",
-                          /* numTentacles */ 25, //100,
-                          /* numSegments */ 4,
-                          /* maxWidth */ 25, //7.,
-                          /* wiggle */ .06);
+                          10, //100, // numTentacles
+                          4, // numSegments
+                          25, //7.,// maxWidth
+                          .06); // wiggle
 
     anemoneTransform->addChild(anemone);
+    */
+
+    bubble = new Bubble("bubble", 1.0);
+    anemoneTransform->addChild(bubble);
 
     return scene;
 }
@@ -394,14 +440,18 @@ int main(int argc, char **argv) {
     glutIdleFunc(draw);
     glutTimerFunc(1000, updateFramerate, 0);
 
-    glutReshapeFunc(resize);
+    //glutReshapeFunc(resize);
     glutKeyboardFunc(handleKey);
 
     glutMotionFunc(handleMouseMotion);
     glutMouseFunc(handleMouse);
 
 	glEnable(GL_DEPTH_TEST);
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	//glEnable(GL_CULL_FACE);
+	glDisable(GL_CULL_FACE);
+
+//	glPolygonMode(GL_FRONT, GL_LINE);
+//	glPolygonMode(GL_BACK, GL_LINE);
 
 	glutMainLoop();
 

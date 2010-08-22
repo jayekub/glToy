@@ -5,6 +5,7 @@
 #include <map>
 
 #include "Visitor.h"
+#include "RenderState.h"
 #include "Mat.h"
 
 class RenderPass;
@@ -16,9 +17,8 @@ public:
                        const std::string &cameraName = "");
     virtual ~SceneRenderVisitor();
 
-    virtual void render(Scene *scene);
+    virtual void render(Graph *scene);
 
-    virtual void visitScene(Scene *scene);
     virtual void visitCamera(Camera *camera);
     virtual void visitLight(Light *light);
     virtual void visitTransform(Transform *transform);
@@ -32,7 +32,8 @@ protected:
     RenderPass *_renderPass;
     std::string _cameraName;
 
-    Scene *_currentScene;
+    RenderState state;
+    //Scene *_currentScene;
 };
 
 #endif /* SCENERENDERVISITOR_H_ */

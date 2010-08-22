@@ -3,8 +3,8 @@
 
 #include "glToy.h"
 
+#include "RenderState.h"
 #include "Prim.h"
-#include "Scene.h"
 #include "Program.h"
 #include "Vec.h"
 
@@ -17,7 +17,7 @@ public:
     virtual ~Anemone();
 
     void update(double dt);
-    virtual void render(const Scene::State *state);
+    virtual void render(const RenderState &state);
 
     void setMagnet(Vec3 position, float strength) {
         _magnetPosition = position;

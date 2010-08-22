@@ -5,7 +5,8 @@ const float shadowBias = 0.5;
 
 #define EPSILON 1e-5
 
-uniform mat4 modelViewMat;
+uniform mat4 modelMat;
+uniform mat4 viewMat;
 uniform mat4 projMat;
 
 uniform vec3 cameraPos;
@@ -13,7 +14,7 @@ uniform vec3 lightPos;
 uniform sampler2D shadowMap;
 uniform mat4 shadowMatrix;
 
-in vec3 p0, p1;
+in vec3 p0w, p1w;
 in float radius;
 in vec3 Pw, Nw;
 
@@ -57,42 +58,40 @@ vec4 composite_colors(in vec4 colors[4], in int n)
 void main()
 {
     vec3 V = normalize(Pw - cameraPos);
-
+    
     // first test intersection with outer tube
     float t1, t2;
-    if (!tube_intersect(cameraPos, V, p0, p1, radius, t1, t2)) {
+    if (!tube_intersect(cameraPos, V, p0w, p1w, radius, t1, t2)) {
         color = vec4(1, 0., 0., 1.);
         //discard;
     } else {
-        color = vec4(abs(Pw), 1.);
-#if 0
         // XXX assumes t1 < t2 and t2 is always inside hit. does this hold??
 
         vec4 hitColors[4]; // = vec4[4](0.);
 
         vec3 Poh1 = cameraPos + t1 * V;
-        vec3 Noh1 = tube_normal(Poh1, p0, p1);
+        vec3 Noh1 = tube_normal(Poh1, p0w, p1w);
 
         hitColors[0] = shade_point(Poh1, Noh1, V, outerColor);
 
         vec3 Poh2 = cameraPos + t2 * V;
-        vec3 Noh2 = -1. * tube_normal(Poh2, p0, p1);
+        vec3 Noh2 = -1. * tube_normal(Poh2, p0w, p1w);
 
         hitColors[1] = shade_point(Poh2, Noh2, V, outerColor);
-
+        
         // now test intersection with inner tube
-        if (tube_intersect(cameraPos, V, p0, p1, radius / 3., t1, t1)) {
+        if (tube_intersect(cameraPos, V, p0w, p1w, radius / 3., t1, t1)) {
             // move second outer hit to the back of the list to make room
             // for the inner hits
             hitColors[3] = hitColors[1];
 
             vec3 Pih1 = cameraPos + t1 * V;
-            vec3 Nih1 = tube_normal(Pih1, p0, p1);
+            vec3 Nih1 = tube_normal(Pih1, p0w, p1w);
 
             hitColors[1] = shade_point(Pih1, Nih1, V, innerColor);
 
             vec3 Pih2 = cameraPos + t2 * V;
-            vec3 Nih2 = -1. * tube_normal(Pih2, p0, p1);
+            vec3 Nih2 = -1. * tube_normal(Pih2, p0w, p1w);
 
             hitColors[2] = shade_point(Pih2, Nih2, V, innerColor);
 
@@ -101,10 +100,12 @@ void main()
             color = composite_colors(hitColors, 2);
         }
 
+        color = vec4(Pw, 1.);
+
         // XXX getting this to work with Phit will be a subtle improvement
         //vec4 PhitProj = projMat * modelViewMat * vec4(Pw, 1.);
         //PhitProj.z /= PhitProj.w;
         //gl_FragDepth = (PhitProj.z + 1.) / 2;
-#endif
     }
+
 }

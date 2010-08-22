@@ -3,6 +3,8 @@
 
 #include <math.h>
 
+#include <boost/format.hpp>
+
 #include "Vec.h"
 
 // stored column major
@@ -15,10 +17,9 @@ public:
     };
 
     Mat4x4() {
-        // initialize to the identity
-        for (int i = 0; i < 4; ++i)
-            for (int j = 0; j < 4; ++j)
-                m[j][i] = i == j ? 1. : 0.;
+        // initialize to all zeroes
+        for (int e = 0; e < 16; ++e)
+            v[e] = 0;
     };
 
     Mat4x4(vec_t m11, vec_t m12, vec_t m13, vec_t m14,
@@ -134,8 +135,32 @@ public:
         return r;
     }
 
+    std::string toString() const {
+        boost::format matFmt("[[%1%, %2%, %3%, %4%], "
+                             "[%5%, %6%, %7%, %8%], "
+                             "[%9%, %10%, %11%, %12%], "
+                             "[%13%, %14%, %15%, %16%]]");
+
+        matFmt = matFmt % v[0] % v[4] % v[8] % v[12]
+                        % v[1] % v[5] % v[9] % v[13]
+                        % v[2] % v[6] % v[10] % v[14]
+                        % v[3] % v[7] % v[11] % v[15];
+
+        return matFmt.str();
+    }
+
+    static Mat4x4 identity() {
+        Mat4x4 I;
+
+        for (int i = 0; i < 4; ++i)
+            for (int j = 0; j < 4; ++j)
+                I(i, j) = i == j ? 1. : 0.;
+
+        return I;
+    }
+
     static Mat4x4 translate(const Vec3 &t) {
-        Mat4x4 T;
+        Mat4x4 T = Mat4x4::identity();
 
         T(0, 3) = t.x;
         T(1, 3) = t.y;
@@ -146,7 +171,7 @@ public:
 
     // angle is in degrees
     static Mat4x4 rotate(vec_t angle, const Vec3 &axis) {
-        Mat4x4 R;
+        Mat4x4 R = Mat4x4::identity();
         Vec3 A = axis.normalize();
 
         vec_t c = cos(angle);
@@ -181,7 +206,7 @@ public:
     }
 
     static Mat4x4 scale(const Vec3 &s) {
-        Mat4x4 S;
+        Mat4x4 S = Mat4x4::identity();
 
         S(0, 0) = s.x;
         S(1, 1) = s.y;
@@ -190,7 +215,55 @@ public:
         return S;
     }
 
-    // XXX add lookat, ortho, and perspective
+    static Mat4x4 ortho(vec_t left, vec_t right, vec_t bottom, vec_t top,
+                        vec_t nearVal, vec_t farVal) {
+
+        Vec3 T(-(right + left) / (right - left),
+               -(top + bottom) / (top - bottom),
+               -(farVal + nearVal) / (farVal - nearVal));
+
+        Mat4x4 O = translate(T);
+
+        O(0, 0) = 2. / (right - left);
+        O(1, 1) = 2. / (top - bottom);
+        O(2, 2) = -2. / (farVal - nearVal);
+
+        return O;
+    }
+
+    static Mat4x4 perspective(vec_t fovy, vec_t aspect,
+                              vec_t zNear, vec_t zFar) {
+
+        vec_t f = 1. / tan(fovy / 2.);
+
+        Mat4x4 P;
+
+        P(0, 0) = f / aspect;
+        P(1, 1) = f;
+        P(2, 2) = (zFar + zNear) / (zNear - zFar);
+        P(2, 3) = 2. * (zFar * zNear) / (zNear - zFar);
+        P(3, 2) = -1.;
+        P(3, 3) = 0.;
+
+        return P;
+    }
+
+    static Mat4x4 lookat(const Vec3 &eye, const Vec3 &center, const Vec3 &up) {
+        Vec3 f = (center - eye).normalize();
+        Vec3 UPn = up.normalize();
+
+        Vec3 s = f.cross(UPn).normalize();
+        Vec3 u = s.cross(f).normalize();
+
+        Mat4x4 M(s.x, s.y, s.z, 0.,
+                 u.x, u.y, u.z, 0.,
+                 -f.x, -f.y, -f.z, 0.,
+                 0., 0., 0., 1.);
+
+        Mat4x4 T = translate(-1. * eye);
+
+        return M * T;
+    }
 };
 
 typedef Mat4x4 Mat4;
