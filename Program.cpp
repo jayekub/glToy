@@ -85,12 +85,12 @@ std::string Program::Shader::getInfoLog() const
     return infoLogStr;
 }
 
-Program::Program(bool debug) : _debug(debug)
+Program::Program(bool debug) : _debug(debug), _numSamplers(0)
 {
     _program = glCreateProgram();
 }
 
-Program::Program(Shader *shader, bool debug) : _debug(debug)
+Program::Program(Shader *shader, bool debug) : _debug(debug), _numSamplers(0)
 {
     _program = glCreateProgram();
     _shaders.push_back(shader);
@@ -98,7 +98,7 @@ Program::Program(Shader *shader, bool debug) : _debug(debug)
 }
 
 Program::Program(const std::vector<Shader *> &shaders, bool debug) :
-        _debug(debug)
+        _debug(debug), _numSamplers(0)
 {
     _program = glCreateProgram();
     _shaders = shaders;
@@ -195,6 +195,12 @@ Program &Program::addShader(Shader *shader)
     return *this;
 }
 
+Program &Program::addShader(Shader &shader)
+{
+    _shaders.push_back(&shader);
+    return *this;
+}
+
 // static
 std::string Program::getInfoLog() const
 {
@@ -220,6 +226,31 @@ Program &Program::setParameter(GLenum param, GLint value) const
 {
     glProgramParameteriARB(_program, param, value);
     return (Program &) *this;
+}
+
+Program &Program::resetSamplers()
+{
+    // XXX unecessary?
+    for (int s = 0; s < _numSamplers; ++s) {
+        glActiveTexture(GL_TEXTURE0 + s);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+    _numSamplers = 0;
+
+    return *this;
+}
+
+Program &Program::setSampler(const std::string &name, GLenum target,
+                             GLuint texture)
+{
+    glActiveTexture(GL_TEXTURE0 + _numSamplers);
+    glBindTexture(target, texture);
+    setUniform(name, _numSamplers);
+
+    ++_numSamplers;
+
+    return *this;
 }
 
 #define UNIFORM_SETTER_IMPL(type, glSetExp) \

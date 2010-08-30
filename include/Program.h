@@ -56,6 +56,7 @@ public:
     Program &link();
 
     Program &addShader(Shader *shader);
+    Program &addShader(Shader &shader);
 
     bool hasUniform(const std::string &name) const;
     bool hasAttribute(const std::string &name) const;
@@ -68,6 +69,9 @@ public:
 
     Program &setDebug(bool debug) { _debug = debug; return *this; }
     Program &setParameter(GLenum param, GLint value) const;
+
+    Program &resetSamplers();
+    Program &setSampler(const std::string &name, GLenum target, GLuint texture);
 
 #define UNIFORM_SETTER_DECL(type) \
     Program &setUniform(const std::string &name, type value) const
@@ -84,6 +88,8 @@ private:
     bool _debug;
 
     GLuint _program;
+
+    int _numSamplers;
 
     // unordered_map is a hash map
     typedef std::unordered_map<std::string, GLuint> _ParamMap;

@@ -352,7 +352,7 @@ Graph *buildAnemoneScene()
     anemoneTransform->addChild(anemone);
     */
 
-    bubble = new Bubble("bubble", 1.0);
+    bubble = new Bubble("bubble", 0.5, 10);
     anemoneTransform->addChild(bubble);
 
     return scene;

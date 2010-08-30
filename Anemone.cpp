@@ -50,7 +50,7 @@ Anemone::Anemone(
     glBindBuffer(GL_ARRAY_BUFFER, 0);*/
 
     _anemoneProgram.addShader(
-           new Program::Shader("shaders/anemone.vs", GL_VERTEX_SHADER));
+           new Program::Shader("shaders/vertexid.vs", GL_VERTEX_SHADER));
 
     _anemoneProgram.addShader(
            &((new Program::Shader(GL_GEOMETRY_SHADER))
@@ -134,20 +134,16 @@ void Anemone::render(const RenderState &state)
     _anemoneProgram.setUniform("lightPos", firstLightPos);
     _anemoneProgram.setUniform("shadowMatrix", firstLight->shadowMatrix);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, firstLight->shadowTexture);
+    _anemoneProgram.resetSamplers();
 
-    _anemoneProgram.setUniform("shadowMap", 0);
+    _anemoneProgram.setSampler("permTexture", GL_TEXTURE_2D,
+                               _permTexture);
 
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, _permTexture);
+    _anemoneProgram.setSampler("gradTexture", GL_TEXTURE_2D,
+                               _gradTexture);
 
-    _anemoneProgram.setUniform("permTexture", 1);
-
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, _gradTexture);
-
-    _anemoneProgram.setUniform("gradTexture", 2);
+    _anemoneProgram.setSampler("shadowMap", GL_TEXTURE_2D,
+                               firstLight->shadowTexture);
 
     glEnableClientState(GL_VERTEX_ARRAY);
 
@@ -160,6 +156,4 @@ void Anemone::render(const RenderState &state)
     glDrawArrays(GL_POINTS, 0, _numTentacles);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    glPopMatrix();
 }

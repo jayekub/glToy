@@ -1,26 +1,51 @@
 #include "glToy.h"
+#include "Noise.h"
 #include "Camera.h"
 #include "Bubble.h"
 
-Bubble::Bubble(const char *name, float radius, int numLat, int numLong) :
-    Prim(name), _radius(radius), _numLat(numLat), _numLong(numLong)
+Bubble::Bubble(const char *name, float radius,
+               int numBubbles, int numLat, int numLong) :
+    Prim(name), _radius(radius),
+    _numBubbles(numBubbles), _numLat(numLat), _numLong(numLong)
 {
-    _bubbleProgram.addShader(
-        new Program::Shader("shaders/bubble.vs", GL_VERTEX_SHADER));
+    glGenBuffers(1, &_vertexBuffer);
+
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
+    glBufferData(GL_ARRAY_BUFFER, _numBubbles * sizeof(Vec3), 0,
+                 GL_STATIC_DRAW);
+
+    Vec3 *vertices = (Vec3 *) glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+
+    for (int i = 0; i < _numBubbles; ++i)
+        vertices[i] = Vec3(0., 0., 0.);
+
+    glUnmapBuffer(GL_ARRAY_BUFFER);
 
     _bubbleProgram.addShader(
-        new Program::Shader("shaders/bubble.gs", GL_GEOMETRY_SHADER));
+        new Program::Shader("shaders/vertexid.vs", GL_VERTEX_SHADER));
 
     _bubbleProgram.addShader(
-        &((new Program::Shader(GL_FRAGMENT_SHADER))
-        ->addFile("shaders/sphere.inc")
-        .addFile("shaders/bubble.fs").compile()));
+        (new Program::Shader(GL_GEOMETRY_SHADER))
+            ->addFile("shaders/common.inc")
+             //.addFile("shaders/sphere.inc")
+             //.addFile("shaders/noise.inc")
+             .addFile("shaders/bubble.gs").compile());
+
+    _bubbleProgram.addShader(
+        ((new Program::Shader(GL_FRAGMENT_SHADER))
+        ->addFile("shaders/common.inc")
+         .addFile("shaders/sphere.inc")
+         .addFile("shaders/bubble.fs").compile()));
 
     _bubbleProgram.link();
+
+    _permTexture = GLSLNoise::makePermutationTexture();
+    _gradTexture = GLSLNoise::makeGradientTexture();
 }
 
 Bubble::~Bubble()
 {
+    glDeleteBuffers(1, &_vertexBuffer);
 }
 
 void Bubble::update(double dt)
@@ -31,19 +56,24 @@ void Bubble::update(double dt)
 void Bubble::render(const RenderState &state)
 {
     _bubbleProgram.use();
+    _bubbleProgram.setUniform("modelMat", state.getTransformMat())
+                  .setUniform("viewMat", state.viewMat)
+                  .setUniform("projMat", state.projectionMat)
+                  .setUniform("cameraPos", state.camera->position)
+                  .setUniform("numLat", _numLat)
+                  .setUniform("numLong", _numLong)
+                  .setUniform("radius", _radius)
+                  .setUniform("numBubbles", _numBubbles)
+                  .resetSamplers()
+                  .setSampler("permTexture", GL_TEXTURE_2D, _permTexture)
+                  .setSampler("gradTexture", GL_TEXTURE_2D, _gradTexture);
 
-    _bubbleProgram.setUniform("modelMat", state.getTransformMat());
-    _bubbleProgram.setUniform("viewMat", state.viewMat);
-    _bubbleProgram.setUniform("projMat", state.projectionMat);
+    glEnableClientState(GL_VERTEX_ARRAY);
 
-    _bubbleProgram.setUniform("cameraPos", state.camera->position);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
+    glVertexPointer(3, GL_FLOAT, 0, 0);
+    glDrawArrays(GL_POINTS, 0, _numBubbles);
 
-    _bubbleProgram.setUniform("numLat", _numLat);
-    _bubbleProgram.setUniform("numLong", _numLong);
-    _bubbleProgram.setUniform("radius", _radius);
-
-    glBegin(GL_POINTS);
-    glVertex3f(0.f, 0.f, 0.f);
-    glEnd();
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 

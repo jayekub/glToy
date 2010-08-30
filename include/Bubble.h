@@ -8,7 +8,8 @@
 class Bubble : public Prim
 {
 public:
-    Bubble(const char *name, float radius, int numLat = 10, int numLong = 10);
+    Bubble(const char *name, float radius, int numBubbles = 1,
+           int numLat = 10, int numLong = 10);
     virtual ~Bubble();
 
     void update(double dt);
@@ -16,11 +17,12 @@ public:
 
 private:
     float _radius;
-    int _numLat, _numLong;
+    int _numBubbles, _numLat, _numLong;
+
+    GLuint _vertexBuffer;
 
     Program _bubbleProgram;
-
-
+    GLuint _permTexture, _gradTexture;
 };
 
 #endif /* BUBBLE_H_ */

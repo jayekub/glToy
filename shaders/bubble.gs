@@ -6,8 +6,6 @@ layout(triangle_strip, max_vertices = 200) out;
 
 //layout(points, max_vertices = 250) out;
 
-const float PI = 3.1415926535;
-
 uniform mat4 modelMat;
 uniform mat4 viewMat;
 uniform mat4 projMat;
@@ -16,12 +14,19 @@ uniform float radius;
 uniform int numLat;
 uniform int numLong;
 
+
+in int vertexId[];
+out int bubbleId;
 out vec3 Pw, Nw;
 
-void main()
+// XXX optimize by only emitting front-facing triangles?
+void emit_sphere(
+    in vec3 position,
+    in float radius,
+    in float numLat,
+    in float numLong,
+    in mat4 modelViewProjMat)
 {
-    mat4 modelViewProjMat = projMat * viewMat * modelMat;
-
     for (int p = 0; p < numLong; ++p) {
         float phi0 = PI * (float(p) / float(numLong));
         float phi1 = PI * (float(p + 1) / float(numLong));
@@ -29,25 +34,38 @@ void main()
         for (int t = 0; t < numLat; ++t) {
             float theta = 2. * PI * (float(t) / float(numLat));
             
-            vec4 P0 = vec4(radius * cos(theta) * sin(phi0),
+            vec3 P0 = position + 
+                      vec3(radius * cos(theta) * sin(phi0),
                            radius * sin(theta) * sin(phi0),
-                           radius * cos(phi0), 1.);
-                                   
-            Pw = (modelMat * P0).xyz;
-            Nw = (modelMat * vec4(normalize(P0).xyz, 0.)).xyz;                      
+                           radius * cos(phi0));
+                             
+            bubbleId = vertexId[0];      
+            Pw = ptransform(modelMat, P0);
+            Nw = vtransform(modelMat, normalize(P0));                 
                                 
-            gl_Position = modelViewProjMat * P0;
+            gl_Position = ptransform4(modelViewProjMat, P0);
             EmitVertex();
             
-            vec4 P1 = vec4(radius * cos(theta) * sin(phi1),
+            vec3 P1 = position +
+                      vec3(radius * cos(theta) * sin(phi1),
                            radius * sin(theta) * sin(phi1),
-                           radius * cos(phi1), 1.);
-                           
-            Pw = (modelMat * P1).xyz;
-            Nw = (modelMat * vec4(normalize(P1).xyz, 0.)).xyz;                      
+                           radius * cos(phi1));
+                          
+            bubbleId = vertexId[0]; 
+            Pw = ptransform(modelMat, P1);
+            Nw = vtransform(modelMat, normalize(P1));                      
                                 
-            gl_Position = modelViewProjMat * P1;
+            gl_Position = ptransform4(modelViewProjMat, P1);
             EmitVertex();
         }
     }
+}
+
+void main()
+{
+    mat4 modelViewProjMat = projMat * viewMat * modelMat;
+
+    vec3 pos = randVec(vertexId[0], -1., 1.);
+    emit_sphere(pos, radius, 
+                numLat, numLong, modelViewProjMat);
 }
