@@ -55,11 +55,17 @@ void Bubble::update(double dt)
 
 void Bubble::render(const RenderState &state)
 {
+
+    // XXX fragile
+    //const Light *firstLight = state.lights.begin()->second;
+    const Vec3 &firstLightPos = state.lightPositions.begin()->second;
+
     _bubbleProgram.use();
     _bubbleProgram.setUniform("modelMat", state.getTransformMat())
                   .setUniform("viewMat", state.viewMat)
                   .setUniform("projMat", state.projectionMat)
                   .setUniform("cameraPos", state.camera->position)
+                  .setUniform("lightPos", firstLightPos)
                   .setUniform("numLat", _numLat)
                   .setUniform("numLong", _numLong)
                   .setUniform("radius", _radius)

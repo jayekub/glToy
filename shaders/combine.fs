@@ -2,8 +2,8 @@ uniform sampler2D tex0;
 uniform sampler2D tex1;
 
 void main() {
-    vec4 col0 = texture2D(tex0, gl_TexCoord[0].st);
-    vec4 col1 = texture2D(tex1, gl_TexCoord[0].st);
+    vec4 col0 = vec4(0.);//texture2D(tex0, gl_TexCoord[0].st);
+    vec4 col1 = vec4(1.);//texture2D(tex1, gl_TexCoord[0].st);
 
     vec4 mixed = mix(col0, col1, 0.3);
                        

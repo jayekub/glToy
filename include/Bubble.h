@@ -9,7 +9,7 @@ class Bubble : public Prim
 {
 public:
     Bubble(const char *name, float radius, int numBubbles = 1,
-           int numLat = 10, int numLong = 10);
+           int numLat = 5, int numLong = 5);
     virtual ~Bubble();
 
     void update(double dt);

@@ -2,7 +2,7 @@
 layout(points) in;
 
 // num vertices out is 6 * numSegments * numSides
-layout(triangle_strip, max_vertices = 200) out;
+layout(triangle_strip, max_vertices = 128) out;
 
 //layout(points, max_vertices = 250) out;
 
@@ -16,7 +16,7 @@ uniform int numLong;
 
 
 in int vertexId[];
-out int bubbleId;
+flat out int bubbleId;
 out vec3 Pw, Nw;
 
 // XXX optimize by only emitting front-facing triangles?

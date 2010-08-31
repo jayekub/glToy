@@ -1,0 +1,46 @@
+Build started: Mon Aug 30 13:38:23 2010
+
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -c -o glToy.o glToy.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -c -o utils.o utils.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -c -o Listener.o Listener.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -c -o Program.o Program.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -c -o Particle.o Particle.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -c -o ParticleSystem.o ParticleSystem.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -c -o FluidParticleSystem.o FluidParticleSystem.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -MM -MP -MD Particle.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -MM -MP -MD utils.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -MM -MP -MD Listener.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -c -o RenderPass.o RenderPass.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -c -o ScreenRenderPass.o ScreenRenderPass.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -c -o TextureRenderPass.o TextureRenderPass.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -MM -MP -MD FluidParticleSystem.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -MM -MP -MD ParticleSystem.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -c -o DepthRenderPass.o DepthRenderPass.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -c -o CellNoiseRenderer.o CellNoiseRenderer.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -MM -MP -MD Program.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -c -o TextureRenderer.o TextureRenderer.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -MM -MP -MD glToy.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -c -o Graph.o Graph.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -MM -MP -MD ScreenRenderPass.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -MM -MP -MD RenderPass.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -MM -MP -MD TextureRenderPass.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -c -o Visitor.o Visitor.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -c -o SceneRenderVisitor.o SceneRenderVisitor.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -c -o Noise.o Noise.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -MM -MP -MD DepthRenderPass.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -MM -MP -MD Noise.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -c -o Anemone.o Anemone.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -c -o Bubble.o Bubble.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -MM -MP -MD CellNoiseRenderer.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -c -o ofxMSAFluidSolver.o ofxMSAFluidSolver.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -MM -MP -MD Visitor.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -MM -MP -MD Graph.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -MM -MP -MD ofxMSAFluidSolver.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -MM -MP -MD Bubble.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -MM -MP -MD Anemone.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -MM -MP -MD SceneRenderVisitor.cpp
+g++ -O2 -g -Wall -fmessage-length=0 -std=c++0x -Iinclude/ -MM -MP -MD TextureRenderer.cpp
+g++ -o glToy glToy.o utils.o Listener.o Program.o Particle.o ParticleSystem.o FluidParticleSystem.o RenderPass.o ScreenRenderPass.o TextureRenderPass.o DepthRenderPass.o CellNoiseRenderer.o TextureRenderer.o Graph.o Visitor.o SceneRenderVisitor.o Noise.o Anemone.o Bubble.o ofxMSAFluidSolver.o -lGLEW -lGLU -lglut
+
+Build finished: Mon Aug 30 13:38:31 2010
+    No errors, No warnings

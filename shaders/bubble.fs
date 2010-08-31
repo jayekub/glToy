@@ -1,6 +1,7 @@
-const vec4 bubbleColor = vec4(0.2, 0.2, 0.8, 0.45);
-
 uniform mat4 modelMat;
+
+uniform mat4 viewMat;
+uniform mat4 projMat;
 
 uniform vec3 cameraPos;
 uniform vec3 lightPos;
@@ -9,7 +10,7 @@ uniform float radius;
 
 uniform int numBubbles;
 
-in int bubbleId;
+flat in int bubbleId;
 in vec3 Pw, Nw;
 
 out vec4 color;
@@ -21,14 +22,21 @@ vec4 shade_point(
     in vec4 Cs)     // surface color
 {
     vec3 L = normalize(lightPos - P);
+    vec3 R = normalize(reflect(V, N));
+
     float NdotL = clamp(dot(N, L), 0., 1.);
+
     float shadow = 1.; //shadow_lookup(P, N);
 
-    // shadowed diffuse + ambient for now
-    return vec4((NdotL * shadow + 0.1) * Cs.rgb, Cs.a);
+    // ambient + diffuse + spec for now
+    float ambient = 0.1;
+    float diffuse = NdotL;
+    float specular = 2. * pow(max(0., dot(L, R)), 5.);
+
+    return vec4((ambient + diffuse + specular)* shadow * Cs.rgb, Cs.a);
 }
 
-bool trace_bubble(
+int trace_bubble(
     in int bubbleId,
     in vec3 O,
     in vec3 V,
@@ -36,27 +44,36 @@ bool trace_bubble(
     out hit hit2)
 {
     vec3 center = ptransform(modelMat, randVec(bubbleId, -1., 1.));
+
+    vec4 bubbleColors[3];
+    
+    bubbleColors[0] = vec4(0.5, 0.5, 0.9, 0.35);
+    bubbleColors[1] = vec4(0.9, 0.5, 0.5, 0.35);
+    bubbleColors[2] = vec4(0.5, 0.9, 0.5, 0.35);
+
+    int colorNum = int(floor(3 * rand(bubbleId * vec2(1.))));
+    vec4 bubbleColor = bubbleColors[colorNum];
     
     float t1, t2;
-    if (sphere_intersect(O, V, center, radius, t1, t2)) {
-        vec3 Phit1 = O + t1 * V;
-        vec3 Nhit1 = sphere_normal(Phit1, center);
+    int numHit = sphere_intersect(O, V, center, 0.75*radius, t1, t2);
+
+    // XXX will be garbage if numHit is zero
+
+    vec3 Phit1 = O + t1 * V;
+    vec3 Nhit1 = sphere_normal(Phit1, center);
         
-        //hit1.id = bubbleId;
-        hit1.depth = t1;
-        hit1.color = vec4(1., 0, 0, 0.5); //shade_point(Phit1, Nhit1, V, bubbleColor);
+    //hit1.id = bubbleId;
+    hit1.depth = t1;
+    hit1.color = shade_point(Phit1, Nhit1, V, bubbleColor);
         
-        vec3 Phit2 = O + t2 * V;
-        vec3 Nhit2 = -1. * sphere_normal(Phit2, center);
+    vec3 Phit2 = O + t2 * V;
+    vec3 Nhit2 = -1. * sphere_normal(Phit2, center);
         
-        //hit2.id = bubbleId;
-        hit2.depth = t2;
-        hit2.color = vec4(0, 0, 1, 0.5); //shade_point(Phit2, Nhit2, V, bubbleColor);
+    //hit2.id = bubbleId;
+    hit2.depth = t2;
+    hit2.color = shade_point(Phit2, Nhit2, V, bubbleColor);
         
-        return true;
-    } else {
-        return false;
-    }
+    return numHit;
 }
 
 void main()
@@ -66,32 +83,19 @@ void main()
 
     vec3 V = normalize(Pw - cameraPos);
     
-    if (trace_bubble(bubbleId, cameraPos, V, hits[numHits], hits[numHits + 1])) {
-        numHits += 2;
+    // XXX will fail if more than MAX_HITS / 2 bubbles overlap
+    for (int i = 0; i < numBubbles && numHits < MAX_HITS - 1; ++i) {
+        numHits += trace_bubble(i, cameraPos, V,
+                                hits[numHits], hits[numHits + 1]);
     }
     
-    for (int i = 0; i < 1 && numHits < MAX_HITS - 1; ++i) {
-        if (i != bubbleId &&
-            trace_bubble(0, cameraPos, V, hits[numHits], hits[numHits + 1])) {
-            numHits += 2;
-        }
-    }
-    
+    sort_hits(hits, numHits);
     color = composite_hits(hits, numHits);
-    
+
     /*
-    vec3 center = ptransform(modelMat, randVec(bubbleId, -1., 1.));
-
-    float t1, t2;
-
-    if (!sphere_intersect(cameraPos, V, center, radius, t1, t2)) {
-        color = vec4(1., 0., 0., 1.);
-    } else {
-        vec3 Phit1 = cameraPos + t1 * V;
-        vec3 Nhit1 = sphere_normal(Phit1, center);
-    
-        float NdotV = clamp(dot(Nhit1, V), 0.1, 1.);
-    
-        color = vec4(NdotV, NdotV, NdotV, 1.);
-    }*/
+    vec4 Pclosest = ptransform4(projMat * viewMat * modelMat,
+                                cameraPos + hits[0].depth * V);
+    Pclosest.z /= Pclosest.w;
+    gl_FragDepth = (Pclosest.z + 1.) / 2.;
+    */
 }

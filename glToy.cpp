@@ -295,7 +295,7 @@ Graph *buildAnemoneScene()
     camera->position = Vec3(0., 0., 0.);
     camera->center = Vec3(0., 0., 1.);
     camera->up = Vec3(0., 1., 0.);
-    camera->nearClip = .1;
+    camera->nearClip = 1;
     camera->farClip = 100.;//4.;
 
     scene->addGlobal(camera);
@@ -440,7 +440,7 @@ int main(int argc, char **argv) {
     glutIdleFunc(draw);
     glutTimerFunc(1000, updateFramerate, 0);
 
-    //glutReshapeFunc(resize);
+    glutReshapeFunc(resize);
     glutKeyboardFunc(handleKey);
 
     glutMotionFunc(handleMouseMotion);

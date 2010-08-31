@@ -1,4 +1,4 @@
-#define MAX_HITS 4
+#define MAX_HITS 8 
 
 const float PI = 3.1415926535897;
 
