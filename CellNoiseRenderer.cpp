@@ -14,7 +14,7 @@ CellNoiseRenderer::CellNoiseRenderer()
 
 void CellNoiseRenderer::render(
         RenderPass *renderPass,
-        ParticleSystem *noiseParticles,
+        ParticleSystem<Vec2> *noiseParticles,
         float particleSize)
 {
 //    renderPass->setFlatProjection();
@@ -26,7 +26,7 @@ void CellNoiseRenderer::render(
     float ps = particleSize * rpWidth;
     float ps_2 = ps / 2.0;
 
-    BOOST_FOREACH(Particle *p, noiseParticles->getParticles()) {
+    BOOST_FOREACH(Particle<Vec2> *p, noiseParticles->getParticles()) {
         float x = p->position.x * rpWidth;
         float y = rpHeight - p->position.y * rpHeight;
 

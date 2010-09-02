@@ -78,6 +78,9 @@ int trace_bubble(
 
 void main()
 {
+    color = vec4(1., 0., 0., 1.);
+
+#if 0
     int numHits = 0;
     hit hits[MAX_HITS];
 
@@ -98,4 +101,5 @@ void main()
     Pclosest.z /= Pclosest.w;
     gl_FragDepth = (Pclosest.z + 1.) / 2.;
     */
+#endif
 }

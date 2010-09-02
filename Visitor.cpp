@@ -10,6 +10,7 @@ Visitor::Visitor()
 void
 Visitor::_visitChildren(Node *node)
 {
+    //PRINT_GLERROR(node->name);
     _visitNodes(node->children);
 }
 

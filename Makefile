@@ -3,9 +3,6 @@ OBJS = \
 	utils.o \
 	Listener.o \
 	Program.o \
-	Particle.o \
-	ParticleSystem.o \
-	FluidParticleSystem.o \
 	RenderPass.o \
 	ScreenRenderPass.o \
 	TextureRenderPass.o \
@@ -17,7 +14,7 @@ OBJS = \
 	SceneRenderVisitor.o \
 	Noise.o \
 	Anemone.o \
-	Bubble.o \
+	Bubbles.o \
 	ofxMSAFluidSolver.o
 
 TARGET = glToy

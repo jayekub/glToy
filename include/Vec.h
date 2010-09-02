@@ -53,6 +53,19 @@ struct Vec2 {
 
         return *this;
     }
+
+    std::string toString() const {
+        boost::format vecFmt("[%1%, %2%]");
+
+        vecFmt = vecFmt % v[0] % v[1];
+        return vecFmt.str();
+    }
+
+    static Vec2 randVec(vec_t min = 0., vec_t max = 1.) {
+        vec_t range = max - min;
+        return Vec2(range * randFloat() + min,
+                    range * randFloat() + min);
+    }
 };
 
 inline Vec2 operator*(const vec_t &a, const Vec2 &v) {
@@ -126,8 +139,8 @@ struct Vec3 {
         return vecFmt.str();
     }
 
-    static Vec3 randVec(float min = 0., float max = 1.) {
-        float range = max - min;
+    static Vec3 randVec(vec_t min = 0., vec_t max = 1.) {
+        vec_t range = max - min;
         return Vec3(range * randFloat() + min,
                     range * randFloat() + min,
                     range * randFloat() + min);

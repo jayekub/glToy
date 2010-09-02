@@ -3,7 +3,6 @@ int sphere_intersect(
     in vec3 V,      // ray direction
     in vec3 P,     // sphere position
     in float r,     // sphere radius
-    out vec2 t)
     out float t1,
     out float t2)
 {

@@ -15,7 +15,7 @@
 #include "Light.h"
 #include "Transform.h"
 #include "Anemone.h"
-#include "Bubble.h"
+#include "Bubbles.h"
 #include "SceneRenderVisitor.h"
 #include "TextureRenderer.h"
 
@@ -46,7 +46,7 @@ Vec2 mouse, lastMouse;
 
 Graph *anemoneScene;
 Anemone *anemone;
-Bubble *bubble;
+Bubbles *bubbles;
 DepthRenderPass *anemoneShadowPass;
 SceneRenderVisitor *sceneRenderer;
 TextureRenderPass *testRenderPass;
@@ -237,6 +237,9 @@ void draw() {
 #endif
 
 //    anemone->update(dt);
+    bubbles->update(dt);
+
+
 
     Transform *anemoneTransform =
             (Transform * ) anemoneScene->getNode("anemoneTransform");
@@ -352,8 +355,10 @@ Graph *buildAnemoneScene()
     anemoneTransform->addChild(anemone);
     */
 
-    bubble = new Bubble("bubble", 0.5, 10);
-    anemoneTransform->addChild(bubble);
+    bubbles = new Bubbles("bubbles", Vec3(10., 10., 10.), 0.05);
+    bubbles->emitRandom(10, 1.);
+
+    anemoneTransform->addChild(bubbles);
 
     return scene;
 }
@@ -364,8 +369,9 @@ void buildCellNoiseScene()
     fluidSolver.enableRGB(false).setFadeSpeed(0).setDeltaT(0.1).setVisc(0.005)
                .setWrap(true, true).setColorDiffusion(0);
 
-    particles0 = new FluidParticleSystem(200, 0.01, 0.1);
-    particles1 = new FluidParticleSystem(1000, 0.01, 0.1);
+    // XXX rewrite
+    //particles0 = new FluidParticleSystem(200, 0.01, 0.1);
+    //particles1 = new FluidParticleSystem(1000, 0.01, 0.1);
 
 #ifndef USE_ACCUM
     cellNoisePass0 = new TextureRenderPass(windowWidth, windowHeight);

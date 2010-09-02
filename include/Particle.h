@@ -3,9 +3,10 @@
 
 #include "Vec.h"
 
+template<class V>
 class Particle {
 public:
-	Vec2 position, velocity;
+	V position, velocity;
 };
 
 #endif /* PARTICLE_H_ */

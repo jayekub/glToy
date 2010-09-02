@@ -14,8 +14,9 @@ uniform float radius;
 uniform int numLat;
 uniform int numLong;
 
-
 in int vertexId[];
+in vec3 vertex[];
+
 flat out int bubbleId;
 out vec3 Pw, Nw;
 
@@ -65,7 +66,7 @@ void main()
 {
     mat4 modelViewProjMat = projMat * viewMat * modelMat;
 
-    vec3 pos = randVec(vertexId[0], -1., 1.);
+    vec3 pos = vertex[0];//randVec(vertexId[0], -1., 1.);
     emit_sphere(pos, radius, 
                 numLat, numLong, modelViewProjMat);
 }
