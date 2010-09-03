@@ -51,10 +51,15 @@ void Bubbles::_prepRender(const RenderState &state)
                   .setUniform("numLat", _numLat)
                   .setUniform("numLong", _numLong)
                   .setUniform("radius", _radius)
+                  .setUniform("numBubbles", (int) _particles.size())
                   .resetSamplers()
-                  .setSampler("permTexture", GL_TEXTURE_2D, _permTexture)
-                  .setSampler("gradTexture", GL_TEXTURE_2D, _gradTexture);
+                  .setSampler("bubbleCenters", GL_TEXTURE_BUFFER,
+                              _vertexTexture);
 
+                  //.setSampler("permTexture", GL_TEXTURE_2D, _permTexture)
+                  //.setSampler("gradTexture", GL_TEXTURE_2D, _gradTexture);
+
+    /*
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
 
     glEnableVertexAttribArray(_bubblesProgram.attribute("vertexIn"));
@@ -62,5 +67,6 @@ void Bubbles::_prepRender(const RenderState &state)
                           GL_FALSE, 0, 0);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    */
 }
 

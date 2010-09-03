@@ -239,14 +239,14 @@ void draw() {
 //    anemone->update(dt);
     bubbles->update(dt);
 
-
-
+/*
     Transform *anemoneTransform =
             (Transform * ) anemoneScene->getNode("anemoneTransform");
 
     anemoneTransform->rotationAxis = Vec3(0., 1., 0.);
     anemoneTransform->rotationAngle =
             fmod(anemoneTransform->rotationAngle + 0.25 * dt, 360.);
+            */
 
 //    fprintf(stderr, "anemoneTransform angle = %g\n",
 //            anemoneTransform->rotationAngle);
@@ -339,7 +339,7 @@ Graph *buildAnemoneScene()
     // Anemone
     Transform *anemoneTransform = new Transform("anemoneTransform");
 
-    anemoneTransform->translation = Vec3(0., 0., 3);
+    anemoneTransform->translation = Vec3(0., -3., 3);
     //anemoneTransform->scale = Vec3(2., 2., 2.);
     // Leave it at the origin for now
 
@@ -355,8 +355,8 @@ Graph *buildAnemoneScene()
     anemoneTransform->addChild(anemone);
     */
 
-    bubbles = new Bubbles("bubbles", Vec3(10., 10., 10.), 0.05);
-    bubbles->emitRandom(10, 1.);
+    bubbles = new Bubbles("bubbles", Vec3(5., 5., 5.), 0.1);
+    bubbles->emitRandom(25, .05);
 
     anemoneTransform->addChild(bubbles);
 
@@ -453,8 +453,7 @@ int main(int argc, char **argv) {
     glutMouseFunc(handleMouse);
 
 	glEnable(GL_DEPTH_TEST);
-	//glEnable(GL_CULL_FACE);
-	glDisable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
 
 //	glPolygonMode(GL_FRONT, GL_LINE);
 //	glPolygonMode(GL_BACK, GL_LINE);

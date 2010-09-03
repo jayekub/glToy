@@ -14,8 +14,10 @@ uniform float radius;
 uniform int numLat;
 uniform int numLong;
 
+uniform samplerBuffer bubbleCenters;
+
 in int vertexId[];
-in vec3 vertex[];
+//in vec3 vertex[];
 
 flat out int bubbleId;
 out vec3 Pw, Nw;
@@ -66,7 +68,11 @@ void main()
 {
     mat4 modelViewProjMat = projMat * viewMat * modelMat;
 
-    vec3 pos = vertex[0];//randVec(vertexId[0], -1., 1.);
-    emit_sphere(pos, radius, 
+    int index = 3 * vertexId[0];
+    vec3 pos = vec3(texelFetch(bubbleCenters, index + 0).r,
+                    texelFetch(bubbleCenters, index + 1).r,
+                    texelFetch(bubbleCenters, index + 2).r);
+
+    emit_sphere(pos, radius,
                 numLat, numLong, modelViewProjMat);
 }

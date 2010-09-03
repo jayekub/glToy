@@ -15,12 +15,16 @@ class ParticleSystem : public Prim
 public:
     ParticleSystem(const char *name, const V size) : Prim(name), _size(size) {
         glGenBuffers(1, &_vertexBuffer);
+        glGenTextures(1, &_vertexTexture);
+
         _vertexBufferSize = 0;
     }
 
     virtual ~ParticleSystem() {
         _destroy();
+
         glDeleteBuffers(1, &_vertexBuffer);
+        glDeleteTextures(1, &_vertexTexture);
     }
 
     // XXX refactor to Emitter
@@ -69,12 +73,19 @@ public:
         glUnmapBuffer(GL_ARRAY_BUFFER);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        glEnableClientState(GL_VERTEX_ARRAY);
+        // hook up vertex buffer to vertex texture
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_BUFFER, _vertexTexture);
+
+        glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, _vertexBuffer);
+
+        glBindTexture(GL_TEXTURE_BUFFER, 0);
 
         // allow subclasses to setup a Program for rendering
         _prepRender(state);
 
         // send particle positions to the card
+        glEnableClientState(GL_VERTEX_ARRAY);
         glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
 
         const int numCoords = sizeof(V) / sizeof(vec_t);
@@ -83,7 +94,6 @@ public:
         glDrawArrays(GL_POINTS, 0, numParticles);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-
         glDisableClientState(GL_VERTEX_ARRAY);
     }
 
@@ -96,7 +106,7 @@ protected:
     std::vector<Particle<V> *> _particles;
 
     size_t _vertexBufferSize;
-    GLuint _vertexBuffer;
+    GLuint _vertexBuffer, _vertexTexture;
 
     void _destroy() {
         BOOST_FOREACH(Particle<V> *p, _particles) {
