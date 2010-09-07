@@ -239,14 +239,22 @@ void draw() {
 //    anemone->update(dt);
     bubbles->update(dt);
 
-/*
+/* XXX need lightPos to take rotation into account for this to work
+    Transform *keyLightTransform =
+            (Transform *) anemoneScene->getNode("keyLightTransform");
+
+    keyLightTransform->rotationAxis = Vec3(0., 0., 1.);
+    keyLightTransform->rotationAngle =
+            fmod(keyLightTransform->rotationAngle + dt, 360.);
+*/
+
     Transform *anemoneTransform =
             (Transform * ) anemoneScene->getNode("anemoneTransform");
 
     anemoneTransform->rotationAxis = Vec3(0., 1., 0.);
     anemoneTransform->rotationAngle =
             fmod(anemoneTransform->rotationAngle + 0.25 * dt, 360.);
-            */
+
 
 //    fprintf(stderr, "anemoneTransform angle = %g\n",
 //            anemoneTransform->rotationAngle);
@@ -306,7 +314,7 @@ Graph *buildAnemoneScene()
     // Light
     Transform *keyLightTransform = new Transform("keyLightTransform");
 
-    keyLightTransform->translation = Vec3(5., 5., -5.);
+    keyLightTransform->translation = Vec3(5., 5., 3.);
 
     scene->addGlobal(keyLightTransform);
 
@@ -339,7 +347,7 @@ Graph *buildAnemoneScene()
     // Anemone
     Transform *anemoneTransform = new Transform("anemoneTransform");
 
-    anemoneTransform->translation = Vec3(0., -3., 3);
+    anemoneTransform->translation = Vec3(0., 0., 3);
     //anemoneTransform->scale = Vec3(2., 2., 2.);
     // Leave it at the origin for now
 
@@ -355,10 +363,16 @@ Graph *buildAnemoneScene()
     anemoneTransform->addChild(anemone);
     */
 
-    bubbles = new Bubbles("bubbles", Vec3(5., 5., 5.), 0.1);
-    bubbles->emitRandom(25, .05);
+    // Bubbles
+    Transform *bubblesTransform = new Transform("bubblesTransform");
 
-    anemoneTransform->addChild(bubbles);
+    bubblesTransform->translation = Vec3(-15., -15., 0.);
+    anemoneTransform->addChild(bubblesTransform);
+
+    bubbles = new Bubbles("bubbles", Vec3(30., 30., 30.), 0.5, true);
+    bubbles->emitRandom(500, 0.05);
+
+    bubblesTransform->addChild(bubbles);
 
     return scene;
 }
@@ -449,11 +463,11 @@ int main(int argc, char **argv) {
     glutReshapeFunc(resize);
     glutKeyboardFunc(handleKey);
 
-    glutMotionFunc(handleMouseMotion);
-    glutMouseFunc(handleMouse);
+    //glutMotionFunc(handleMouseMotion);
+    //glutMouseFunc(handleMouse);
 
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
+//	glEnable(GL_CULL_FACE);
 
 //	glPolygonMode(GL_FRONT, GL_LINE);
 //	glPolygonMode(GL_BACK, GL_LINE);

@@ -106,7 +106,7 @@ void Anemone::update(double dt)
     glBindBuffer(GL_ARRAY_BUFFER, 0);*/
 }
 
-void Anemone::render(const RenderState &state)
+void Anemone::render(RenderState &state)
 {
     _anemoneProgram.use();
     //_anemoneProgram.setDebug(true);

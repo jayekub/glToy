@@ -8,6 +8,34 @@ struct hit {
     vec4 color;
 };
 
+void sort_hits(inout hit hits[MAX_HITS],
+               in int numHits)
+{
+    // XXX O(n^2) insertion sort
+    for (int i = 1; i < numHits - 1; ++i) {
+        hit tmp = hits[i];
+        int j = i - 1;
+        
+        while(tmp.depth < hits[j].depth && j >= 0) {
+            hits[j + 1] = hits[j];
+            --j;
+        }
+        
+        hits[j + 1] = tmp;
+    }
+}
+               
+// expects that hits is already sorted by depth
+vec4 composite_hits(in hit hits[MAX_HITS], in int numHits)
+{
+    vec4 finalColor = vec4(0., 0., 0., 0.);
+
+    for (int i = 0; i < numHits && finalColor.a < 1.; ++i)
+        finalColor += (1. - finalColor.a) * hits[i].color;
+
+    return finalColor;
+}
+
 /*
 // Some commonly used PRNG function. Where does it come from?
 float rand(in int n)
@@ -82,32 +110,4 @@ vec4 vtransform4(in mat4 transMat, in vec3 vector)
 vec3 vtransform(in mat4 transMat, in vec3 vector)
 {
     return vtransform4(transMat, vector).xyz;
-}
-
-void sort_hits(inout hit hits[MAX_HITS],
-               in int numHits)
-{
-    // XXX O(n^2) insertion sort
-    for (int i = 1; i < numHits - 1; ++i) {
-        hit tmp = hits[i];
-        int j = i - 1;
-        
-        while(tmp.depth < hits[j].depth && j >= 0) {
-            hits[j + 1] = hits[j];
-            --j;
-        }
-        
-        hits[j + 1] = tmp;
-    }
-}
-               
-// expects that hits is already sorted by depth
-vec4 composite_hits(in hit hits[MAX_HITS], in int numHits)
-{
-    vec4 finalColor = vec4(0., 0., 0., 0.);
-
-    for (int i = 0; i < numHits && finalColor.a < 1.; ++i)
-        finalColor += (1. - finalColor.a) * hits[i].color;
-
-    return finalColor;
 }

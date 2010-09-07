@@ -3,10 +3,15 @@
 
 #include "Vec.h"
 
-template<class V>
-class Particle {
-public:
-	V position, velocity;
+struct EmptyAttributes {
+};
+
+template<class A = EmptyAttributes>
+struct Particle
+{
+	Vec3 position;
+	Vec3 velocity;
+	A attributes;
 };
 
 #endif /* PARTICLE_H_ */

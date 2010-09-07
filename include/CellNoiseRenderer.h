@@ -12,7 +12,7 @@ public:
     CellNoiseRenderer();
 
     void render(RenderPass *renderPass,
-                ParticleSystem<Vec2> *noiseParticles,
+                ParticleSystem<> *noiseParticles,
                 float particleSize = -1.0);
     void reload();
 

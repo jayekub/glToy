@@ -3,13 +3,16 @@
 #include "Camera.h"
 #include "Bubbles.h"
 
-Bubbles::Bubbles(const char *name, const Vec3 &size,
-                 float radius, int numLat, int numLong) :
-    ParticleSystem<Vec3>(name, size),
-    _radius(radius), _numLat(numLat), _numLong(numLong)
+Bubbles::Bubbles(
+    const char *name,
+    const Vec3 &size,
+    float radius,
+    bool drawBox) :
+    ParticleSystem<particle_t>(name, size, true /* needsDepthSort */),
+    _radius(radius), _drawBox(drawBox)
 {
     _bubblesProgram.addShader(
-        new Program::Shader("shaders/vertexid.vs", GL_VERTEX_SHADER));
+        new Program::Shader("shaders/bubbles.vs", GL_VERTEX_SHADER));
 
     _bubblesProgram.addShader(
         (new Program::Shader(GL_GEOMETRY_SHADER))
@@ -26,6 +29,19 @@ Bubbles::Bubbles(const char *name, const Vec3 &size,
 
     _bubblesProgram.link();
 
+    ////
+
+    _boxProgram.addShader(
+       new Program::Shader("shaders/null.vs", GL_VERTEX_SHADER));
+
+    _boxProgram.addShader(
+       new Program::Shader("shaders/box.gs", GL_GEOMETRY_SHADER));
+
+    _boxProgram.addShader(
+       new Program::Shader("shaders/constant.fs", GL_FRAGMENT_SHADER));
+
+    _boxProgram.link();
+
     //_permTexture = GLSLNoise::makePermutationTexture();
     //_gradTexture = GLSLNoise::makeGradientTexture();
 }
@@ -34,39 +50,66 @@ Bubbles::~Bubbles()
 {
 }
 
-void Bubbles::_prepRender(const RenderState &state)
+// XXX refactor to Emitter
+void Bubbles::_setRandomAttributes(particle_t *p) const {
+    p->attributes.radius = _radius * (randFloat() + 0.5);
+}
+
+void Bubbles::_preRender(RenderState &state)
 {
+    state.pushTransformMat();
+    state.multTransformMat(Mat4::scale(_size));
+
+    //fprintf(stderr, "modelMat = %s\n",
+    //        state.getTransformMat().toString().c_str());
+
     // XXX fragile
     //const Light *firstLight = state.lights.begin()->second;
     const Vec3 &firstLightPos = state.lightPositions.begin()->second;
 
-    Mat4 modelMat = state.getTransformMat() * Mat4::scale(_size);
-
     _bubblesProgram.use();
-    _bubblesProgram.setUniform("modelMat", modelMat)
-                  .setUniform("viewMat", state.viewMat)
-                  .setUniform("projMat", state.projectionMat)
-                  .setUniform("cameraPos", state.camera->position)
-                  .setUniform("lightPos", firstLightPos)
-                  .setUniform("numLat", _numLat)
-                  .setUniform("numLong", _numLong)
-                  .setUniform("radius", _radius)
-                  .setUniform("numBubbles", (int) _particles.size())
-                  .resetSamplers()
-                  .setSampler("bubbleCenters", GL_TEXTURE_BUFFER,
-                              _vertexTexture);
+    _bubblesProgram.setUniform("modelMat", state.getTransformMat())
+                   .setUniform("viewMat", state.viewMat)
+                   .setUniform("projMat", state.projectionMat)
+                   .setUniform("cameraPos", state.camera->position)
+                   .setUniform("lightPos", firstLightPos);
 
-                  //.setSampler("permTexture", GL_TEXTURE_2D, _permTexture)
-                  //.setSampler("gradTexture", GL_TEXTURE_2D, _gradTexture);
+    const GLuint centerInLoc = _bubblesProgram.attribute("centerIn");
+    const GLuint radiusInLoc = _bubblesProgram.attribute("radiusIn");
 
-    /*
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, _particleBuffer);
 
-    glEnableVertexAttribArray(_bubblesProgram.attribute("vertexIn"));
-    glVertexAttribPointer(_bubblesProgram.attribute("vertexIn"), 3, GL_FLOAT,
-                          GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(centerInLoc);
+    glVertexAttribPointer(centerInLoc, 3, GL_FLOAT, GL_FALSE,
+                          sizeof(particle_t), 0);
+
+    glEnableVertexAttribArray(radiusInLoc);
+    glVertexAttribPointer(radiusInLoc, 1, GL_FLOAT, GL_FALSE,
+                          sizeof(particle_t),
+                          BUFFER_OFFSET(2 * sizeof(Vec3)));
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    */
+
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 }
 
+void Bubbles::_postRender(RenderState &state)
+{
+    glDisable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
+
+    if (_drawBox) {
+        _boxProgram.use();
+        _boxProgram.setUniform("modelMat", state.getTransformMat())
+                   .setUniform("viewMat", state.viewMat)
+                   .setUniform("projMat", state.projectionMat);
+
+        glBegin(GL_POINTS);
+        glVertex3f(0., 0., 0.);
+        glEnd();
+    }
+
+    state.popTransformMat();
+}

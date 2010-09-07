@@ -67,41 +67,8 @@ void SceneRenderVisitor::visitCamera(Camera *camera)
                                   (float) vpWidth / (float) vpHeight,
                                   camera->nearClip, camera->farClip);
 
-            //state.projectionMat = Mat4::identity();
-
-            /*
-            Mat4 dbg;
-            glMatrixMode(GL_PROJECTION);
-            glLoadIdentity();
-            gluPerspective(camera->fov, (float) vpWidth / (float) vpHeight,
-                           camera->nearClip, camera->farClip);
-            glGetFloatv(GL_PROJECTION_MATRIX, dbg.v);
-            glLoadIdentity();
-
-            fprintf(stderr, "mine:\t%s\ntheirs:\t%s\n\n",
-                    state.projectionMat.toString().c_str(),
-                    dbg.toString().c_str());
-            */
-
             state.viewMat =
                 Mat4::lookat(camera->position, camera->center, camera->up);
-
-            //state.viewMat = Mat4::identity();
-
-            /*
-            Mat4 dbg;
-            glMatrixMode(GL_MODELVIEW);
-            glLoadIdentity();
-            gluLookAt(camera->position.x, camera->position.y, camera->position.z,
-                      camera->center.x, camera->center.y, camera->center.z,
-                      camera->up.x, camera->up.y, camera->up.z);
-            glGetFloatv(GL_MODELVIEW_MATRIX, dbg.v);
-            glLoadIdentity();
-
-            fprintf(stderr, "mine:\t%s\ntheirs:\t%s\n\n",
-                    state.viewMat.toString().c_str(),
-                    dbg.toString().c_str());
-                    */
         }
 
         // build shadow matrix and update light

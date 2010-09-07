@@ -11,6 +11,8 @@
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
+#define BUFFER_OFFSET(i) ((char *) NULL + (i))
+
 #define fwrap(x, m) fmod(fmod((x), (m)) + (m), (m))
 
 #define randFloat() ((float) random() / (float) RAND_MAX)

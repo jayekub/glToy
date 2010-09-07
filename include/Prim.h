@@ -7,7 +7,7 @@
 
 struct Prim : public Node
 {
-    virtual void render(const RenderState &state) = 0;
+    virtual void render(RenderState &state) = 0;
     virtual void accept(Visitor *visitor) { visitor->visitPrim(this); }
 
     Prim(const char *name) : Node(name) {};

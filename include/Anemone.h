@@ -17,7 +17,7 @@ public:
     virtual ~Anemone();
 
     void update(double dt);
-    virtual void render(const RenderState &state);
+    virtual void render(RenderState &state);
 
     void setMagnet(Vec3 position, float strength) {
         _magnetPosition = position;

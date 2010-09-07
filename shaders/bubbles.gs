@@ -1,78 +1,66 @@
-// one point per tentacle in
+// one point per particle in
 layout(points) in;
 
-// num vertices out is 6 * numSegments * numSides
+// max vertices out is 2 * numSides
 layout(triangle_strip, max_vertices = 128) out;
-
-//layout(points, max_vertices = 250) out;
 
 uniform mat4 modelMat;
 uniform mat4 viewMat;
 uniform mat4 projMat;
+uniform vec3 cameraPos;
 
-uniform float radius;
-uniform int numLat;
-uniform int numLong;
+in vec3 center[];
+in float radius[];
 
-uniform samplerBuffer bubbleCenters;
+out vec3 Pw;
 
-in int vertexId[];
-//in vec3 vertex[];
+flat out vec3 bcenter;
+flat out float bradius;
 
-flat out int bubbleId;
-out vec3 Pw, Nw;
-
-// XXX optimize by only emitting front-facing triangles?
-void emit_sphere(
-    in vec3 position,
-    in float radius,
-    in float numLat,
-    in float numLong,
-    in mat4 modelViewProjMat)
+void emit_regpoly(
+    in vec3 Cw,             // polygon center
+    in vec3 Nw,             // polygon normal
+    in float radiusW,       // radius of bubble
+    in float circumradiusW, // radius of polygon
+    in int sides,           // number of sides
+    in mat4 viewProjMat)    // projection*view matrix
 {
-    for (int p = 0; p < numLong; ++p) {
-        float phi0 = PI * (float(p) / float(numLong));
-        float phi1 = PI * (float(p + 1) / float(numLong));
+    float innerAngle = 2. * PI / float(sides);
+
+    vec4 Cs = ptransform4(viewProjMat, Cw);
+    vec3 Vw = normalize(perpVec(Nw));
     
-        for (int t = 0; t < numLat; ++t) {
-            float theta = 2. * PI * (float(t) / float(numLat));
+    // XXX only need to emit single vertex for last iteration
+    for (int p = 0; p <= sides; ++p) {
+        float phi = p * innerAngle;
+        vec3 Rw = normalize(rotateVec(Vw, phi, Nw));
+        
+        bcenter = Cw;
+        bradius = radiusW;
+        Pw = Cw;
+        gl_Position = Cs;
             
-            vec3 P0 = position + 
-                      vec3(radius * cos(theta) * sin(phi0),
-                           radius * sin(theta) * sin(phi0),
-                           radius * cos(phi0));
-                             
-            bubbleId = vertexId[0];      
-            Pw = ptransform(modelMat, P0);
-            Nw = vtransform(modelMat, normalize(P0));                 
-                                
-            gl_Position = ptransform4(modelViewProjMat, P0);
-            EmitVertex();
+        EmitVertex();
+        
+        bcenter = Cw;
+        bradius = radiusW;
+        Pw = Cw + circumradiusW * Rw;
+        gl_Position = ptransform4(viewProjMat, Pw);
             
-            vec3 P1 = position +
-                      vec3(radius * cos(theta) * sin(phi1),
-                           radius * sin(theta) * sin(phi1),
-                           radius * cos(phi1));
-                          
-            bubbleId = vertexId[0]; 
-            Pw = ptransform(modelMat, P1);
-            Nw = vtransform(modelMat, normalize(P1));                      
-                                
-            gl_Position = ptransform4(modelViewProjMat, P1);
-            EmitVertex();
-        }
+        EmitVertex(); 
     }
+    EndPrimitive();
 }
 
 void main()
 {
-    mat4 modelViewProjMat = projMat * viewMat * modelMat;
+    mat4 viewProjMat = projMat * viewMat;
 
-    int index = 3 * vertexId[0];
-    vec3 pos = vec3(texelFetch(bubbleCenters, index + 0).r,
-                    texelFetch(bubbleCenters, index + 1).r,
-                    texelFetch(bubbleCenters, index + 2).r);
+    const int sides = 4;
+    vec3 Cw = ptransform(modelMat, center[0]); 
+    vec3 Vw = normalize(cameraPos - Cw);
 
-    emit_sphere(pos, radius,
-                numLat, numLong, modelViewProjMat);
+    float circumradiusW = radius[0] / cos(PI / sides);
+
+    emit_regpoly(Cw, Vw, radius[0], circumradiusW, sides, viewProjMat);
 }
