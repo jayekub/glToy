@@ -10,6 +10,8 @@
 
 class RenderPass;
 
+// TODO refactor -> SceneRenderer
+// TODO inherit from Renderer
 class SceneRenderVisitor : public Visitor
 {
 public:

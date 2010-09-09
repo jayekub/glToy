@@ -32,7 +32,7 @@ Bubbles::Bubbles(
     ////
 
     _boxProgram.addShader(
-       new Program::Shader("shaders/null.vs", GL_VERTEX_SHADER));
+       new Program::Shader("shaders/standard.vs", GL_VERTEX_SHADER));
 
     _boxProgram.addShader(
        new Program::Shader("shaders/box.gs", GL_GEOMETRY_SHADER));
@@ -90,7 +90,7 @@ void Bubbles::_preRender(RenderState &state)
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    glDisable(GL_DEPTH_TEST);
+   // glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 }

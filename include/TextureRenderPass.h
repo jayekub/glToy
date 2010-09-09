@@ -5,6 +5,8 @@
 
 #include "RenderPass.h"
 
+// TODO allow use of depth texture to be configurable
+// TODO allow multiple render targets
 class TextureRenderPass : public RenderPass
 {
 public:

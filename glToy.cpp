@@ -18,6 +18,7 @@
 #include "Bubbles.h"
 #include "SceneRenderVisitor.h"
 #include "TextureRenderer.h"
+#include "Program.h"
 
 #include "ofxMSAFluidSolver.h"
 #include "FluidParticleSystem.h"
@@ -49,8 +50,10 @@ Anemone *anemone;
 Bubbles *bubbles;
 DepthRenderPass *anemoneShadowPass;
 SceneRenderVisitor *sceneRenderer;
-TextureRenderPass *testRenderPass;
+
+TextureRenderPass *geomPass, *blurPass1, *blurPass2;
 TextureRenderer *textureRenderer;
+Program *dofProgram;
 
 ofxMSAFluidSolver fluidSolver;
 FluidParticleSystem *particles0, *particles1;
@@ -236,7 +239,6 @@ void draw() {
 #endif
 #endif
 
-//    anemone->update(dt);
     bubbles->update(dt);
 
 /* XXX need lightPos to take rotation into account for this to work
@@ -255,22 +257,25 @@ void draw() {
     anemoneTransform->rotationAngle =
             fmod(anemoneTransform->rotationAngle + 0.25 * dt, 360.);
 
+    ////
 
-//    fprintf(stderr, "anemoneTransform angle = %g\n",
-//            anemoneTransform->rotationAngle);
-
-    /*
-    sceneRenderer->setRenderPass(testRenderPass);
-    sceneRenderer->setCameraName("keyLightShadowCam");
-    sceneRenderer->render(anemoneScene);
-
-    textureRenderer->setTexture(testRenderPass->getTexture());
-    textureRenderer->render();
-    */
-
-    sceneRenderer->setRenderPass(screenPass);
+    sceneRenderer->setRenderPass(geomPass);
     sceneRenderer->setCameraName("anemoneCamera");
     sceneRenderer->render(anemoneScene);
+
+    printf("blur pass\n");
+    textureRenderer->setRenderPass(blurPass1);
+    textureRenderer->setProgram(NULL);
+    textureRenderer->setTexture(geomPass->getTexture());
+    textureRenderer->render();
+
+    printf("dof pass\n");
+    textureRenderer->setRenderPass(screenPass);
+    textureRenderer->setProgram(dofProgram);
+    textureRenderer->setTexture(geomPass->getTexture());
+    textureRenderer->addTexture(geomPass->getDepthTexture());
+    textureRenderer->addTexture(blurPass1->getTexture());
+    textureRenderer->render();
 
 	glutSwapBuffers();
 	++frames;
@@ -342,7 +347,7 @@ Graph *buildAnemoneScene()
     scene->addGlobal(keyLightShadowCam);
 
     keyLight->hasShadow = true;
-    keyLight->shadowTexture = testRenderPass->getDepthTexture();
+    //keyLight->shadowTexture = testRenderPass->getDepthTexture();
 
     // Anemone
     Transform *anemoneTransform = new Transform("anemoneTransform");
@@ -437,22 +442,27 @@ int main(int argc, char **argv) {
 	checkExtension(GL_VERSION_3_2);
 	checkExtension(GLEW_ARB_geometry_shader4);
 
-	//anemoneShadowPass = new DepthRenderPass(windowWidth, windowHeight);
-    screenPass = new ScreenRenderPass(windowWidth, windowHeight);
+	////
 
-	// for debugging
+    anemoneScene = buildAnemoneScene();
+    sceneRenderer = new SceneRenderVisitor();
 
-    testRenderPass = new TextureRenderPass(windowWidth, windowHeight);
+    geomPass = new TextureRenderPass(windowWidth, windowHeight);
+
+    blurPass1 = new TextureRenderPass(windowWidth, windowHeight);
+	//blurPass2 = new TextureRenderPass(windowWidth / 2., windowHeight / 2.);
 
     textureRenderer = new TextureRenderer();
-	textureRenderer->setProgram(new Program(
-	    new Program::Shader("shaders/test.fs", GL_FRAGMENT_SHADER)))
-                    .setTexture(testRenderPass->getTexture())
-                    .setRenderPass(screenPass);
 
-	anemoneScene = buildAnemoneScene();
+    dofProgram = new Program();
 
-	sceneRenderer = new SceneRenderVisitor(screenPass);
+    dofProgram->addShader(
+         new Program::Shader("shaders/standard.vs", GL_VERTEX_SHADER));
+    dofProgram->addShader(
+         new Program::Shader("shaders/dof.fs", GL_FRAGMENT_SHADER));
+    dofProgram->link();
+
+    screenPass = new ScreenRenderPass(windowWidth, windowHeight);
 
     resize(windowWidth, windowHeight);
 
