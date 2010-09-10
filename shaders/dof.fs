@@ -12,5 +12,6 @@ void main()
     float depth = texture(tex1, texcoord).r;
     vec4 blurred = texture(tex2, texcoord);
 
-    color = mix(sharp, blurred, depth);
+    color = mix(sharp, blurred, max(0, 2. * depth * depth - 1));
+    //color = texture(tex0, texcoord);
 }

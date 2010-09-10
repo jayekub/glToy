@@ -45,6 +45,8 @@ Vec2 mouse, lastMouse;
 
 ////
 
+GLuint testTexture;
+
 Graph *anemoneScene;
 Anemone *anemone;
 Bubbles *bubbles;
@@ -263,13 +265,11 @@ void draw() {
     sceneRenderer->setCameraName("anemoneCamera");
     sceneRenderer->render(anemoneScene);
 
-    printf("blur pass\n");
     textureRenderer->setRenderPass(blurPass1);
     textureRenderer->setProgram(NULL);
     textureRenderer->setTexture(geomPass->getTexture());
     textureRenderer->render();
 
-    printf("dof pass\n");
     textureRenderer->setRenderPass(screenPass);
     textureRenderer->setProgram(dofProgram);
     textureRenderer->setTexture(geomPass->getTexture());
@@ -277,8 +277,8 @@ void draw() {
     textureRenderer->addTexture(blurPass1->getTexture());
     textureRenderer->render();
 
-	glutSwapBuffers();
-	++frames;
+    glutSwapBuffers();
+    ++frames;
 }
 
 void updateFramerate(int /* ignored */)
@@ -444,13 +444,14 @@ int main(int argc, char **argv) {
 
 	////
 
+    testTexture = makeTestTexture(512);
+
     anemoneScene = buildAnemoneScene();
     sceneRenderer = new SceneRenderVisitor();
 
     geomPass = new TextureRenderPass(windowWidth, windowHeight);
-
-    blurPass1 = new TextureRenderPass(windowWidth, windowHeight);
-	//blurPass2 = new TextureRenderPass(windowWidth / 2., windowHeight / 2.);
+    blurPass1 = new TextureRenderPass(windowWidth, windowHeight, 0.25);
+    //blurPass2 = new TextureRenderPass(windowWidth / 2., windowHeight / 2.);
 
     textureRenderer = new TextureRenderer();
 

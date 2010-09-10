@@ -1,6 +1,7 @@
 #include "TextureRenderPass.h"
 
-TextureRenderPass::TextureRenderPass(int width, int height)
+TextureRenderPass::TextureRenderPass(int width, int height, float scale) :
+    _scale(scale)
 {
     glGenFramebuffers(1, &_frameBuffer);
     //glGenRenderbuffers(1, &_depthBuffer);
@@ -20,37 +21,39 @@ TextureRenderPass::~TextureRenderPass()
 
 void TextureRenderPass::begin()
 {
-    glViewport(0.0, 0.0, _width, _height);
     glBindFramebuffer(GL_FRAMEBUFFER, _frameBuffer);
-
     RenderPass::begin();
 }
 
 void TextureRenderPass::end()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
     RenderPass::end();
 }
 
 void TextureRenderPass::setSize(int width, int height)
 {
-    RenderPass::setSize(width, height);
+    RenderPass::setSize(_scale * width, _scale * height);
+
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     // color texture
-    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, _texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                    GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+                    GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _width, _height, 0, GL_RGBA,
                  GL_UNSIGNED_BYTE, 0);
 
+    glBindTexture(GL_TEXTURE_2D, 0);
+
     // depth texture
-    glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, _depthTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
@@ -59,6 +62,8 @@ void TextureRenderPass::setSize(int width, int height)
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, _width, _height, 0,
                  GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     //glBindRenderbuffer(GL_RENDERBUFFER, _depthBuffer);
     //glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _width, _height);
@@ -73,10 +78,6 @@ void TextureRenderPass::setSize(int width, int height)
 
     //glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
     //                          GL_RENDERBUFFER, _depthBuffer);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, 0);
 
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

@@ -8,13 +8,14 @@
 class RenderPass : public Listener
 {
 public:
-    RenderPass(int width, int height);
-    virtual ~RenderPass();
+    RenderPass(int width, int height) { setSize(width, height); }
+    virtual ~RenderPass() {}
 
-    virtual void begin() {};
+    virtual void begin() { glViewport(0., 0., _width, _height); };
     virtual void end() {};
 
-    virtual void setSize(int width, int height);
+    virtual void setSize(int width, int height) {
+        _width = width; _height = height; }
 
     // Listener implementation
     void resize(int width, int height) { setSize(width, height); }
@@ -25,6 +26,7 @@ public:
 protected:
     int _width, _height;
 
+    // For use by subclasses that need to control when setSize is called
     RenderPass() {};
 };
 

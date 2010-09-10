@@ -3,7 +3,6 @@ OBJS = \
 	utils.o \
 	Listener.o \
 	Program.o \
-	RenderPass.o \
 	ScreenRenderPass.o \
 	TextureRenderPass.o \
 	DepthRenderPass.o \

@@ -22,7 +22,7 @@ TextureRenderer::TextureRenderer()
                  GL_STATIC_DRAW);
 
     const Vec2 texcoords[4] = {
-        Vec2(0., 1.), Vec2(1., 1.), Vec2(1., 0.), Vec2(0., 0.)};
+        Vec2(0., 0.), Vec2(1., 0.), Vec2(1., 1.), Vec2(0., 1.)};
 
     glBindBuffer(GL_ARRAY_BUFFER, _texcoordBuffer);
     glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(Vec2), texcoords,
@@ -96,27 +96,22 @@ void TextureRenderer::render()
 
     program->resetSamplers();
 
-    printf("%d textures\n", _textures.size());
-
     int tex = 0;
     BOOST_FOREACH(GLuint texture, _textures) {
         std::string argName = (boost::format("tex%1%") % tex).str();
 
-        printf("checking for sampler %s\n", argName.c_str());
-
         // XXX two hash lookups, could be optimized
         if (program->hasUniform(argName)) {
             program->setSampler(argName, GL_TEXTURE_2D, texture);
-
-            printf("bound texture %u to sampler %s\n", texture,
-                   argName.c_str());
         }
 
         if (++tex >= _maxTextures)
             break;
     }
 
-    glClearColor(0.0, 0.0, 0.0, 0.0);
+    _renderPass->begin();
+
+    glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
@@ -126,6 +121,8 @@ void TextureRenderer::render()
     glDisableVertexAttribArray(vertexInLoc);
     glDisableVertexAttribArray(texcoordInLoc);
     glDisableClientState(GL_VERTEX_ARRAY);
+
+    _renderPass->end();
 }
 
 TextureRenderer &TextureRenderer::setTextures(
