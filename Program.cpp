@@ -224,7 +224,8 @@ std::string Program::getInfoLog() const
 
 Program &Program::setParameter(GLenum param, GLint value) const
 {
-    glProgramParameteriARB(_program, param, value);
+    // XXX gl3
+    //glProgramParameteriARB(_program, param, value);
     return (Program &) *this;
 }
 

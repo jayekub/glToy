@@ -3,13 +3,18 @@
 
 #include <sys/types.h>
 
-#include <GL/glew.h>
+#define GL3_PROTOTYPES
+#include <GL3/gl3.h>
+
+//#include <GL/glew.h>
 
 #ifdef __APPLE__
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
+#include <GL/freeglut_ext.h>
 #endif
+
 
 #define BUFFER_OFFSET(i) ((char *) NULL + (i))
 

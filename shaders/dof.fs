@@ -13,5 +13,5 @@ void main()
     vec4 blurred = texture(tex2, texcoord);
 
     //color = mix(sharp, blurred, max(0, 2. * depth * depth - 1));
-    color = texture(tex2, texcoord);
+    color = texture(tex1, texcoord);
 }

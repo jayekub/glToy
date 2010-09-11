@@ -67,14 +67,14 @@ CellNoiseRenderer *cellNoiseRenderer;
 TextureRenderer *combineRenderer;
 
 void resize(int w, int h) {
-	windowWidth = w;
-	windowHeight = h;
-	invWidth = 1.0 / (double) w;
-	invHeight = 1.0 / (double) h;
+    windowWidth = w;
+    windowHeight = h;
+    invWidth = 1.0 / (double) w;
+    invHeight = 1.0 / (double) h;
 
-	fluidSolver.setSize(fluidSize, (float) fluidSize * (float) h / (float) w);
+    fluidSolver.setSize(fluidSize, (float) fluidSize * (float) h / (float) w);
 
-	Listener::resizeAll(w, h);
+    Listener::resizeAll(w, h);
 }
 
 void translate(const Vec3 &t)
@@ -94,26 +94,26 @@ void translate(const Vec3 &t)
 
 void handleKey(unsigned char key, int x, int y)
 {
-	switch(key) {;
-		case 'r':
+    switch(key) {;
+        case 'r':
             reset = true;
-			break;
-		case 'q':
-			exit(0);
-			break;
-		case 'w':
-		    translate(Vec3(0., 0., 1.));
-		    break;
-		case 's':
-		    translate(Vec3(0., 0., -1.));
-		    break;
-		case 'a':
-		    translate(Vec3(1., 0., 0.));
-		    break;
-		case 'd':
-		    translate(Vec3(-1., 0., 0.));
-		    break;
-	}
+            break;
+        case 'q':
+            exit(0);
+            break;
+        case 'w':
+            translate(Vec3(0., 0., 1.));
+            break;
+        case 's':
+            translate(Vec3(0., 0., -1.));
+            break;
+        case 'a':
+            translate(Vec3(1., 0., 0.));
+            break;
+        case 'd':
+            translate(Vec3(-1., 0., 0.));
+            break;
+    }
 }
 
 void handleMouseMotion(int x, int y)
@@ -190,13 +190,13 @@ void draw() {
     //dampenFluid(&fluidSolver, 0.9);
     fluidSolver.update();
 
-	particles0->update(dt, &fluidSolver);
-	particles1->update(dt, &fluidSolver);
+    particles0->update(dt, &fluidSolver);
+    particles1->update(dt, &fluidSolver);
 
 #ifdef USE_ACCUM
-	screenPass->begin();
+    screenPass->begin();
 
-	glClearAccum(0.0, 0.0, 0.0, 0.0);
+    glClearAccum(0.0, 0.0, 0.0, 0.0);
     glClearColor(1.0, 0.0, 1.0, 1.0);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ACCUM_BUFFER_BIT);
@@ -261,22 +261,25 @@ void draw() {
 
     ////
 
-    sceneRenderer->setRenderPass(geomPass);
+//    sceneRenderer->setRenderPass(geomPass);
+    sceneRenderer->setRenderPass(screenPass);
     sceneRenderer->setCameraName("anemoneCamera");
     sceneRenderer->render(anemoneScene);
 
+/*
     textureRenderer->setRenderPass(blurPass1);
     textureRenderer->setProgram(NULL);
     textureRenderer->setTexture(geomPass->getTexture());
     textureRenderer->render();
 
     textureRenderer->setRenderPass(screenPass);
-//    textureRenderer->setProgram(dofProgram);
-    textureRenderer->setTexture(blurPass1->getTexture());
-//    textureRenderer->setTexture(geomPass->getTexture());
-//    textureRenderer->addTexture(geomPass->getDepthTexture());
-//    textureRenderer->addTexture(blurPass1->getTexture());
+    textureRenderer->setProgram(dofProgram);
+//    textureRenderer->setTexture(blurPass1->getTexture());
+    textureRenderer->setTexture(geomPass->getTexture());
+    textureRenderer->addTexture(geomPass->getDepthTexture());
+    textureRenderer->addTexture(blurPass1->getTexture());
     textureRenderer->render();
+*/
 
     glutSwapBuffers();
     ++frames;
@@ -417,11 +420,14 @@ int main(int argc, char **argv) {
 
     srandom((unsigned int) time(NULL));
 
-	glutInit(&argc, argv);
+    glutInit(&argc, argv);
 
-	glutInitDisplayMode(GLUT_RGBA |  GLUT_DOUBLE | GLUT_DEPTH);
+    glutInitContextVersion(3, 2);
+    glutInitContextProfile(GLUT_CORE_PROFILE);
 
-	if (argc > 1 && strcmp(argv[1], "-f") == 0) {
+    glutInitDisplayMode(GLUT_RGBA |  GLUT_DOUBLE | GLUT_DEPTH);
+
+    if (argc > 1 && strcmp(argv[1], "-f") == 0) {
         int fullWidth = glutGet(GLUT_SCREEN_WIDTH);
         int fullHeight = glutGet(GLUT_SCREEN_HEIGHT);
 
@@ -431,19 +437,19 @@ int main(int argc, char **argv) {
 
         glutGameModeString(gameModeSS.str().c_str());
         glutEnterGameMode();
-	} else {
-	    glutInitWindowPosition(0, 0);
-	    glutInitWindowSize(windowWidth, windowHeight);
+    } else {
+        glutInitWindowPosition(0, 0);
+        glutInitWindowSize(windowWidth, windowHeight);
 
-	    glutCreateWindow("GL Toy");
-	}
+        glutCreateWindow("GL Toy");
+    }
 
-	glewInit();
+    //glewInit();
 
-	checkExtension(GL_VERSION_3_2);
-	checkExtension(GLEW_ARB_geometry_shader4);
+    //checkExtension(GL_VERSION_3_2);
+    //checkExtension(GLEW_ARB_geometry_shader4);
 
-	////
+    ////
 
     anemoneScene = buildAnemoneScene();
     sceneRenderer = new SceneRenderVisitor();
@@ -476,19 +482,22 @@ int main(int argc, char **argv) {
     //glutMotionFunc(handleMouseMotion);
     //glutMouseFunc(handleMouse);
 
-	glEnable(GL_DEPTH_TEST);
-//	glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+//  glEnable(GL_CULL_FACE);
 
-//	glPolygonMode(GL_FRONT, GL_LINE);
-//	glPolygonMode(GL_BACK, GL_LINE);
+//  glPolygonMode(GL_FRONT, GL_LINE);
+//  glPolygonMode(GL_BACK, GL_LINE);
 
-	glutMainLoop();
+    printf("OpenGL %s, GLSL %s\n", glGetString(GL_VERSION),
+           glGetString(GL_SHADING_LANGUAGE_VERSION));
 
-	} catch(const char *err) {
-	    fprintf(stderr, "Error: %s\n", err);
+    glutMainLoop();
+
+    } catch(const char *err) {
+        fprintf(stderr, "Error: %s\n", err);
 
         return 1;
-	}
+    }
 
-	return 0;
+    return 0;
 }

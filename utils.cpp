@@ -8,20 +8,20 @@
 #include "utils.h"
 
 std::string readFile(const std::string &filename) {
-	std::ifstream file(filename.c_str());
-	std::string contents;
+    std::ifstream file(filename.c_str());
+    std::string contents;
 
-	if (file.is_open()) {
-		std::string line;
-		while (std::getline(file, line)) {
-			contents += line + '\n';
-		}
-	} else {
-	    fprintf(stderr, "Unable to open file %s\n", filename.c_str());
-		throw "Unable to open file";
-	}
+    if (file.is_open()) {
+        std::string line;
+        while (std::getline(file, line)) {
+            contents += line + '\n';
+        }
+    } else {
+        fprintf(stderr, "Unable to open file %s\n", filename.c_str());
+        throw "Unable to open file";
+    }
 
-	return contents;
+    return contents;
 }
 
 GLuint makeTestTexture(int size)
@@ -68,8 +68,9 @@ GLuint makeTestTexture(int size)
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_WRAP_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_WRAP_BORDER);
+    // XXX gl3
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_WRAP_BORDER);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_WRAP_BORDER);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     //glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
@@ -83,6 +84,7 @@ GLuint makeTestTexture(int size)
     return texture;
 }
 
+/*
 void drawViewportQuad(int width, int height)
 {
     glMatrixMode(GL_MODELVIEW);
@@ -115,3 +117,4 @@ void drawViewportQuad(int width, int height)
 
     glPopMatrix();
 }
+*/

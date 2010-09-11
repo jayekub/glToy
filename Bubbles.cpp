@@ -57,12 +57,6 @@ void Bubbles::_setRandomAttributes(particle_t *p) const {
 
 void Bubbles::_preRender(RenderState &state)
 {
-    state.pushTransformMat();
-    state.multTransformMat(Mat4::scale(_size));
-
-    //fprintf(stderr, "modelMat = %s\n",
-    //        state.getTransformMat().toString().c_str());
-
     // XXX fragile
     //const Light *firstLight = state.lights.begin()->second;
     const Vec3 &firstLightPos = state.lightPositions.begin()->second;
@@ -110,6 +104,4 @@ void Bubbles::_postRender(RenderState &state)
         glVertex3f(0., 0., 0.);
         glEnd();
     }
-
-    state.popTransformMat();
 }

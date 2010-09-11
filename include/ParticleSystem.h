@@ -76,6 +76,9 @@ public:
     }
 
     virtual void render(RenderState &state) {
+        state.pushTransformMat();
+        state.multTransformMat(Mat4::scale(_size));
+
         // if necessary, sort particles by distances from camera so that further
         // away particles are rendered first
         if (_needsDepthSort) {
@@ -140,6 +143,8 @@ public:
         _postRender(state);
 
         glDisableClientState(GL_VERTEX_ARRAY);
+
+        state.popTransformMat();
     }
 
     void reset() { _destroy(); }
