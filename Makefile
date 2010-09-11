@@ -33,6 +33,12 @@ ifeq ($(UNAME),Darwin)
            -L/opt/local/lib -lGLEW
 endif
 
+ifeq ($(UNAME),CYGWIN_NT-5.1)
+   LIBS = -lglut32 \
+          -lglu32 \
+          -lopengl32
+endif
+
 all: $(TARGET)
 
 $(TARGET): $(OBJS)

@@ -418,7 +418,7 @@ void buildCellNoiseScene()
 int main(int argc, char **argv) {
     try {
 
-    srandom((unsigned int) time(NULL));
+    srand((unsigned int) time(NULL));
 
     glutInit(&argc, argv);
 

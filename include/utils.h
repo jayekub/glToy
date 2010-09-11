@@ -15,7 +15,7 @@
 
 #define fwrap(x, m) fmod(fmod((x), (m)) + (m), (m))
 
-#define randFloat() ((float) random() / (float) RAND_MAX)
+#define randFloat() ((float) rand() / (float) RAND_MAX)
 #define btoa(b) (b ? "true" : "false")
 
 /*
