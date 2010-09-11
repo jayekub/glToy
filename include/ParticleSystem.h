@@ -79,8 +79,12 @@ public:
         // if necessary, sort particles by distances from camera so that further
         // away particles are rendered first
         if (_needsDepthSort) {
+            Mat4 invModelMat = state.getTransformMat().inverse();
+            Vec3 localCameraPos = invModelMat.ptransform(
+                state.camera->position);
+
             std::stable_sort(_particles.begin(), _particles.end(),
-                             _ParticleLt(state.camera->position));
+                             _ParticleLt(localCameraPos));
         }
 
         // put current particle positions in vertex buffer and allocate more

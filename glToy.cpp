@@ -271,10 +271,11 @@ void draw() {
     textureRenderer->render();
 
     textureRenderer->setRenderPass(screenPass);
-    textureRenderer->setProgram(dofProgram);
-    textureRenderer->setTexture(geomPass->getTexture());
-    textureRenderer->addTexture(geomPass->getDepthTexture());
-    textureRenderer->addTexture(blurPass1->getTexture());
+//    textureRenderer->setProgram(dofProgram);
+    textureRenderer->setTexture(blurPass1->getTexture());
+//    textureRenderer->setTexture(geomPass->getTexture());
+//    textureRenderer->addTexture(geomPass->getDepthTexture());
+//    textureRenderer->addTexture(blurPass1->getTexture());
     textureRenderer->render();
 
     glutSwapBuffers();
@@ -308,8 +309,8 @@ Graph *buildAnemoneScene()
     // Camera
     Camera *camera = new Camera("anemoneCamera");
 
-    camera->position = Vec3(0., 0., 0.);
-    camera->center = Vec3(0., 0., 1.);
+    camera->position = Vec3(0., 0., -20);
+    camera->center = Vec3(0., 0., 0.);
     camera->up = Vec3(0., 1., 0.);
     camera->nearClip = 1;
     camera->farClip = 100.;//4.;
@@ -375,7 +376,7 @@ Graph *buildAnemoneScene()
     anemoneTransform->addChild(bubblesTransform);
 
     bubbles = new Bubbles("bubbles", Vec3(30., 30., 30.), 0.5, true);
-    bubbles->emitRandom(500, 0.05);
+    bubbles->emitRandom(5000, 0.05);
 
     bubblesTransform->addChild(bubbles);
 
@@ -418,7 +419,7 @@ int main(int argc, char **argv) {
 
 	glutInit(&argc, argv);
 
-	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH /*| GLUT_ACCUM*/);
+	glutInitDisplayMode(GLUT_RGBA |  GLUT_DOUBLE | GLUT_DEPTH);
 
 	if (argc > 1 && strcmp(argv[1], "-f") == 0) {
         int fullWidth = glutGet(GLUT_SCREEN_WIDTH);
@@ -444,13 +445,11 @@ int main(int argc, char **argv) {
 
 	////
 
-    testTexture = makeTestTexture(512);
-
     anemoneScene = buildAnemoneScene();
     sceneRenderer = new SceneRenderVisitor();
 
     geomPass = new TextureRenderPass(windowWidth, windowHeight);
-    blurPass1 = new TextureRenderPass(windowWidth, windowHeight, 0.25);
+    blurPass1 = new TextureRenderPass(windowWidth, windowHeight, 0.9);
     //blurPass2 = new TextureRenderPass(windowWidth / 2., windowHeight / 2.);
 
     textureRenderer = new TextureRenderer();

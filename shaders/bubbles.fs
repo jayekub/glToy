@@ -1,4 +1,4 @@
-const vec4 bubbleColor = vec4(0.4, 0.4, 0.7, 0.5);
+const vec4 bubbleColor = vec4(0.4, 0.4, 0.7, 0.3);
 
 uniform mat4 modelMat;
 uniform mat4 viewMat;
@@ -36,6 +36,9 @@ vec4 shade_point(
 
 void main()
 {
+//    color = vec4(0., 0., 1., 1.);
+
+#if 1
     vec3 V = normalize(Pw - cameraPos);
 
     float t1, t2;
@@ -63,4 +66,5 @@ void main()
     Pclosest.z /= Pclosest.w;
     gl_FragDepth = (Pclosest.z + 1.) / 2.;
     */
+#endif
 }

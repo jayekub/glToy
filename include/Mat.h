@@ -95,6 +95,14 @@ public:
         return mI;
     }
 
+    Vec3 ptransform(const Vec3 &vec) const {
+        const Mat4x4 &me = *this;
+        return Vec3(
+            me(0, 0) * vec.x + me(0, 1) * vec.y + me(0, 2) * vec.z + me(0, 3),
+            me(1, 0) * vec.x + me(1, 1) * vec.y + me(1, 2) * vec.z + me(1, 3),
+            me(2, 0) * vec.x + me(2, 1) * vec.y + me(2, 2) * vec.z + me(2, 3));
+    }
+
     Vec3 getTranslation() const {
         const Mat4x4 &me = *this;
         return Vec3(me(0, 3), me(1, 3), me(2, 3));

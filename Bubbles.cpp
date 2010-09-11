@@ -92,13 +92,13 @@ void Bubbles::_preRender(RenderState &state)
 
    // glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void Bubbles::_postRender(RenderState &state)
 {
     glDisable(GL_BLEND);
-    glEnable(GL_DEPTH_TEST);
+    //glEnable(GL_DEPTH_TEST);
 
     if (_drawBox) {
         _boxProgram.use();
