@@ -18,17 +18,10 @@
 #define randFloat() ((float) random() / (float) RAND_MAX)
 #define btoa(b) (b ? "true" : "false")
 
-/*
-#define checkExtension(ext) \
-    if (!ext) { \
-        fprintf(stderr, "Extension " #ext " not available\n"); \
-        exit(1); \
-    }
-*/
-
 std::string readFile(const std::string &filename);
 GLuint makeTestTexture(int size);
-//void drawViewportQuad(int width, int height);
+
+std::vector<float> makeBlurWeights(int blurDiameter);
 
 // XXX yoink
 class ofPoint {

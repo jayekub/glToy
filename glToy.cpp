@@ -10,20 +10,13 @@
 
 #include "Listener.h"
 
-#include "Graph.h"
-#include "Camera.h"
-#include "Light.h"
-#include "Transform.h"
-#include "Anemone.h"
-#include "Bubbles.h"
-#include "SceneRenderVisitor.h"
+#include "BubblesScene.h"
+
 #include "TextureRenderer.h"
 #include "Program.h"
-
 #include "ofxMSAFluidSolver.h"
 #include "FluidParticleSystem.h"
 #include "TextureRenderPass.h"
-#include "DepthRenderPass.h"
 #include "ScreenRenderPass.h"
 #include "CellNoiseRenderer.h"
 
@@ -45,23 +38,15 @@ Vec2 mouse, lastMouse;
 
 ////
 
+BubblesScene *_bubblesScene;
+ScreenRenderPass *_screenPass;
+
 GLuint testTexture;
-
-Graph *anemoneScene;
-Anemone *anemone;
-Bubbles *bubbles;
-DepthRenderPass *anemoneShadowPass;
-SceneRenderVisitor *sceneRenderer;
-
-TextureRenderPass *geomPass, *blurPass1, *blurPass2;
-TextureRenderer *textureRenderer;
-Program *dofProgram;
 
 ofxMSAFluidSolver fluidSolver;
 FluidParticleSystem *particles0, *particles1;
 
 TextureRenderPass *cellNoisePass0 = NULL, *cellNoisePass1 = NULL;
-ScreenRenderPass *screenPass;
 
 CellNoiseRenderer *cellNoiseRenderer;
 TextureRenderer *combineRenderer;
@@ -77,21 +62,6 @@ void resize(int w, int h) {
     Listener::resizeAll(w, h);
 }
 
-void translate(const Vec3 &t)
-{
-    /*
-    Transform *transform =
-            (Transform * ) anemoneScene->getNode("anemoneTransform");
-
-    transform->translation += 0.25 * t;
-*/
-
-    Camera *camera = (Camera *) anemoneScene->getNode("anemoneCamera");
-
-    camera->position += 0.25 * t;
-    camera->center += 0.25 * t;
-}
-
 void handleKey(unsigned char key, int x, int y)
 {
     switch(key) {;
@@ -101,19 +71,9 @@ void handleKey(unsigned char key, int x, int y)
         case 'q':
             exit(0);
             break;
-        case 'w':
-            translate(Vec3(0., 0., 1.));
-            break;
-        case 's':
-            translate(Vec3(0., 0., -1.));
-            break;
-        case 'a':
-            translate(Vec3(1., 0., 0.));
-            break;
-        case 'd':
-            translate(Vec3(-1., 0., 0.));
-            break;
     }
+
+    _bubblesScene->handleKey(key, x, y);
 }
 
 void handleMouseMotion(int x, int y)
@@ -146,25 +106,6 @@ void handleMouseMotion(int x, int y)
 #endif
 }
 
-void handleMouse(int button, int state, int x, int y)
-{
-    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-        // Signal that the mouse coords aren't valid
-        mouse.x = -1;
-        mouse.y = -1;
-        lastMouse.x = -1;
-        lastMouse.y = -1;
-
-        // XXX blech
-        Vec3 pos = Vec3(2. * x / (float) windowWidth - 1,
-                        2. * (windowHeight - y) / (float) windowHeight - 1, 0.);
-
-        anemone->setMagnet(pos, .3);
-    } else if (button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
-        anemone->setMagnet(Vec3(), 0.);
-    }
-}
-
 void draw() {
     if (reset) {
         //fluidSolver.reset();
@@ -176,12 +117,13 @@ void draw() {
         reset = false;
     }
 
-    //int drawTime = glutGet(GLUT_ELAPSED_TIME);
-    //double dt = (drawTime - lastDrawTime) / 1000.0;
-
-    //lastDrawTime = drawTime;
-
     double dt = avgDT < 0 ? 0.01 : avgDT;
+
+    _bubblesScene->update(dt);
+    _bubblesScene->render(_screenPass);
+
+    glutSwapBuffers();
+    ++frames;
 
 #if 0
     // TODO average dt?
@@ -194,7 +136,7 @@ void draw() {
     particles1->update(dt, &fluidSolver);
 
 #ifdef USE_ACCUM
-    screenPass->begin();
+    _screenPass->begin();
 
     glClearAccum(0.0, 0.0, 0.0, 0.0);
     glClearColor(1.0, 0.0, 1.0, 1.0);
@@ -202,7 +144,7 @@ void draw() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ACCUM_BUFFER_BIT);
 
     glColorMask(GL_TRUE, GL_FALSE, GL_TRUE, GL_TRUE);
-    cellNoiseRenderer->render(screenPass, particles0, 0.3);
+    cellNoiseRenderer->render(_screenPass, particles0, 0.3);
     glAccum(GL_ACCUM, 1.0);
 
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
@@ -240,49 +182,6 @@ void draw() {
     screenPass->end();
 #endif
 #endif
-
-    bubbles->update(dt);
-
-/* XXX need lightPos to take rotation into account for this to work
-    Transform *keyLightTransform =
-            (Transform *) anemoneScene->getNode("keyLightTransform");
-
-    keyLightTransform->rotationAxis = Vec3(0., 0., 1.);
-    keyLightTransform->rotationAngle =
-            fmod(keyLightTransform->rotationAngle + dt, 360.);
-*/
-
-    Transform *anemoneTransform =
-            (Transform * ) anemoneScene->getNode("anemoneTransform");
-
-    anemoneTransform->rotationAxis = Vec3(0., 1., 0.);
-    anemoneTransform->rotationAngle =
-            fmod(anemoneTransform->rotationAngle + 0.25 * dt, 360.);
-
-    ////
-
-//    sceneRenderer->setRenderPass(geomPass);
-    sceneRenderer->setRenderPass(screenPass);
-    sceneRenderer->setCameraName("anemoneCamera");
-    sceneRenderer->render(anemoneScene);
-
-/*
-    textureRenderer->setRenderPass(blurPass1);
-    textureRenderer->setProgram(NULL);
-    textureRenderer->setTexture(geomPass->getTexture());
-    textureRenderer->render();
-
-    textureRenderer->setRenderPass(screenPass);
-    textureRenderer->setProgram(dofProgram);
-//    textureRenderer->setTexture(blurPass1->getTexture());
-    textureRenderer->setTexture(geomPass->getTexture());
-    textureRenderer->addTexture(geomPass->getDepthTexture());
-    textureRenderer->addTexture(blurPass1->getTexture());
-    textureRenderer->render();
-*/
-
-    glutSwapBuffers();
-    ++frames;
 }
 
 void updateFramerate(int /* ignored */)
@@ -303,87 +202,6 @@ void updateFramerate(int /* ignored */)
     frames = 0;
 
     glutTimerFunc(1000, updateFramerate, 0);
-}
-
-Graph *buildAnemoneScene()
-{
-    Graph *scene = new Graph("sceneRoot");
-
-    // Camera
-    Camera *camera = new Camera("anemoneCamera");
-
-    camera->position = Vec3(0., 0., -20);
-    camera->center = Vec3(0., 0., 0.);
-    camera->up = Vec3(0., 1., 0.);
-    camera->nearClip = 1;
-    camera->farClip = 100.;//4.;
-
-    scene->addGlobal(camera);
-
-    // Light
-    Transform *keyLightTransform = new Transform("keyLightTransform");
-
-    keyLightTransform->translation = Vec3(5., 5., 3.);
-
-    scene->addGlobal(keyLightTransform);
-
-    Light *keyLight = new Light("keyLight");
-
-    keyLight->type = Light::POINT;
-    keyLight->color = Vec3(1., 1., 1.);
-
-    keyLightTransform->addChild(keyLight);
-
-    // Shadow
-    Camera *keyLightShadowCam = new Camera("keyLightShadowCam");
-
-    Vec3 OtoShad = Vec3(5., 5., -5.).normalize();
-
-    keyLightShadowCam->position = -4. * OtoShad;//Vec3(5., 5., -5.);
-    keyLightShadowCam->center = Vec3(0., 0., 0.);
-    keyLightShadowCam->up = Vec3(0., 1., 0.);
-    keyLightShadowCam->nearClip = 3.;
-    keyLightShadowCam->farClip = 5.;
-
-    keyLightShadowCam->isShadowCamera = true;
-    keyLightShadowCam->light = keyLight;
-
-    scene->addGlobal(keyLightShadowCam);
-
-    keyLight->hasShadow = true;
-    //keyLight->shadowTexture = testRenderPass->getDepthTexture();
-
-    // Anemone
-    Transform *anemoneTransform = new Transform("anemoneTransform");
-
-    anemoneTransform->translation = Vec3(0., 0., 3);
-    //anemoneTransform->scale = Vec3(2., 2., 2.);
-    // Leave it at the origin for now
-
-    scene->root->addChild(anemoneTransform);
-
-    /*
-    anemone = new Anemone("anemone",
-                          10, //100, // numTentacles
-                          4, // numSegments
-                          25, //7.,// maxWidth
-                          .06); // wiggle
-
-    anemoneTransform->addChild(anemone);
-    */
-
-    // Bubbles
-    Transform *bubblesTransform = new Transform("bubblesTransform");
-
-    bubblesTransform->translation = Vec3(-15., -15., 0.);
-    anemoneTransform->addChild(bubblesTransform);
-
-    bubbles = new Bubbles("bubbles", Vec3(30., 30., 30.), 0.5, true);
-    bubbles->emitRandom(5000, 0.05);
-
-    bubblesTransform->addChild(bubbles);
-
-    return scene;
 }
 
 void buildCellNoiseScene()
@@ -422,8 +240,8 @@ int main(int argc, char **argv) {
 
     glutInit(&argc, argv);
 
-    glutInitContextVersion(3, 2);
-    glutInitContextProfile(GLUT_CORE_PROFILE);
+    //glutInitContextVersion(3, 2);
+    //glutInitContextProfile(GLUT_CORE_PROFILE);
 
     glutInitDisplayMode(GLUT_RGBA |  GLUT_DOUBLE | GLUT_DEPTH);
 
@@ -451,27 +269,6 @@ int main(int argc, char **argv) {
 
     ////
 
-    anemoneScene = buildAnemoneScene();
-    sceneRenderer = new SceneRenderVisitor();
-
-    geomPass = new TextureRenderPass(windowWidth, windowHeight);
-    blurPass1 = new TextureRenderPass(windowWidth, windowHeight, 0.9);
-    //blurPass2 = new TextureRenderPass(windowWidth / 2., windowHeight / 2.);
-
-    textureRenderer = new TextureRenderer();
-
-    dofProgram = new Program();
-
-    dofProgram->addShader(
-         new Program::Shader("shaders/standard.vs", GL_VERTEX_SHADER));
-    dofProgram->addShader(
-         new Program::Shader("shaders/dof.fs", GL_FRAGMENT_SHADER));
-    dofProgram->link();
-
-    screenPass = new ScreenRenderPass(windowWidth, windowHeight);
-
-    resize(windowWidth, windowHeight);
-
     glutDisplayFunc(draw);
     glutIdleFunc(draw);
     glutTimerFunc(1000, updateFramerate, 0);
@@ -488,10 +285,15 @@ int main(int argc, char **argv) {
 //  glPolygonMode(GL_FRONT, GL_LINE);
 //  glPolygonMode(GL_BACK, GL_LINE);
 
+    _screenPass = new ScreenRenderPass(windowWidth, windowHeight);
+    _bubblesScene = new BubblesScene(windowWidth, windowHeight);
+
     printf("OpenGL %s, GLSL %s\n", glGetString(GL_VERSION),
            glGetString(GL_SHADING_LANGUAGE_VERSION));
 
     glutMainLoop();
+
+    delete _bubblesScene;
 
     } catch(const char *err) {
         fprintf(stderr, "Error: %s\n", err);

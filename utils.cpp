@@ -1,3 +1,5 @@
+#include <math.h>
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -84,37 +86,31 @@ GLuint makeTestTexture(int size)
     return texture;
 }
 
-/*
-void drawViewportQuad(int width, int height)
+// code stolen from
+// http://bocoup.com/processing-js/docs/index.php?page=Gaussian%20Blur
+std::vector<float> makeBlurWeights(int blurDiameter)
 {
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
 
-    glTranslated((double) width / 2.0, (double) height / 2.0, 0.0);
-    glScaled((double) width / 2.0, (double) height / 2.0, 1.0);
+    int gaussWidth = (blurDiameter * 2) + 1;
 
-    glBegin(GL_QUADS);
-        // ul
-        //glColor3f(1., 0., 0.);
-        glTexCoord2f(0., 1.);
-        glVertex2f(-1., 1.);
+    // compute the blurDiameter'th row of pascal's triangle
+    std::vector<float> previous(gaussWidth), pascals(gaussWidth);
 
-        // ur
-        //glColor3f(0., 1., 0.);
-        glTexCoord2f(1., 1.);
-        glVertex2f(1., 1.);
+    previous[0] = 1.;
+    previous[1] = 1.;
 
-        // lr
-        //glColor3f(1., 1., 1.);
-        glTexCoord2f(1., 0.);
-        glVertex2f(1., -1.);
+    for (int r = 2; r <= gaussWidth; ++r) {
+        for (int c = 0; c < r; ++c)
+            pascals[c] = (c == 0) || (c == r - 1) ?
+                    1. : previous[c] + previous[c - 1];
 
-        // ll
-        //glColor3f(0., 0., 1.);
-        glTexCoord2f(0., 0.);
-        glVertex2f(-1., -1.);
-    glEnd();
+        previous = pascals;
+    }
 
-    glPopMatrix();
+    printf("blur weights (%u): ", pascals.size());
+    for (int i = 0; i < gaussWidth; ++i)
+        printf("%g ", pascals[i]);
+    printf("\n");
+
+    return pascals;
 }
-*/

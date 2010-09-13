@@ -86,6 +86,15 @@ public:
             Vec3 localCameraPos = invModelMat.ptransform(
                 state.camera->position);
 
+            printf("trans mat is %s\n",
+                   state.getTransformMat().toString().c_str());
+            printf("inv trans mat is %s\n",
+                   invModelMat.toString().c_str());
+
+            printf("camera pos is %s, (local %s)\n",
+                   state.camera->position.toString().c_str(),
+                   localCameraPos.toString().c_str());
+
             std::stable_sort(_particles.begin(), _particles.end(),
                              _ParticleLt(localCameraPos));
         }

@@ -78,8 +78,11 @@ public:
 
     UNIFORM_SETTER_DECL(int);
     UNIFORM_SETTER_DECL(float);
+    UNIFORM_SETTER_DECL(bool);
+    UNIFORM_SETTER_DECL(const Vec2 &);
     UNIFORM_SETTER_DECL(const Vec3 &);
     UNIFORM_SETTER_DECL(const Mat4 &);
+    UNIFORM_SETTER_DECL(const std::vector<float> &);
 
 #undef UNIFORM_SETTER_DECL
 

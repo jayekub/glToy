@@ -256,7 +256,7 @@ Program &Program::setSampler(const std::string &name, GLenum target,
 
 #define UNIFORM_SETTER_IMPL(type, glSetExp) \
     Program &Program::setUniform(const std::string &name, type value) const \
-	{ \
+    { \
         int uniformLoc = uniform(name); \
         if (uniformLoc != PROGRAM_NONEXISTENT_LOCATION) \
             glSetExp; \
@@ -265,9 +265,13 @@ Program &Program::setSampler(const std::string &name, GLenum target,
 
 UNIFORM_SETTER_IMPL(int, glUniform1i(uniformLoc, value))
 UNIFORM_SETTER_IMPL(float, glUniform1f(uniformLoc, value))
+UNIFORM_SETTER_IMPL(bool, glUniform1i(uniformLoc, value))
+UNIFORM_SETTER_IMPL(const Vec2 &, glUniform2fv(uniformLoc, 1, value.v))
 UNIFORM_SETTER_IMPL(const Vec3 &, glUniform3fv(uniformLoc, 1, value.v))
 UNIFORM_SETTER_IMPL(const Mat4 &,
                     glUniformMatrix4fv(uniformLoc, 1, GL_FALSE, value.v))
+UNIFORM_SETTER_IMPL(const std::vector<float> &,
+                    glUniform1fv(uniformLoc, value.size(), &value[0]));
 
 #undef UNIFORM_SETTER_IMPL
 

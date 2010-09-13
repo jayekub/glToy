@@ -102,13 +102,7 @@ void SceneRenderVisitor::visitTransform(Transform *transform)
 {
     state.pushTransformMat();
 
-    state.multTransformMat(Mat4::translate(transform->translation));
-    state.multTransformMat(Mat4::rotate(transform->rotationAngle,
-                                        transform->rotationAxis));
-    state.multTransformMat(Mat4::scale(transform->scale));
-
-//    fprintf(stderr, "applied %s, transform is %s\n", transform->name,
-//            state.getTransformMat().toString().c_str());
+    state.multTransformMat(transform->matrix);
 
     _visitChildren(transform);
 

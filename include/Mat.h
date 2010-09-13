@@ -68,6 +68,8 @@ public:
         Mat4x4 mI;
         vec_t det = determinant();
 
+        printf("mat inverse: det is %g\n", det);
+
         if (det == 0.0) return mI;
 
         mI(0, 0) = me(1, 2)*me(2, 3)*me(3, 1) - me(1, 3)*me(2, 2)*me(3, 1) + me(1, 3)*me(2, 1)*me(3, 2) - me(1, 1)*me(2, 3)*me(3, 2) - me(1, 2)*me(2, 1)*me(3, 3) + me(1, 1)*me(2, 2)*me(3, 3);

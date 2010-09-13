@@ -14,6 +14,7 @@ OBJS = \
 	Noise.o \
 	Anemone.o \
 	Bubbles.o \
+	BubblesScene.o \
 	ofxMSAFluidSolver.o
 
 TARGET = glToy

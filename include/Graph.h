@@ -26,7 +26,7 @@ public:
     Node *getNode(const char *name) const;
 
     Graph(const char *name_);
-    virtual ~Graph();
+    ~Graph();
 };
 
 #endif /* GRAPH_H_ */
