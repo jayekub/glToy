@@ -1,7 +1,17 @@
 #ifndef GLTOY_H_
 #define GLTOY_H_
 
-#include <sys/types.h>
+#ifdef __CYGWIN__
+#  define _STDCALL_SUPPORTED
+#  define _M_IX86
+#  define WIN32_LEAN_AND_MEAN
+#  include <windows.h>
+
+#  undef min
+#  undef max
+#endif
+
+//#include <sys/types.h>
 
 #define GL3_PROTOTYPES
 #include <GL3/gl3.h>
