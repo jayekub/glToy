@@ -107,10 +107,12 @@ std::vector<float> makeBlurWeights(int blurDiameter)
         previous = pascals;
     }
 
+    /*
     printf("blur weights (%u): ", pascals.size());
     for (int i = 0; i < gaussWidth; ++i)
         printf("%g ", pascals[i]);
     printf("\n");
+    */
 
     return pascals;
 }

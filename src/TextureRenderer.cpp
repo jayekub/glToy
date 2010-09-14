@@ -14,15 +14,17 @@ TextureRenderer::TextureRenderer()
     glGenBuffers(1, &_texcoordBuffer);
 
     const Vec3 vertices[4] = {
-        Vec3(-1., 1., 0.), Vec3(1., 1., 0.),
-        Vec3(1., -1., 0.), Vec3(-1., -1., 0.)};
+        Vec3(-1., -1., 0.),
+        Vec3(-1., 1., 0.),
+        Vec3(1., -1., 0.),
+        Vec3(1., 1., 0.)};
 
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(Vec3), vertices,
                  GL_STATIC_DRAW);
 
     const Vec2 texcoords[4] = {
-        Vec2(0., 0.), Vec2(1., 0.), Vec2(1., 1.), Vec2(0., 1.)};
+        Vec2(0., 1.), Vec2(0., 0.), Vec2(1., 1.), Vec2(1., 0.)};
 
     glBindBuffer(GL_ARRAY_BUFFER, _texcoordBuffer);
     glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(Vec2), texcoords,

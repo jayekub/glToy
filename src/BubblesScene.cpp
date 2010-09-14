@@ -27,7 +27,7 @@ BubblesScene::~BubblesScene()
 
     delete _geomPass;
     delete _blurPass1;
-    //delete _blurPass2;
+    delete _blurPass2;
 
     delete _sceneRenderer;
     delete _textureRenderer;
@@ -38,15 +38,7 @@ void BubblesScene::update(double dt)
 {
     _bubbles->update(dt);
 
-    //_rotationAngle = fmod(_rotationAngle + 0.25 * dt);
-//    Vec3 translation = _bubblesTransform->matrix.getTranslation();
     _bubblesTransform->matrix *= Mat4::rotate(0.25 * dt, Vec3(0., 1., 0.));
-
-//    _bubblesTransform->rotationAxis = Vec3(0., 1., 0.);
-//    _bubblesTransform->rotationAngle =
-//            fmod(_bubblesTransform->rotationAngle + 0.25 * dt, 360.);
-
-
 }
 
 void BubblesScene::render(RenderPass *renderPass)

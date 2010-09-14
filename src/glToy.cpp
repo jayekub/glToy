@@ -120,6 +120,7 @@ void draw() {
     double dt = avgDT < 0 ? 0.01 : avgDT;
 
     _bubblesScene->update(dt);
+
     _bubblesScene->render(_screenPass);
 
     glutSwapBuffers();
@@ -243,7 +244,7 @@ int main(int argc, char **argv) {
     //glutInitContextVersion(3, 2);
     //glutInitContextProfile(GLUT_CORE_PROFILE);
 
-    glutInitDisplayMode(GLUT_RGBA |  GLUT_DOUBLE | GLUT_DEPTH);
+    glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
 
     if (argc > 1 && strcmp(argv[1], "-f") == 0) {
         int fullWidth = glutGet(GLUT_SCREEN_WIDTH);
@@ -262,7 +263,9 @@ int main(int argc, char **argv) {
         glutCreateWindow("GL Toy");
     }
 
+#ifdef USE_GL3W
     gl3wInit();
+#endif
 
     //checkExtension(GL_VERSION_3_2);
     //checkExtension(GLEW_ARB_geometry_shader4);

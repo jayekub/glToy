@@ -1,21 +1,24 @@
 OBJS = \
-	gl3w.o \
-	glToy.o \
-	utils.o \
-	Listener.o \
-	Program.o \
-	ScreenRenderPass.o \
-	TextureRenderPass.o \
-	CellNoiseRenderer.o \
-	TextureRenderer.o \
-	Graph.o \
-	Visitor.o \
-	SceneRenderVisitor.o \
-	Noise.o \
-	Anemone.o \
-	Bubbles.o \
-	BubblesScene.o \
-	ofxMSAFluidSolver.o
+    glToy.o \
+    utils.o \
+    Listener.o \
+    Program.o \
+    ScreenRenderPass.o \
+    TextureRenderPass.o \
+    CellNoiseRenderer.o \
+    TextureRenderer.o \
+    Graph.o \
+    Visitor.o \
+    SceneRenderVisitor.o \
+    Noise.o \
+    Anemone.o \
+    Bubbles.o \
+    BubblesScene.o \
+    ofxMSAFluidSolver.o
+
+ifdef USE_GL3W
+    OBJS += gl3w.o
+endif
 
 TARGET = glToy
 
@@ -23,7 +26,6 @@ SRC_DIR = src
 BUILD_DIR = build
 
 ####
-
 BUILD_OBJS = $(patsubst %,$(BUILD_DIR)/%,$(OBJS))
 
 UNAME := $(shell uname)
@@ -32,6 +34,11 @@ INCLUDES = -I$(SRC_DIR)/include/
 LIBS = -lGLU -lglut
 
 CFLAGS = -O2 -g -Wall -fmessage-length=0
+
+ifdef USE_GL3W
+    CFLAGS += -DUSE_GL3W
+endif
+
 CXXFLAGS = $(CFLAGS) -std=c++0x
 
 ifeq ($(UNAME),Darwin)

@@ -29,6 +29,8 @@ Bubbles::Bubbles(
 
     _bubblesProgram.link();
 
+    _bubblesProgram.setDebug(true);
+
     ////
 
     _boxProgram.addShader(
@@ -68,12 +70,14 @@ void Bubbles::_preRender(RenderState &state)
                    .setUniform("cameraPos", state.camera->position)
                    .setUniform("lightPos", firstLightPos);
 
+
     const GLuint centerInLoc = _bubblesProgram.attribute("centerIn");
     const GLuint radiusInLoc = _bubblesProgram.attribute("radiusIn");
 
     glBindBuffer(GL_ARRAY_BUFFER, _particleBuffer);
 
     glEnableVertexAttribArray(centerInLoc);
+
     glVertexAttribPointer(centerInLoc, 3, GL_FLOAT, GL_FALSE,
                           sizeof(particle_t), 0);
 
@@ -86,6 +90,7 @@ void Bubbles::_preRender(RenderState &state)
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 }
 
 void Bubbles::_postRender(RenderState &state)

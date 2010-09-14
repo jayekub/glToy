@@ -1,13 +1,20 @@
 #ifndef GLTOY_H_
 #define GLTOY_H_
 
-#include <GL3/gl3w.h>
+#include <sys/types.h>
+
+#ifdef USE_GL3W
+#  include <GL3/gl3w.h>
+#else
+#  define GL3_PROTOTYPES
+#  include <GL3/gl3.h>
+#endif
 
 #ifdef __APPLE__
-#include <GLUT/glut.h>
+#  include <GLUT/glut.h>
 #else
-#include <GL/glut.h>
-#include <GL/freeglut_ext.h>
+#  include <GL/glut.h>
+#  include <GL/freeglut_ext.h>
 #endif
 
 #define BUFFER_OFFSET(i) ((char *) NULL + (i))
