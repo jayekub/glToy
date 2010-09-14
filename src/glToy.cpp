@@ -262,7 +262,7 @@ int main(int argc, char **argv) {
         glutCreateWindow("GL Toy");
     }
 
-    //glewInit();
+    gl3wInit();
 
     //checkExtension(GL_VERSION_3_2);
     //checkExtension(GLEW_ARB_geometry_shader4);

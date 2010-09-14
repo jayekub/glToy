@@ -134,24 +134,18 @@ public:
         */
 
         // get ready to render
-        glEnableClientState(GL_VERTEX_ARRAY);
 
         // allow subclasses to setup a Program and other state for rendering
         _preRender(state);
 
         // send particle positions to the card
         glBindBuffer(GL_ARRAY_BUFFER, _particleBuffer);
-
-        glVertexPointer(3, GL_FLOAT, sizeof(particle_t), 0);
         glDrawArrays(GL_POINTS, 0, numParticles);
-
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         // allow subclasses to possibly render more stuff and also cleanup
         // after themselves
         _postRender(state);
-
-        glDisableClientState(GL_VERTEX_ARRAY);
 
         state.popTransformMat();
     }

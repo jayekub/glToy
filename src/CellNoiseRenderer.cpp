@@ -63,6 +63,7 @@ void CellNoiseRenderer::reload()
 {
     _particleDisplayList = 1;
 
+/* XXX gl3
     glNewList(_particleDisplayList, GL_COMPILE);
 
         glBegin(GL_TRIANGLE_STRIP);
@@ -82,10 +83,12 @@ void CellNoiseRenderer::reload()
         glEnd();
 
     glEndList();
+*/
 }
 
 void CellNoiseRenderer::_drawParticle(float x, float y, float size)
 {
+/* XXX gl3
     glPushMatrix();
 
     glTranslatef(x, y, 0.0);
@@ -95,4 +98,5 @@ void CellNoiseRenderer::_drawParticle(float x, float y, float size)
     glCallList(_particleDisplayList);
 
     glPopMatrix();
+*/
 }

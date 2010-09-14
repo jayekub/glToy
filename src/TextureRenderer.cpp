@@ -115,14 +115,13 @@ void TextureRenderer::render()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
-    glDrawArrays(GL_QUADS, 0, 4);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     program->resetSamplers();
 
     glDisableVertexAttribArray(vertexInLoc);
     glDisableVertexAttribArray(texcoordInLoc);
-    glDisableClientState(GL_VERTEX_ARRAY);
 
     _renderPass->end();
 }

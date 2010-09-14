@@ -29,13 +29,10 @@ void SceneRenderVisitor::render(Graph *scene)
     state.renderPass = _renderPass;
     state.cameraName = _cameraName;
 
-//    fprintf(stderr, "initial transform is %s\n",
-//            state.getTransformMat().toString().c_str());
-
     _renderPass->begin();
 
     glClearColor(0., 0., 0., 1.0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ACCUM_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     _visitNodes(scene->globals);
 

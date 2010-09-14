@@ -145,14 +145,9 @@ void Anemone::render(RenderState &state)
     _anemoneProgram.setSampler("shadowMap", GL_TEXTURE_2D,
                                firstLight->shadowTexture);
 
-    glEnableClientState(GL_VERTEX_ARRAY);
-
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
-    glVertexPointer(3, GL_FLOAT, 0, 0);
 
     glPointSize(5.);
-    glColor3f(1., 0., 0.);
-
     glDrawArrays(GL_POINTS, 0, _numTentacles);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);

@@ -93,13 +93,12 @@ void Bubbles::_postRender(RenderState &state)
     glDisable(GL_BLEND);
 
     if (_drawBox) {
+        /* XXX gl3
         _boxProgram.use();
         _boxProgram.setUniform("modelMat", state.getTransformMat())
                    .setUniform("viewMat", state.viewMat)
                    .setUniform("projMat", state.projectionMat);
 
-        glBegin(GL_POINTS);
-        glVertex3f(0., 0., 0.);
-        glEnd();
+        */
     }
 }
