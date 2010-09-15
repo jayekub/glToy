@@ -1,4 +1,4 @@
-const int blurRadius = 5;
+const int blurRadius = 10;
 const int kernelWidth = 2 * blurRadius + 1;
 
 uniform sampler2D tex0;

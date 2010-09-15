@@ -38,6 +38,8 @@ Vec2 mouse, lastMouse;
 
 ////
 
+bool _pause = false;
+
 BubblesScene *_bubblesScene;
 ScreenRenderPass *_screenPass;
 
@@ -67,6 +69,9 @@ void handleKey(unsigned char key, int x, int y)
     switch(key) {;
         case 'r':
             reset = true;
+            break;
+        case 'p':
+            _pause = !_pause;
             break;
         case 'q':
             exit(0);
@@ -119,7 +124,8 @@ void draw() {
 
     double dt = avgDT < 0 ? 0.01 : avgDT;
 
-    _bubblesScene->update(dt);
+    if (!_pause)
+        _bubblesScene->update(dt);
 
     _bubblesScene->render(_screenPass);
 

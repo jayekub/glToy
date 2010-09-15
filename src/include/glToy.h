@@ -3,6 +3,10 @@
 
 #include <sys/types.h>
 
+#ifdef _WIN32
+#  define USE_GL3W
+#endif
+
 #ifdef USE_GL3W
 #  include <GL3/gl3w.h>
 #else
@@ -13,8 +17,10 @@
 #ifdef __APPLE__
 #  include <GLUT/glut.h>
 #else
+// XXX this define is necessary to prevent glut.h from including glext.h, which
+//     conflicts with gl3.h on some systems...
+#  define GL_GLEXT_LEGACY
 #  include <GL/glut.h>
-#  include <GL/freeglut_ext.h>
 #endif
 
 #define BUFFER_OFFSET(i) ((char *) NULL + (i))

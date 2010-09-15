@@ -2,4 +2,4 @@ glToy
 *.o
 *.d
 .*
-build/*
+build*

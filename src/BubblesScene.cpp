@@ -168,7 +168,7 @@ void BubblesScene::_build()
     _blurProgram->link();
 
     _blurProgram->use();
-    _blurProgram->setUniform("blurWeights", makeBlurWeights(5));
+    _blurProgram->setUniform("blurWeights", makeBlurWeights(10));
     _blurProgram->setUniform("dxdy",
         Vec2(1. / (float) _blurPass1->getWidth(),
              1. / (float) _blurPass1->getHeight()));
