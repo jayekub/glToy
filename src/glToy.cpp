@@ -28,17 +28,16 @@ const int fluidSize = 100;
 float invWidth, invHeight;
 //float fluidWidth, fluidHeight;
 
-bool reset = false;
-int lastDrawTime = -1;
-int lastFPSTime = -1;
-int frames = 0;
-double avgDT = -1.0;
-
 Vec2 mouse, lastMouse;
 
-////
+int _lastDrawTime = -1;
+int _lastFpsTime = -1;
+int _frames = 0;
 
 bool _pause = false;
+bool _reset = false;
+
+////
 
 BubblesScene *_bubblesScene;
 ScreenRenderPass *_screenPass;
@@ -68,7 +67,7 @@ void handleKey(unsigned char key, int x, int y)
 {
     switch(key) {;
         case 'r':
-            reset = true;
+            _reset = true;
             break;
         case 'p':
             _pause = !_pause;
@@ -112,17 +111,13 @@ void handleMouseMotion(int x, int y)
 }
 
 void draw() {
-    if (reset) {
-        //fluidSolver.reset();
-        //particles0->reset();
-        //particles1->reset();
-
+    if (_reset) {
         Listener::reloadAll();
-
-        reset = false;
+        _reset = false;
     }
 
-    double dt = avgDT < 0 ? 0.01 : avgDT;
+    int drawTime = glutGet(GLUT_ELAPSED_TIME);
+    double dt = (drawTime - _lastDrawTime) / 1000.;
 
     if (!_pause)
         _bubblesScene->update(dt);
@@ -130,7 +125,9 @@ void draw() {
     _bubblesScene->render(_screenPass);
 
     glutSwapBuffers();
-    ++frames;
+
+    ++_frames;
+    _lastDrawTime = drawTime;
 
 #if 0
     // TODO average dt?
@@ -193,22 +190,19 @@ void draw() {
 
 void updateFramerate(int /* ignored */)
 {
-    int time = glutGet(GLUT_ELAPSED_TIME);
-    int elapsed = time - lastFPSTime;
-    float framerate = 1000.0 * (float) frames / (float) elapsed;
-
-    avgDT = 1.0 / framerate;
+    int fpsTime = glutGet(GLUT_ELAPSED_TIME);
+    int elapsed = fpsTime - _lastFpsTime;
+    float framerate = 1000.0 * (float) _frames / (float) elapsed;
 
     std::stringstream framerateSS;
 
-    framerateSS << "GL Toy " << framerate << " fps";
-
+    framerateSS << framerate << " fps";
     glutSetWindowTitle(framerateSS.str().c_str());
 
-    lastFPSTime = time;
-    frames = 0;
+    _lastFpsTime = fpsTime;
+    _frames = 0;
 
-    glutTimerFunc(1000, updateFramerate, 0);
+    glutTimerFunc(500, updateFramerate, 0);
 }
 
 void buildCellNoiseScene()
@@ -299,6 +293,9 @@ int main(int argc, char **argv) {
 
     printf("OpenGL %s, GLSL %s\n", glGetString(GL_VERSION),
            glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+    _lastDrawTime = glutGet(GLUT_ELAPSED_TIME);
+    _lastFpsTime = _lastDrawTime;
 
     glutMainLoop();
 

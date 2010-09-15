@@ -31,6 +31,7 @@ public:
 
 private:
     float _rotationAngle;
+    bool _dof;
 
     Graph *_graph;
     Camera *_camera;

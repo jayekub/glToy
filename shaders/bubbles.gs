@@ -23,13 +23,18 @@ void emit_regpoly(
     in float radiusW,       // radius of bubble
     in float circumradiusW, // radius of polygon
     in int sides,           // number of sides
+    in mat4 modelViewMat,  // model*view matrix
     in mat4 viewProjMat)    // projection*view matrix
 {
     float innerAngle = 2. * PI / float(sides);
 
     vec4 Cs = ptransform4(viewProjMat, Cw);
-    vec3 Vw = normalize(perpVec(Nw));
-    
+    //vec3 Vw = normalize(perpVec(Nw));
+
+    vec3 Vw = vec3(viewMat[0][0],
+                   viewMat[1][0],
+                   viewMat[2][0]);
+
     // XXX only need to emit single vertex for last iteration
     for (int p = 0; p <= sides; ++p) {
         float phi = p * innerAngle;
@@ -54,6 +59,7 @@ void emit_regpoly(
 
 void main()
 {
+    mat4 modelViewMat = modelMat * viewMat;
     mat4 viewProjMat = projMat * viewMat;
 
     const int sides = 4;
@@ -62,5 +68,5 @@ void main()
 
     float circumradiusW = radius[0] / cos(PI / sides);
 
-    emit_regpoly(Cw, Vw, radius[0], circumradiusW, sides, viewProjMat);
+    emit_regpoly(Cw, Vw, radius[0], circumradiusW, sides, modelViewMat, viewProjMat);
 }

@@ -52,14 +52,8 @@ public:
     virtual void update(double dt) {
 
 #define WRAP_DIM(p, d) \
-    if (p->position.d < 0.0) \
-        p->position.d += 1.0; \
-    else if (p->position.d > 1.0) \
-        p->position.d -= 1.0;
-
-    /*
     p->position.d += p->position.d < 0.0 ? \
-         1.0 : p->position.d > 1.0 ? -1.0 : 0.0;*/
+         1.0 : p->position.d > 1.0 ? -1.0 : 0.0;
 
         BOOST_FOREACH(particle_t *p, _particles) {
             //fprintf(stderr, "pos %s vel %s\n",
@@ -67,9 +61,9 @@ public:
             //        p->velocity.toString().c_str());
             p->position += p->velocity * dt;
 
-            WRAP_DIM(p, x);
-            WRAP_DIM(p, y);
-            WRAP_DIM(p, z);
+//            WRAP_DIM(p, x);
+//            WRAP_DIM(p, y);
+//            WRAP_DIM(p, z);
         }
 
 #undef WRAP_DIM
@@ -86,6 +80,8 @@ public:
             Vec3 localCameraPos = invModelMat.ptransform(
                 state.camera->position);
 
+            //std::sort(_particles.begin(), _particles.end(),
+            //          _ParticleLt(localCameraPos));
             std::stable_sort(_particles.begin(), _particles.end(),
                              _ParticleLt(localCameraPos));
         }

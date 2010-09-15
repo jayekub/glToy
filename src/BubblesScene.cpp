@@ -15,7 +15,7 @@
 #include "BubblesScene.h"
 
 BubblesScene::BubblesScene(int width, int height) :
-    Scene(width, height), _rotationAngle(0.)
+    Scene(width, height), _rotationAngle(0.), _dof(true)
 {
     _build();
 }
@@ -43,35 +43,37 @@ void BubblesScene::update(double dt)
 
 void BubblesScene::render(RenderPass *renderPass)
 {
-    _sceneRenderer->setRenderPass(_geomPass);
+    _sceneRenderer->setRenderPass(_dof ? _geomPass : renderPass);
 //    _sceneRenderer->setRenderPass(renderPass);
     _sceneRenderer->setCameraName("camera");
     _sceneRenderer->render(_graph);
 
-    _blurProgram->use();
-    _blurProgram->setUniform("horizontal", true);
+    if (_dof) {
+        _blurProgram->use();
+        _blurProgram->setUniform("horizontal", true);
 
-    _textureRenderer->setRenderPass(_blurPass1);
-//    _textureRenderer->setRenderPass(renderPass);
-    _textureRenderer->setProgram(_blurProgram);
-    _textureRenderer->setTexture(_geomPass->getTexture());
-    _textureRenderer->render();
+        _textureRenderer->setRenderPass(_blurPass1);
+    //    _textureRenderer->setRenderPass(renderPass);
+        _textureRenderer->setProgram(_blurProgram);
+        _textureRenderer->setTexture(_geomPass->getTexture());
+        _textureRenderer->render();
 
-    _blurProgram->setUniform("horizontal", false);
+        _blurProgram->setUniform("horizontal", false);
 
-    _textureRenderer->setRenderPass(_blurPass2);
-//    _textureRenderer->setRenderPass(renderPass);
-//    _textureRenderer->setProgram(_blurProgram);
-    _textureRenderer->setTexture(_blurPass1->getTexture());
-    _textureRenderer->render();
+        _textureRenderer->setRenderPass(_blurPass2);
+    //    _textureRenderer->setRenderPass(renderPass);
+    //    _textureRenderer->setProgram(_blurProgram);
+        _textureRenderer->setTexture(_blurPass1->getTexture());
+        _textureRenderer->render();
 
-    _textureRenderer->setRenderPass(renderPass);
-    _textureRenderer->setProgram(_dofProgram);
-//    _textureRenderer->setTexture(_blurPass1->getTexture());
-    _textureRenderer->setTexture(_geomPass->getTexture());
-    _textureRenderer->addTexture(_geomPass->getDepthTexture());
-    _textureRenderer->addTexture(_blurPass2->getTexture());
-    _textureRenderer->render();
+        _textureRenderer->setRenderPass(renderPass);
+        _textureRenderer->setProgram(_dofProgram);
+    //    _textureRenderer->setTexture(_blurPass1->getTexture());
+        _textureRenderer->setTexture(_geomPass->getTexture());
+        _textureRenderer->addTexture(_geomPass->getDepthTexture());
+        _textureRenderer->addTexture(_blurPass2->getTexture());
+        _textureRenderer->render();
+    }
 }
 
 void BubblesScene::resize(int width, int height)
@@ -97,6 +99,9 @@ void BubblesScene::handleKey(unsigned char key, int x, int y)
             break;
         case 'd':
             _translate(Vec3(-1., 0., 0.));
+            break;
+        case 't':
+            _dof = !_dof;
             break;
     }
 }

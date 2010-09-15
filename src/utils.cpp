@@ -95,24 +95,26 @@ std::vector<float> makeBlurWeights(int blurDiameter)
 
     // compute the blurDiameter'th row of pascal's triangle
     std::vector<float> previous(gaussWidth), pascals(gaussWidth);
+    float rowSum = 0.;
 
     previous[0] = 1.;
     previous[1] = 1.;
 
     for (int r = 2; r <= gaussWidth; ++r) {
-        for (int c = 0; c < r; ++c)
+        rowSum = 0.;
+
+        for (int c = 0; c < r; ++c) {
             pascals[c] = (c == 0) || (c == r - 1) ?
                     1. : previous[c] + previous[c - 1];
+            rowSum += pascals[c];
+        }
 
         previous = pascals;
     }
 
-    /*
-    printf("blur weights (%u): ", pascals.size());
+    // normalize the weights
     for (int i = 0; i < gaussWidth; ++i)
-        printf("%g ", pascals[i]);
-    printf("\n");
-    */
+        pascals[i] /= rowSum;
 
     return pascals;
 }

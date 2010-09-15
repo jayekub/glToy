@@ -16,49 +16,48 @@ OBJS = \
     BubblesScene.o \
     ofxMSAFluidSolver.o
 
-ifdef USE_GL3W
-    OBJS += gl3w.o
-endif
-
 TARGET = glToy
 
 SRC_DIR = src
 BUILD_DIR = build
 
 ####
-BUILD_OBJS = $(patsubst %,$(BUILD_DIR)/%,$(OBJS))
 
-UNAME := $(shell uname)
+OS := $(shell uname -s)
 
 INCLUDES = -I$(SRC_DIR)/include/
 LIBS = -lGLU -lglut
 
-CFLAGS = -O2 -g -Wall -fmessage-length=0
+CFLAGS = -pg -O3 -Wall -fmessage-length=0
+LDFLAGS = -pg
 
-ifdef USE_GL3W
-    CFLAGS += -DUSE_GL3W
+ifeq ($(OS),CYGWIN_NT-5.1)
+    FREEGLUT_DIR = "C:\MinGW\freeglut"
+    BOOST_DIR = "C:\Program Files\boost_1_44_0"
+
+    CFLAGS += -D_WIN32
+    INCLUDES += -I$(FREEGLUT_DIR)/include -I$(BOOST_DIR)
+
+    OBJS += gl3w.o
+    LIBS = -lglut32 -lglu32 -lopengl32
 endif
 
 CXXFLAGS = $(CFLAGS) -std=c++0x
 
-ifeq ($(UNAME),Darwin)
+ifeq ($(OS),Darwin)
     CXXFLAGS += -I/opt/local/include
-    LIBS = -framework GLUT \
-           -framework OpenGL \
-           -framework Cocoa \
+    LIBS = -framework GLUT -framework OpenGL -framework Cocoa \
            -L/opt/local/lib -lGLEW
 endif
 
-ifeq ($(UNAME),CYGWIN_NT-5.1)
-   LIBS = -lglut32 \
-          -lglu32 \
-          -lopengl32
-endif
+BUILD_OBJS = $(patsubst %,$(BUILD_DIR)/%,$(OBJS))
+
+####
 
 all: $(TARGET)
 
 $(TARGET): $(BUILD_OBJS)
-	$(CXX) -o $(TARGET) $^ $(LIBS)
+	$(CXX) $(LDFLAGS) $(LIBS) -o $(TARGET) $^
 
 $(BUILD_DIR)/%.o : $(SRC_DIR)/%.c
 	@mkdir -p $(BUILD_DIR)

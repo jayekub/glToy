@@ -29,7 +29,7 @@ Bubbles::Bubbles(
 
     _bubblesProgram.link();
 
-    _bubblesProgram.setDebug(true);
+    //_bubblesProgram.setDebug(true);
 
     ////
 
@@ -82,6 +82,7 @@ void Bubbles::_preRender(RenderState &state)
                           sizeof(particle_t), 0);
 
     glEnableVertexAttribArray(radiusInLoc);
+
     glVertexAttribPointer(radiusInLoc, 1, GL_FLOAT, GL_FALSE,
                           sizeof(particle_t),
                           BUFFER_OFFSET(2 * sizeof(Vec3)));
