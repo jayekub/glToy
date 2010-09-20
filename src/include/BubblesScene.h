@@ -28,10 +28,14 @@ public:
 
     void resize(int width, int height);
     void handleKey(unsigned char key, int x, int y);
+    void handleMouse(int button, int state, int x, int y);
+    void handleMouseMotion(int x, int y);
 
 private:
     float _rotationAngle;
     bool _dof;
+    bool _grabMouse;
+    Vec2 _lastMousePos;
 
     Graph *_graph;
     Camera *_camera;

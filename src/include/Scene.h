@@ -16,7 +16,11 @@ public:
 
     void resize(int width, int height) { _width = width; _height = height; }
 
-    virtual void handleKey(unsigned char key, int x, int y) = 0;
+    virtual void handleKey(unsigned char key, int x, int y) {};
+    virtual void handleMouse(int button, int state, int x, int y) {};
+    virtual void handleMouseMotion(int x, int y) {};
+    virtual void handlePassiveMouseMotion(int x, int y) {
+        handleMouseMotion(x, y); }
 
 protected:
     int _width, _height;

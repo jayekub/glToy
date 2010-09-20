@@ -1,72 +1,86 @@
 // one point per particle in
 layout(points) in;
 
-// max vertices out is 2 * numSides
-layout(triangle_strip, max_vertices = 128) out;
+// one uuad per particle out
+layout(triangle_strip, max_vertices = 4) out;
 
 uniform mat4 modelMat;
 uniform mat4 viewMat;
 uniform mat4 projMat;
+
 uniform vec3 cameraPos;
 
 in vec3 center[];
 in float radius[];
 
 out vec3 Pw;
-
 flat out vec3 bcenter;
 flat out float bradius;
 
-void emit_regpoly(
-    in vec3 Cw,             // polygon center
-    in vec3 Nw,             // polygon normal
-    in float radiusW,       // radius of bubble
-    in float circumradiusW, // radius of polygon
-    in int sides,           // number of sides
-    in mat4 modelViewMat,  // model*view matrix
-    in mat4 viewProjMat)    // projection*view matrix
-{
-    float innerAngle = 2. * PI / float(sides);
-
-    vec4 Cs = ptransform4(viewProjMat, Cw);
-    //vec3 Vw = normalize(perpVec(Nw));
-
-    vec3 Vw = vec3(viewMat[0][0],
-                   viewMat[1][0],
-                   viewMat[2][0]);
-
-    // XXX only need to emit single vertex for last iteration
-    for (int p = 0; p <= sides; ++p) {
-        float phi = p * innerAngle;
-        vec3 Rw = normalize(rotateVec(Vw, phi, Nw));
-        
-        bcenter = Cw;
-        bradius = radiusW;
-        Pw = Cw;
-        gl_Position = Cs;
-            
-        EmitVertex();
-        
-        bcenter = Cw;
-        bradius = radiusW;
-        Pw = Cw + circumradiusW * Rw;
-        gl_Position = ptransform4(viewProjMat, Pw);
-            
-        EmitVertex(); 
-    }
-    EndPrimitive();
-}
-
 void main()
 {
-    mat4 modelViewMat = modelMat * viewMat;
+    mat4 modelViewMat = viewMat * modelMat;
     mat4 viewProjMat = projMat * viewMat;
 
-    const int sides = 4;
-    vec3 Cw = ptransform(modelMat, center[0]); 
-    vec3 Vw = normalize(cameraPos - Cw);
+    vec3 centerW = ptransform(modelMat, center[0]);
 
-    float circumradiusW = radius[0] / cos(PI / sides);
+    // world oriented
+//    vec3 Xw = radius[0] * vec3(1., 0., 0.);
+//    vec3 Yw = radius[0] * vec3(0., 1., 0.);
+//    vec3 Zw = radius[0] * vec3(0., 0., 1.);
 
-    emit_regpoly(Cw, Vw, radius[0], circumradiusW, sides, modelViewMat, viewProjMat);
+    // viewplane oriented
+//    vec3 Xw = radius[0] * vec3(viewMat[0][0], viewMat[1][0], viewMat[2][0]);
+//    vec3 Yw = radius[0] * vec3(viewMat[0][1], viewMat[1][1], viewMat[2][1]);
+//    vec3 Zw = radius[0] * vec3(viewMat[0][2], viewMat[1][2], viewMat[2][2]);
+
+    // viewpoint oriented
+    vec3 Vw = normalize(centerW - cameraPos);
+    vec3 UPw = vec3(0., 1., 0.);
+
+    vec3 Xw = radius[0] * normalize(cross(UPw, Vw));
+    vec3 Yw = radius[0] * normalize(cross(Vw, Xw));
+    vec3 Zw = radius[0] * Vw;
+
+    // compute quad corners
+    vec3 cornersW[4];
+
+    cornersW[0] = centerW - Xw - Yw - Zw;
+    cornersW[1] = centerW + Xw - Yw - Zw;
+    cornersW[2] = centerW + Xw + Yw - Zw;
+    cornersW[3] = centerW - Xw + Yw - Zw;
+
+    // transform corners to clip space and check for intersections with the
+    // clipping planes--discard if there are any to avoid mangled particles
+
+    bool discardParticle = false;
+    vec4 cornersC[4];
+
+    for (int i = 0; i < 4; ++i) {
+        cornersC[i] = ptransform4(viewProjMat, cornersW[i]);
+
+#if 1
+        float cornerZNDC = cornersC[i].z / cornersC[i].w;
+        if (cornerZNDC < -1. || cornerZNDC > 1.) {
+            discardParticle = true;
+            break;
+        }
+#endif
+    }
+
+    // now emit the box
+    if (!discardParticle) {
+
+#define EMIT_VERT(n) \
+    bcenter = centerW; \
+    bradius = radius[0]; \
+    Pw = cornersW[n]; \
+    gl_Position = cornersC[n]; \
+    EmitVertex();
+
+        EMIT_VERT(0); EMIT_VERT(1); EMIT_VERT(3); EMIT_VERT(2);
+
+        EndPrimitive();
+
+    }
 }

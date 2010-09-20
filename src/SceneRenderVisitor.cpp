@@ -56,16 +56,33 @@ void SceneRenderVisitor::visitCamera(Camera *camera)
 
         glViewport(0.0, 0.0, vpWidth, vpHeight);
 
-        if (camera->projection == Camera::FLAT) {
-            state.projectionMat = Mat4::ortho(0, vpWidth, vpHeight, 0, 0, 1);
-        } else { // camera->projection == Camera::PERSP
-            state.projectionMat =
-                Mat4::perspective(camera->fov,
+        switch (camera->projection) {
+            case Camera::FLAT:
+                state.projectionMat = Mat4::ortho(0, vpWidth, vpHeight,
+                                                  0, 0, 1);
+                break;
+            case Camera::ORTHO: {
+                int w_2 = camera->width / 2;
+                int h_2 = camera->height / 2;
+
+                state.projectionMat =
+                    Mat4::ortho(-w_2 - camera->position.x,
+                                w_2 - camera->position.x,
+                                -h_2 - camera->position.y,
+                                h_2 - camera->position.y,
+                                camera->nearClip + camera->position.z,
+                                camera->farClip + camera->position.z);
+                break;
+            }
+            case Camera::PERSP:
+                state.projectionMat =
+                    Mat4::perspective(camera->fov,
                                   (float) vpWidth / (float) vpHeight,
                                   camera->nearClip, camera->farClip);
 
-            state.viewMat =
-                Mat4::lookat(camera->position, camera->center, camera->up);
+                state.viewMat =
+                    Mat4::lookat(camera->position, camera->center, camera->up);
+                break;
         }
 
         // build shadow matrix and update light

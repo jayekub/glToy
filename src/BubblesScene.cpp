@@ -14,8 +14,11 @@
 
 #include "BubblesScene.h"
 
+// TODO refactor camera control into CameraController class
+
 BubblesScene::BubblesScene(int width, int height) :
-    Scene(width, height), _rotationAngle(0.), _dof(true)
+    Scene(width, height), _rotationAngle(0.), _dof(true), _grabMouse(false),
+    _lastMousePos(width / 2, height / 2)
 {
     _build();
 }
@@ -87,22 +90,59 @@ void BubblesScene::resize(int width, int height)
 
 void BubblesScene::handleKey(unsigned char key, int x, int y)
 {
+    Vec3 forward = 0.25 * (_camera->center - _camera->position).normalize();
+    Vec3 right = 0.25 * forward.cross(_camera->up).normalize();
+
+    Vec3 translation;
+
     switch (key) {
         case 'w':
-            _translate(Vec3(0., 0., 1.));
+            translation = forward;
             break;
         case 's':
-            _translate(Vec3(0., 0., -1.));
+            translation = -1. * forward;
             break;
         case 'a':
-            _translate(Vec3(1., 0., 0.));
+            translation = -1. * right;
             break;
         case 'd':
-            _translate(Vec3(-1., 0., 0.));
+            translation = right;
             break;
         case 't':
             _dof = !_dof;
             break;
+    }
+
+    _camera->position += translation;
+    _camera->center += translation;
+}
+
+void BubblesScene::handleMouse(int button, int state, int x, int y)
+{
+    if (button == GLUT_LEFT && state == GLUT_DOWN) {
+        _grabMouse = !_grabMouse;
+    }
+}
+
+void BubblesScene::handleMouseMotion(int x, int y)
+{
+    // XXX broken
+    if (_grabMouse) {
+        Vec2 delta = 0.01 * (Vec2(x, y) - _lastMousePos);
+
+        Mat4 transform = Mat4::translate(-1. * _camera->position) *
+                         Mat4::rotate(delta.x, Vec3(0., 1., 0.)) *
+                         Mat4::rotate(delta.y, Vec3(1., 0., 0.)) *
+                         Mat4::translate(_camera->position);
+
+        _camera->center = transform.ptransform(_camera->center);
+        _camera->up = transform.vtransform(_camera->up);
+
+        _lastMousePos = Vec2(x, y);
+        //_lastMousePos = Vec2(_width / 2, _height / 2);
+        //glutWarpPointer(_lastMousePos.x, _lastMousePos.y);
+    } else {
+        _lastMousePos = Vec2(x, y);
     }
 }
 
@@ -113,6 +153,12 @@ void BubblesScene::_build()
 
     // Camera
     _camera = new Camera("camera");
+
+    /*
+    _camera->projection = Camera::ORTHO;
+    _camera->width = 30.;
+    _camera->height = 30.;
+    */
 
     _camera->position = Vec3(0., 0., -20);
     _camera->center = Vec3(0., 0., 0.);

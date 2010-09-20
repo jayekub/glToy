@@ -15,11 +15,15 @@ template<class P = Particle<> >
 class ParticleSystem : public Prim
 {
 public:
+    enum WallType { NONE, BOUNCE, WRAP };
+
     typedef P particle_t;
 
     ParticleSystem(const char *name, const Vec3 &size,
+                   WallType wallType = WRAP,
                    bool needsDepthSort = false) :
-        Prim(name), _size(size), _needsDepthSort(needsDepthSort) {
+        Prim(name), _size(size), _wallType(wallType),
+        _needsDepthSort(needsDepthSort) {
 
         glGenBuffers(1, &_particleBuffer);
         glGenTextures(1, &_particleTexture);
@@ -52,8 +56,13 @@ public:
     virtual void update(double dt) {
 
 #define WRAP_DIM(p, d) \
-    p->position.d += p->position.d < 0.0 ? \
-         1.0 : p->position.d > 1.0 ? -1.0 : 0.0;
+    p->position.d += p->position.d < 0. ? \
+         1. : p->position.d > 1. ? -1. : 0.;
+
+#define BOUNCE_DIM(p, d) \
+    p->velocity.d *= p->position.d < 0. || p->position.d > 1. ? -1. : 1.; \
+    p->position.d = p->position.d < 0. ? \
+        0. : p->position.d > 1. ? 1. : p->position.d; \
 
         BOOST_FOREACH(particle_t *p, _particles) {
             //fprintf(stderr, "pos %s vel %s\n",
@@ -61,12 +70,25 @@ public:
             //        p->velocity.toString().c_str());
             p->position += p->velocity * dt;
 
-//            WRAP_DIM(p, x);
-//            WRAP_DIM(p, y);
-//            WRAP_DIM(p, z);
+            switch(_wallType) {
+                case NONE:
+                    break;
+
+                case BOUNCE:
+                    BOUNCE_DIM(p, x);
+                    BOUNCE_DIM(p, y);
+                    BOUNCE_DIM(p, z);
+
+                case WRAP:
+                    WRAP_DIM(p, x);
+                    WRAP_DIM(p, y);
+                    WRAP_DIM(p, z);
+                    break;
+            }
         }
 
 #undef WRAP_DIM
+#undef BOUNCE_DIM
     }
 
     virtual void render(RenderState &state) {
@@ -162,6 +184,7 @@ protected:
     size_t _particleBufferSize;
     GLuint _particleBuffer, _particleTexture;
 
+    WallType _wallType;
     bool _needsDepthSort;
 
     void _destroy() {

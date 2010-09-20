@@ -20,8 +20,8 @@
 #include "ScreenRenderPass.h"
 #include "CellNoiseRenderer.h"
 
-int windowWidth = 640;
-int windowHeight = 480;
+int windowWidth = 853;
+int windowHeight = 640;
 
 const int fluidSize = 100;
 
@@ -36,6 +36,10 @@ int _frames = 0;
 
 bool _pause = false;
 bool _reset = false;
+bool _debug = false;
+bool _grabMouse = false;
+
+Scene *_currentScene;
 
 ////
 
@@ -72,16 +76,36 @@ void handleKey(unsigned char key, int x, int y)
         case 'p':
             _pause = !_pause;
             break;
+        case 'm':
+            _debug = !_debug;
+
+            if (_debug) {
+                glPolygonMode(GL_FRONT, GL_LINE);
+                glPolygonMode(GL_BACK, GL_LINE);
+            } else {
+                glPolygonMode(GL_FRONT, GL_FILL);
+                glPolygonMode(GL_BACK, GL_FILL);
+            }
+
+            break;
         case 'q':
             exit(0);
             break;
     }
 
-    _bubblesScene->handleKey(key, x, y);
+    _currentScene->handleKey(key, x, y);
+}
+
+void handleMouse(int button, int state, int x, int y)
+{
+    _currentScene->handleMouse(button, state, x, y);
 }
 
 void handleMouseMotion(int x, int y)
 {
+    _currentScene->handleMouseMotion(x, y);
+
+#if 0
     // Prevent popping when the button is first pressed
     if (mouse.x < 0) {
         mouse.x = x;
@@ -108,6 +132,12 @@ void handleMouseMotion(int x, int y)
     fluidSolver.addForceAtPos((double) x * invWidth,
                               (double) y * invHeight, vel.x, vel.y);
 #endif
+#endif
+}
+
+void handlePassiveMouseMotion(int x, int y)
+{
+    _currentScene->handlePassiveMouseMotion(x, y);
 }
 
 void draw() {
@@ -120,9 +150,9 @@ void draw() {
     double dt = (drawTime - _lastDrawTime) / 1000.;
 
     if (!_pause)
-        _bubblesScene->update(dt);
+        _currentScene->update(dt);
 
-    _bubblesScene->render(_screenPass);
+    _currentScene->render(_screenPass);
 
     glutSwapBuffers();
 
@@ -279,17 +309,17 @@ int main(int argc, char **argv) {
     glutReshapeFunc(resize);
     glutKeyboardFunc(handleKey);
 
-    //glutMotionFunc(handleMouseMotion);
-    //glutMouseFunc(handleMouse);
+    glutMouseFunc(handleMouse);
+    glutMotionFunc(handleMouseMotion);
+    glutPassiveMotionFunc(handlePassiveMouseMotion);
 
     glEnable(GL_DEPTH_TEST);
-//  glEnable(GL_CULL_FACE);
-
-//  glPolygonMode(GL_FRONT, GL_LINE);
-//  glPolygonMode(GL_BACK, GL_LINE);
+//    glEnable(GL_CULL_FACE);
 
     _screenPass = new ScreenRenderPass(windowWidth, windowHeight);
     _bubblesScene = new BubblesScene(windowWidth, windowHeight);
+
+    _currentScene = _bubblesScene;
 
     printf("OpenGL %s, GLSL %s\n", glGetString(GL_VERSION),
            glGetString(GL_SHADING_LANGUAGE_VERSION));

@@ -9,15 +9,21 @@ class Light;
 
 struct Camera : public Node
 {
-    enum ProjectionType { FLAT, PERSP };
+    enum ProjectionType { FLAT, ORTHO, PERSP };
     ProjectionType projection;
 
-    float fov;
-    float nearClip;
-    float farClip;
+    // common options
+    float nearClip, farClip;
 
     Vec3 position, center, up;
 
+    // ortho options
+    float width, height;
+
+    // persp options
+    float fov;
+
+    // shadow cam options
     bool isShadowCamera;
     Light *light;
 
@@ -25,8 +31,9 @@ struct Camera : public Node
 
     Camera(const char *name_) :
         Node(name_),
-        projection(PERSP), fov(45.), nearClip(1.), farClip(1000.),
+        projection(PERSP), nearClip(1.), farClip(1000.),
         position(0., 0., 0.), center(0., 0., 1.), up(0., 1., 0.),
+        width(2.), height(2.), fov(45),
         isShadowCamera(false), light(NULL) {};
 };
 

@@ -10,6 +10,7 @@ uniform vec3 lightPos;
 flat in vec3 bcenter;
 flat in float bradius;
 in vec3 Pw;
+in vec3 Vw;
 
 out vec4 color;
 
@@ -31,40 +32,47 @@ vec4 shade_point(
     float diffuse = NdotL;
     float specular = 2. * pow(max(0., dot(L, R)), 5.);
 
-    return vec4((ambient + diffuse + specular)* shadow * Cs.rgb, Cs.a);
+    return vec4((ambient + diffuse + specular) * shadow * Cs.rgb, Cs.a);
 }
 
 void main()
 {
-//    color = vec4(0., 0., 1., 1.);
+//    color = vec4(bcenter.xyz, 1.);
 
 #if 1
+    // persp
+    vec3 O = cameraPos;
     vec3 V = normalize(Pw - cameraPos);
 
+    // ortho 
+//    vec3 O = vec3(Pw.x, Pw.y, cameraPos.z);
+//    vec3 V = normalize(vec3(0., 0., Pw.z - cameraPos.z));
+
     float t1, t2;
-    if (sphere_intersect(cameraPos, V, bcenter, bradius, t1, t2) < 2) {
-        discard;
+    if (sphere_intersect(O, V, bcenter, bradius, t1, t2) < 2) {
+        color = vec4(0., 0., 1., 1.);
+//        discard;
     } else {
 //        color = vec4(.2, .2, .6, .5);
 
-        vec3 Phit1 = cameraPos + t1 * V;
+        vec3 Phit1 = O + t1 * V;
         vec3 Nhit1 = sphere_normal(Phit1, bcenter);
 
         vec4 color1 = shade_point(Phit1, Nhit1, V, bubbleColor);
 
-        vec3 Phit2 = cameraPos + t2 * V;
+        vec3 Phit2 = O + t2 * V;
         vec3 Nhit2 = -1. * sphere_normal(Phit2, bcenter);
 
         vec4 color2 = shade_point(Phit2, Nhit2, V, bubbleColor);
 
         color = color1 + (1. - color1.a) * color2;
-    }
 
-    /*
-    vec4 Pclosest = ptransform4(projMat * viewMat * modelMat,
-                                cameraPos + hits[0].depth * V);
-    Pclosest.z /= Pclosest.w;
-    gl_FragDepth = (Pclosest.z + 1.) / 2.;
-    */
+/*
+        vec4 PclosestC = ptransform4(projMat * viewMat, Phit1);
+        PclosestC.z /= PclosestC.w;
+
+        gl_FragDepth = (PclosestC.z + 1.) / 2.;
+*/
+    }
 #endif
 }

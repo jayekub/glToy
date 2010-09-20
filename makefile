@@ -70,6 +70,6 @@ $(BUILD_DIR)/%.o : $(SRC_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -MM -MP -MT $@ -MF $(@:%.o=%.d) $<
 
 clean:
-	rm -f $(BUILD_OBJS) $(BUILD_OBJS:%.o=%.d) $(TARGET)
+	rm -f $(BUILD_OBJS) $(BUILD_OBJS:%.o=%.d) $(TARGET) gmon.out
 
 -include $(BUILD_OBJS:%.o=%.d)

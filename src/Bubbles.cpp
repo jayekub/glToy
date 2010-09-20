@@ -8,7 +8,7 @@ Bubbles::Bubbles(
     const Vec3 &size,
     float radius,
     bool drawBox) :
-    ParticleSystem<particle_t>(name, size, true /* needsDepthSort */),
+    ParticleSystem<particle_t>(name, size, BOUNCE, true /* needsDepthSort */),
     _radius(radius), _drawBox(drawBox)
 {
     _bubblesProgram.addShader(
@@ -69,7 +69,6 @@ void Bubbles::_preRender(RenderState &state)
                    .setUniform("projMat", state.projectionMat)
                    .setUniform("cameraPos", state.camera->position)
                    .setUniform("lightPos", firstLightPos);
-
 
     const GLuint centerInLoc = _bubblesProgram.attribute("centerIn");
     const GLuint radiusInLoc = _bubblesProgram.attribute("radiusIn");
