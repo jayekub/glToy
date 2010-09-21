@@ -28,6 +28,9 @@ private:
 
     void _setRandomAttributes(particle_t *p) const;
 
+    bool _particlelt(const particle_t *a, const particle_t * b,
+                     const Vec3 &cameraPos) const;
+
     void _preRender(RenderState &state);
     void _postRender(RenderState &state);
 };

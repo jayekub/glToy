@@ -102,7 +102,7 @@ public:
             //std::sort(_particles.begin(), _particles.end(),
             //          _ParticleLt(localCameraPos));
             std::stable_sort(_particles.begin(), _particles.end(),
-                             _ParticleLt(localCameraPos));
+                             _ParticleLt(localCameraPos, this));
         }
 
         // put current particle positions in vertex buffer and allocate more
@@ -159,18 +159,18 @@ public:
     std::vector<particle_t *> &getParticles() { return _particles; }
 
 protected:
-    struct _ParticleLt
-    {
-        Vec3 cameraPos;
-
-        _ParticleLt(const Vec3 &cameraPos_) : cameraPos(cameraPos_) {}
+    struct _ParticleLt {
+        _ParticleLt(const Vec3 &cameraPos,
+                    const ParticleSystem<P> *particleSystem) :
+            _cameraPos(cameraPos), _particleSystem(particleSystem) {}
 
         bool operator()(const particle_t *a, const particle_t *b) const {
-            vec_t aDist = (a->position - cameraPos).length();
-            vec_t bDist = (b->position - cameraPos).length();
-
-            return aDist < bDist;
+            return _particleSystem->_particlelt(a, b, _cameraPos);
         }
+
+    private:
+        const Vec3 _cameraPos;
+        const ParticleSystem<P> *_particleSystem;
     };
 
     Vec3 _size;
@@ -191,6 +191,14 @@ protected:
 
     virtual void _setRandomAttributes(particle_t *p) const {
         // subclasses can particle attributes here
+    }
+
+    virtual bool _particlelt(const particle_t *a, const particle_t *b,
+                             const Vec3 &cameraPos) const {
+        vec_t aDist = (a->position - cameraPos).length();
+        vec_t bDist = (b->position - cameraPos).length();
+
+        return aDist < bDist;
     }
 
     virtual void _preRender(RenderState &state) {

@@ -57,6 +57,16 @@ void Bubbles::_setRandomAttributes(particle_t *p) const {
     p->attributes.radius = _radius * (randFloat() + 0.5);
 }
 
+bool Bubbles::_particlelt(const particle_t *a, const particle_t * b,
+                          const Vec3 &cameraPos) const
+{
+    vec_t aDist = (a->position - cameraPos).length() - a->attributes.radius;
+    vec_t bDist = (b->position - cameraPos).length() - b->attributes.radius;
+
+    return aDist < bDist;
+}
+
+
 void Bubbles::_preRender(RenderState &state)
 {
     // XXX fragile
