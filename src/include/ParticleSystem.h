@@ -44,7 +44,10 @@ public:
         for (int i = 0; i < num; ++i) {
             particle_t *p = new particle_t();
 
-            p->position = Vec3::randVec(0., 1.);
+            p->position =
+                Vec3(randFloat() * _size.x,
+                     randFloat() * _size.y,
+                     randFloat() * _size.z);
             p->velocity = maxVelocity * Vec3::randVec(-1, 1).normalize();
 
             _setRandomAttributes(p);
@@ -57,17 +60,14 @@ public:
 
 #define WRAP_DIM(p, d) \
     p->position.d += p->position.d < 0. ? \
-         1. : p->position.d > 1. ? -1. : 0.;
+         _size.d : p->position.d > _size.d ? -_size.d : 0.;
 
 #define BOUNCE_DIM(p, d) \
-    p->velocity.d *= p->position.d < 0. || p->position.d > 1. ? -1. : 1.; \
+    p->velocity.d *= p->position.d < 0. || p->position.d > _size.d ? -1. : 1.;\
     p->position.d = p->position.d < 0. ? \
-        0. : p->position.d > 1. ? 1. : p->position.d; \
+        0. : p->position.d > _size.d ? _size.d : p->position.d; \
 
         BOOST_FOREACH(particle_t *p, _particles) {
-            //fprintf(stderr, "pos %s vel %s\n",
-            //        p->position.toString().c_str(),
-            //        p->velocity.toString().c_str());
             p->position += p->velocity * dt;
 
             switch(_wallType) {
@@ -92,9 +92,6 @@ public:
     }
 
     virtual void render(RenderState &state) {
-        state.pushTransformMat();
-        state.multTransformMat(Mat4::scale(_size));
-
         // if necessary, sort particles by distances from camera so that further
         // away particles are rendered first
         if (_needsDepthSort) {
@@ -155,8 +152,6 @@ public:
         // allow subclasses to possibly render more stuff and also cleanup
         // after themselves
         _postRender(state);
-
-        state.popTransformMat();
     }
 
     void reset() { _destroy(); }

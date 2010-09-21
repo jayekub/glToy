@@ -50,8 +50,8 @@ void main()
 
     float t1, t2;
     if (sphere_intersect(O, V, bcenter, bradius, t1, t2) < 2) {
-        color = vec4(0., 0., 1., 1.);
-//        discard;
+//        color = vec4(0., 0., 1., 1.);
+        discard;
     } else {
 //        color = vec4(.2, .2, .6, .5);
 

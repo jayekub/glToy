@@ -197,7 +197,7 @@ void BubblesScene::_build()
     _bubblesTransform->addChild(bubblesOffset);
 
     _bubbles = new Bubbles("bubbles", Vec3(30., 30., 30.), 0.5); //, true);
-    _bubbles->emitRandom(5000, 0.05);
+    _bubbles->emitRandom(5000, 1.5);
 
     bubblesOffset->addChild(_bubbles);
 
