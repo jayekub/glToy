@@ -5,16 +5,17 @@ OBJS = \
     Program.o \
     ScreenRenderPass.o \
     TextureRenderPass.o \
-    CellNoiseRenderer.o \
     TextureRenderer.o \
+    ofxMSAFluidSolver.o \
+    CellNoiseFluid.o \
+    CellNoiseScene.o \
     Graph.o \
     Visitor.o \
     SceneRenderVisitor.o \
     Noise.o \
     Anemone.o \
     Bubbles.o \
-    BubblesScene.o \
-    ofxMSAFluidSolver.o
+    BubblesScene.o
 
 TARGET = glToy
 
@@ -28,8 +29,8 @@ OS := $(shell uname -s)
 INCLUDES = -I$(SRC_DIR)/include/
 LIBS = -lGLU -lglut
 
-CFLAGS = -pg -O3 -Wall -fmessage-length=0
-LDFLAGS = -pg
+CFLAGS = -O3 -Wall -fmessage-length=0
+LDFLAGS =
 
 ifeq ($(OS),CYGWIN_NT-5.1)
     FREEGLUT_DIR = "C:\MinGW\freeglut"
