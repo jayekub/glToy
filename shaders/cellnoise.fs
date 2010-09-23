@@ -1,10 +1,10 @@
-in vec2 texcoord;
+//in vec2 texcoord;
 
 out vec4 color;
 
 void main()
 {
-    color = vec4(1., 0., 0., 1.);
+    color = vec4(1., 1., 1., 1.);
 
     /*
     // normalize so that the max distance is reached perpendicular to quad

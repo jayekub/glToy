@@ -183,11 +183,11 @@ int main(int argc, char **argv) {
 
     _screenPass = new ScreenRenderPass(windowWidth, windowHeight);
 
-    _bubblesScene = new BubblesScene(windowWidth, windowHeight);
-    _currentScene = _bubblesScene;
+    //_bubblesScene = new BubblesScene(windowWidth, windowHeight);
+    //_currentScene = _bubblesScene;
 
-    //_cellNoiseScene = new CellNoiseScene(windowWidth, windowHeight);
-    //_currentScene = _cellNoiseScene;
+    _cellNoiseScene = new CellNoiseScene(windowWidth, windowHeight);
+    _currentScene = _cellNoiseScene;
 
     printf("OpenGL %s, GLSL %s\n", glGetString(GL_VERSION),
            glGetString(GL_SHADING_LANGUAGE_VERSION));

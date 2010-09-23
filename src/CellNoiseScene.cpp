@@ -40,11 +40,21 @@ void CellNoiseScene::update(double dt)
 
 void CellNoiseScene::render(RenderPass *renderPass)
 {
-    _cellNoisePass0->begin();
-    _renderState.renderPass = _cellNoisePass0;
-    _cellNoiseFluid0->render(_renderState);
-    _cellNoisePass0->end();
+    glViewport(0., 0., _width, _height);
 
+//    _cellNoisePass0->begin();
+//    _renderState.renderPass = _cellNoisePass0;
+    renderPass->begin();
+    _renderState.renderPass = renderPass;
+
+    glClearColor(0., 0., .25, 1.);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    _cellNoiseFluid0->render(_renderState);
+    renderPass->end();
+//    _cellNoisePass0->end();
+
+/*
     _cellNoisePass1->begin();
     _renderState.renderPass = _cellNoisePass1;
     _cellNoiseFluid1->render(_renderState);
@@ -52,6 +62,7 @@ void CellNoiseScene::render(RenderPass *renderPass)
 
     _combineRenderer->setRenderPass(renderPass);
     _combineRenderer->render();
+    */
 }
 
 void CellNoiseScene::resize(int width, int height)
@@ -91,7 +102,7 @@ void CellNoiseScene::_build()
 {
     _renderState.reset();
     _renderState.multTransformMat(Mat4::scale(Vec3(_width, _height, 1.)));
-    _renderState.projectionMat = Mat4::ortho(0, _width, _height, 0, 0, 1);
+    _renderState.projectionMat = Mat4::ortho(0., _width, _height, 0., 0., 1.);
 
     _fluidSolver = new ofxMSAFluidSolver();
 
