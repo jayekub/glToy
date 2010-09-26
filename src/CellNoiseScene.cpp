@@ -42,27 +42,28 @@ void CellNoiseScene::render(RenderPass *renderPass)
 {
     glViewport(0., 0., _width, _height);
 
-//    _cellNoisePass0->begin();
-//    _renderState.renderPass = _cellNoisePass0;
-    renderPass->begin();
-    _renderState.renderPass = renderPass;
+    _cellNoisePass0->begin();
+    _renderState.renderPass = _cellNoisePass0;
 
-    glClearColor(0., 0., .25, 1.);
+    glClearColor(1., 1., 1., 1.);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     _cellNoiseFluid0->render(_renderState);
-    renderPass->end();
-//    _cellNoisePass0->end();
 
-/*
+    _cellNoisePass0->end();
+
+    //
     _cellNoisePass1->begin();
     _renderState.renderPass = _cellNoisePass1;
+
+    glClearColor(1., 1., 1., 1.);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     _cellNoiseFluid1->render(_renderState);
+
     _cellNoisePass1->end();
 
+    //
     _combineRenderer->setRenderPass(renderPass);
     _combineRenderer->render();
-    */
 }
 
 void CellNoiseScene::resize(int width, int height)
@@ -75,7 +76,7 @@ void CellNoiseScene::resize(int width, int height)
 
     _renderState.reset();
     _renderState.multTransformMat(Mat4::scale(Vec3(width, height, 1.)));
-    _renderState.projectionMat = Mat4::ortho(0, width, height, 0, 0, 1);
+    _renderState.projectionMat = Mat4::ortho(0., width, height, 0., 0., 1.);
 }
 
 void CellNoiseScene::handleMouseMotion(int x, int y)
@@ -103,6 +104,7 @@ void CellNoiseScene::_build()
     _renderState.reset();
     _renderState.multTransformMat(Mat4::scale(Vec3(_width, _height, 1.)));
     _renderState.projectionMat = Mat4::ortho(0., _width, _height, 0., 0., 1.);
+    //_renderState.projectionMat = Mat4::ortho(0., 1., 1., 0., 0., 1.);
 
     _fluidSolver = new ofxMSAFluidSolver();
 
@@ -117,14 +119,13 @@ void CellNoiseScene::_build()
 
     _cellNoiseFluid0 =
         new CellNoiseFluid("cellNoiseFluid0", Vec2(1., 1.),
-                           _fluidSolver, 0.1);
+                           _fluidSolver, .15);
     _cellNoiseFluid1 =
         new CellNoiseFluid("cellNoiseFluid1", Vec2(1., 1.),
-                           _fluidSolver, 0.1);
+                           _fluidSolver, .15);
 
-    // XXX this will result in 3d velocities...need 2d
-    _cellNoiseFluid0->emitRandom(200, 0.1);
-    _cellNoiseFluid1->emitRandom(1000, 0.1);
+    _cellNoiseFluid0->emitRandom(200, 0.5);
+    _cellNoiseFluid1->emitRandom(1000, 0.5);
 
     _cellNoisePass0 = new TextureRenderPass(_width, _height);
     _cellNoisePass1 = new TextureRenderPass(_width, _height);
@@ -133,9 +134,9 @@ void CellNoiseScene::_build()
 
     _combineProgram->addShader(
         new Program::Shader("shaders/standard.vs", GL_VERTEX_SHADER));
-    //_combineProgram->addShader(
-    //    new Program::Shader("shaders/cellnoisecombine.fs",
-    //                        GL_FRAGMENT_SHADER));
+    _combineProgram->addShader(
+        new Program::Shader("shaders/combine.fs",
+                            GL_FRAGMENT_SHADER));
 
     _combineProgram->link();
 

@@ -12,6 +12,7 @@ class ofxMSAFluidSolver;
 class CellNoiseFluid : public ParticleSystem<>
 {
 public:
+    // particleSize is radius of particles as a fraction of screen width
     CellNoiseFluid(const char *name, const Vec2 &size,
                    ofxMSAFluidSolver *fluid, float particleSize);
 

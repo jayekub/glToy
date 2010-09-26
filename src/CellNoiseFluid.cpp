@@ -56,14 +56,11 @@ void CellNoiseFluid::_preRender(RenderState &state)
 
     _cellNoiseProgram.setUniform("modelMat", state.getTransformMat())
                      .setUniform("viewMat", state.viewMat)
-                     .setUniform("projMat", state.projectionMat);
-
-                     /*
+                     .setUniform("projMat", state.projectionMat)
                      .setUniform("rasterSize",
                                  Vec2(state.renderPass->getWidth(),
                                       state.renderPass->getHeight()))
                      .setUniform("particleSize", _particleSize);
-                     */
 
     const GLuint centerInLoc = _cellNoiseProgram.attribute("centerIn");
 

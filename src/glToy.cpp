@@ -33,8 +33,8 @@ bool _grabMouse = false;
 Scene *_currentScene;
 ScreenRenderPass *_screenPass;
 
-BubblesScene *_bubblesScene;
-CellNoiseScene *_cellNoiseScene;
+BubblesScene *_bubblesScene = NULL;
+CellNoiseScene *_cellNoiseScene = NULL;
 
 ////
 
@@ -54,9 +54,11 @@ void handleKey(unsigned char key, int x, int y)
         case 'r':
             _reset = true;
             break;
+
         case 'p':
             _pause = !_pause;
             break;
+
         case 'm':
             _debug = !_debug;
 
@@ -69,6 +71,24 @@ void handleKey(unsigned char key, int x, int y)
             }
 
             break;
+
+        case 'n':
+            if (_bubblesScene) {
+                delete _bubblesScene;
+                _bubblesScene = NULL;
+
+                _cellNoiseScene = new CellNoiseScene(windowWidth, windowHeight);
+                _currentScene = _cellNoiseScene;
+            } else {
+                delete _cellNoiseScene;
+                _cellNoiseScene = NULL;
+
+                _bubblesScene = new BubblesScene(windowWidth, windowHeight);
+                _currentScene = _bubblesScene;
+            }
+
+            break;
+
         case 'q':
             exit(0);
             break;
@@ -183,11 +203,9 @@ int main(int argc, char **argv) {
 
     _screenPass = new ScreenRenderPass(windowWidth, windowHeight);
 
-    //_bubblesScene = new BubblesScene(windowWidth, windowHeight);
-    //_currentScene = _bubblesScene;
+    _bubblesScene = new BubblesScene(windowWidth, windowHeight);
+    _currentScene = _bubblesScene;
 
-    _cellNoiseScene = new CellNoiseScene(windowWidth, windowHeight);
-    _currentScene = _cellNoiseScene;
 
     printf("OpenGL %s, GLSL %s\n", glGetString(GL_VERSION),
            glGetString(GL_SHADING_LANGUAGE_VERSION));
