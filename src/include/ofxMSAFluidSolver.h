@@ -47,7 +47,12 @@
 #include <stddef.h>
 #include <math.h>
 
-#include "utils.h"
+//#include "utils.h"
+// XXX use my class for ofxMSAFluidSolver
+#define ofPoint Vec3
+#include "Vec.h"
+
+
 
 //	AAASEED is defined for use in the AAASeed Software
 #ifndef	AAASEED	
@@ -57,7 +62,6 @@
 //#include "aaa_msa_ofmain.h"
 #endif
 #endif
-
 
 // do not change these values, you can override them using the solver methods
 #define		FLUID_DEFAULT_NX					100

@@ -5,7 +5,7 @@
 #include "RenderState.h"
 #include "Scene.h"
 
-class ofxMSAFluidSolver;
+class FluidSimField;
 class CellNoiseFluid;
 class TextureRenderPass;
 class TextureRenderer;
@@ -30,7 +30,7 @@ private:
     Vec2 _lastMousePos;
 
     float _fluidSize;
-    ofxMSAFluidSolver *_fluidSolver;
+    FluidSimField *_fluidField;
 
     CellNoiseFluid *_cellNoiseFluid0, *_cellNoiseFluid1;
     TextureRenderPass *_cellNoisePass0, *_cellNoisePass1;

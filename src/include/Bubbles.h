@@ -5,30 +5,20 @@
 #include "Program.h"
 #include "ParticleSystem.h"
 
-struct BubbleAttributes
-{
-    float radius;
-};
-
-class Bubbles : public ParticleSystem<Particle<BubbleAttributes> >
+class Bubbles : public ParticleSystem
 {
 public:
-    Bubbles(const char *name, const Vec3 &size, float radius,
-            bool drawBox = false);
+    Bubbles(const char *name, const Vec3 &size, bool drawBox = false);
     virtual ~Bubbles();
 
 private:
-    float _radius;
-
     Program _bubblesProgram;
     GLuint _permTexture, _gradTexture;
 
     bool _drawBox;
     Program _boxProgram;
 
-    void _setRandomAttributes(particle_t *p) const;
-
-    bool _particlelt(const particle_t *a, const particle_t * b,
+    bool _particlelt(const Particle *a, const Particle * b,
                      const Vec3 &cameraPos) const;
 
     void _preRender(RenderState &state);

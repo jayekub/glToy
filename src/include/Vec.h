@@ -23,7 +23,7 @@ struct Vec2 {
     Vec2() : x(0), y(0) {
     }
 
-    Vec2(double x_, double y_) :
+    Vec2(vec_t x_, vec_t y_) :
         x(x_), y(y_) {
     }
 
@@ -89,10 +89,10 @@ struct Vec3 {
 
     Vec3() : x(0), y(0), z(0) {}
 
-    Vec3(double x_, double y_, double z_) :
+    Vec3(vec_t x_, vec_t y_, vec_t z_) :
         x(x_), y(y_), z(z_) {}
 
-    Vec3(const Vec2 &vec, double z_) :
+    Vec3(const Vec2 &vec, vec_t z_) :
         x(vec.x), y(vec.y), z(z_) {}
 
     vec_t length() const {
@@ -131,6 +131,10 @@ struct Vec3 {
         z += vec.z;
 
         return *this;
+    }
+
+    void set(const vec_t &x_, const vec_t &y_, const vec_t &z_ = 0.) {
+        x = x_; y = y_; z = z_;
     }
 
     std::string toString() const {

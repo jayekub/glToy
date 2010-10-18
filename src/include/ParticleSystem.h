@@ -1,213 +1,122 @@
 #ifndef PARTICLESYSTEM_H_
 #define PARTICLESYSTEM_H_
 
-#include <string.h>
 #include <vector>
 
-#include <boost/foreach.hpp>
-
 #include "Vec.h"
-#include "Particle.h"
 #include "Prim.h"
-#include "Camera.h"
 
-template<class P = Particle<> >
+// TODO split into ParticleSystem and ParticleSystemPrim or
+//      ParticleSystemRenderer
+
+class Particle;
+class ParticleSystem;
+
+class Emitter
+{
+public:
+    virtual void update(double dt) {};
+
+protected:
+    friend class ParticleSystem;
+
+    virtual void _emitParticles(double dt,
+        const ParticleSystem *particleSystem,
+        std::vector<Particle *> *particles) = 0;
+};
+
+class Field
+{
+public:
+    virtual void update(double dt) {};
+
+protected:
+    friend class ParticleSystem;
+
+    virtual Vec3 _particleAcceleration(double dt, Particle *p,
+        const ParticleSystem *particleSystem) = 0;
+};
+
 class ParticleSystem : public Prim
 {
 public:
     enum WallType { NONE, BOUNCE, WRAP };
 
-    typedef P particle_t;
-
     ParticleSystem(const char *name, const Vec3 &size,
                    WallType wallType = WRAP,
-                   bool needsDepthSort = false) :
-        Prim(name), _size(size), _wallType(wallType),
-        _needsDepthSort(needsDepthSort) {
+                   bool needsDepthSort = false);
 
-        glGenBuffers(1, &_particleBuffer);
-        glGenTextures(1, &_particleTexture);
+    virtual ~ParticleSystem();
 
-        _particleBufferSize = 0;
-
-    }
-
-    virtual ~ParticleSystem() {
-        _destroy();
-
-        glDeleteBuffers(1, &_particleBuffer);
-        glDeleteTextures(1, &_particleTexture);
-    }
-
-    // XXX refactor to Emitter
-    void emitRandom(int num, double maxVelocity) {
-        for (int i = 0; i < num; ++i) {
-            particle_t *p = new particle_t();
-
-            p->position =
-                Vec3(randFloat() * _size.x,
-                     randFloat() * _size.y,
-                     randFloat() * _size.z);
-            p->velocity = maxVelocity * Vec3::randVec(-1, 1).normalize();
-
-            _setRandomAttributes(p);
-
-            _particles.push_back(p);
-        }
-    }
-
-    virtual void update(double dt) {
-
-#define WRAP_DIM(p, d) \
-    p->position.d += p->position.d < 0. ? \
-         _size.d : p->position.d > _size.d ? -_size.d : 0.;
-
-#define BOUNCE_DIM(p, d) \
-    p->velocity.d *= p->position.d < 0. || p->position.d > _size.d ? -1. : 1.;\
-    p->position.d = p->position.d < 0. ? \
-        0. : p->position.d > _size.d ? _size.d : p->position.d; \
-
-        BOOST_FOREACH(particle_t *p, _particles) {
-            p->position += p->velocity * dt;
-
-            switch(_wallType) {
-                case NONE:
-                    break;
-
-                case BOUNCE:
-                    BOUNCE_DIM(p, x);
-                    BOUNCE_DIM(p, y);
-                    BOUNCE_DIM(p, z);
-
-                case WRAP:
-                    WRAP_DIM(p, x);
-                    WRAP_DIM(p, y);
-                    WRAP_DIM(p, z);
-                    break;
-            }
-        }
-
-#undef WRAP_DIM
-#undef BOUNCE_DIM
-    }
-
-    virtual void render(RenderState &state) {
-        // if necessary, sort particles by distances from camera so that further
-        // away particles are rendered first
-        if (_needsDepthSort) {
-            Mat4 invModelMat = state.getTransformMat().inverse();
-            Vec3 localCameraPos = invModelMat.ptransform(
-                state.camera->position);
-
-            //std::sort(_particles.begin(), _particles.end(),
-            //          _ParticleLt(localCameraPos));
-            std::stable_sort(_particles.begin(), _particles.end(),
-                             _ParticleLt(localCameraPos, this));
-        }
-
-        // put current particle positions in vertex buffer and allocate more
-        // space if necessary
-        const size_t numParticles = _particles.size();
-
-        glBindBuffer(GL_ARRAY_BUFFER, _particleBuffer);
-
-        if (_particleBufferSize < numParticles) {
-            glBufferData(GL_ARRAY_BUFFER, numParticles * sizeof(particle_t), 0,
-                         GL_DYNAMIC_DRAW);
-            _particleBufferSize = numParticles;
-        }
-
-        particle_t *particles = (particle_t *) glMapBuffer(
-                GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-
-        // _particles may be sorted in ascending order of distance from camera,
-        // so reverse the order for rendering to make the furthest particles
-        // render first
-        for (size_t p = 0; p < numParticles; ++p)
-            particles[p] = *(_particles[numParticles - p - 1]);
-
-        glUnmapBuffer(GL_ARRAY_BUFFER);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-        // hook up vertex buffer to vertex texture
-        /*
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_BUFFER, _particleTexture);
-
-        glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, _particleBuffer);
-
-        glBindTexture(GL_TEXTURE_BUFFER, 0);
-        */
-
-        // get ready to render
-
-        // allow subclasses to setup a Program and other state for rendering
-        _preRender(state);
-
-        // send particle positions to the card
-        glBindBuffer(GL_ARRAY_BUFFER, _particleBuffer);
-        glDrawArrays(GL_POINTS, 0, numParticles);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-        // allow subclasses to possibly render more stuff and also cleanup
-        // after themselves
-        _postRender(state);
-    }
+    virtual void update(double dt);
+    virtual void render(RenderState &state);
 
     void reset() { _destroy(); }
 
-    std::vector<particle_t *> &getParticles() { return _particles; }
+    void addEmitter(Emitter *emitter) { _emitters.push_back(emitter); }
+    void addField(Field *field) { _fields.push_back(field); }
+
+    const Vec3 &getSize() const { return _size; }
+    const std::vector<Particle *> &getParticles() { return _particles; }
 
 protected:
     struct _ParticleLt {
         _ParticleLt(const Vec3 &cameraPos,
-                    const ParticleSystem<P> *particleSystem) :
+                    const ParticleSystem *particleSystem) :
             _cameraPos(cameraPos), _particleSystem(particleSystem) {}
 
-        bool operator()(const particle_t *a, const particle_t *b) const {
+        bool operator()(const Particle *a, const Particle *b) const {
             return _particleSystem->_particlelt(a, b, _cameraPos);
         }
 
     private:
         const Vec3 _cameraPos;
-        const ParticleSystem<P> *_particleSystem;
+        const ParticleSystem *_particleSystem;
     };
 
     Vec3 _size;
-    std::vector<particle_t *> _particles;
-
-    size_t _particleBufferSize;
-    GLuint _particleBuffer, _particleTexture;
+    std::vector<Particle *> _particles;
+    std::vector<Emitter *> _emitters;
+    std::vector<Field *> _fields;
 
     WallType _wallType;
     bool _needsDepthSort;
 
-    void _destroy() {
-        BOOST_FOREACH(particle_t *p, _particles) {
-            delete p;
-        }
-        _particles.clear();
-    }
+    size_t _particleBufferSize;
+    GLuint _particleBuffer, _particleTexture;
 
-    virtual void _setRandomAttributes(particle_t *p) const {
-        // subclasses can particle attributes here
-    }
+    void _destroy();
 
-    virtual bool _particlelt(const particle_t *a, const particle_t *b,
-                             const Vec3 &cameraPos) const {
-        vec_t aDist = (a->position - cameraPos).length();
-        vec_t bDist = (b->position - cameraPos).length();
+    virtual bool _particlelt(const Particle *a, const Particle *b,
+                             const Vec3 &cameraPos) const;
 
-        return aDist < bDist;
-    }
+    // subclasses can setup Program etc here
+    virtual void _preRender(RenderState &state) {}
 
-    virtual void _preRender(RenderState &state) {
-        // subclasses can setup Program etc here
-    }
+    // subclasses can render additional stuff and cleanup here
+    virtual void _postRender(RenderState &state) {}
+};
 
-    virtual void _postRender(RenderState &state) {
-        // subclasses can render additional stuff and cleanup here
-    }
+class RandomEmitter : public Emitter
+{
+public:
+    RandomEmitter() : _numToEmit(0), _maxSpeed(0.), _meanRadius(0.) {}
+
+    void emitOnce(int numParticles, float maxSpeed, float meanRadius = 0.);
+
+private:
+    int _numToEmit;
+    float _maxSpeed;
+    float _meanRadius;
+
+    void _emitParticles(double dt, const ParticleSystem *particleSystem,
+                        std::vector<Particle *> *particles);
+};
+
+class GravityField : public Field
+{
+    Vec3 _particleAcceleration(double dt, Particle *p,
+        const ParticleSystem *particleSystem) { return Vec3(0., -9.8, 0.); }
 };
 
 #endif /* PARTICLESYSTEM_H_ */

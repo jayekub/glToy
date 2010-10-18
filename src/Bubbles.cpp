@@ -1,15 +1,15 @@
 #include "glToy.h"
 #include "Noise.h"
 #include "Camera.h"
+#include "Particle.h"
 #include "Bubbles.h"
 
 Bubbles::Bubbles(
     const char *name,
     const Vec3 &size,
-    float radius,
     bool drawBox) :
-    ParticleSystem<particle_t>(name, size, BOUNCE, true /* needsDepthSort */),
-    _radius(radius), _drawBox(drawBox)
+    ParticleSystem(name, size, BOUNCE, true /* needsDepthSort */),
+    _drawBox(drawBox)
 {
     _bubblesProgram.addShader(
         new Program::Shader("shaders/bubbles.vs", GL_VERTEX_SHADER));
@@ -52,20 +52,14 @@ Bubbles::~Bubbles()
 {
 }
 
-// XXX refactor to Emitter
-void Bubbles::_setRandomAttributes(particle_t *p) const {
-    p->attributes.radius = _radius * (randFloat() + 0.5);
-}
-
-bool Bubbles::_particlelt(const particle_t *a, const particle_t * b,
+bool Bubbles::_particlelt(const Particle *a, const Particle * b,
                           const Vec3 &cameraPos) const
 {
-    vec_t aDist = (a->position - cameraPos).length() - a->attributes.radius;
-    vec_t bDist = (b->position - cameraPos).length() - b->attributes.radius;
+    vec_t aDist = (a->position - cameraPos).length() - a->radius;
+    vec_t bDist = (b->position - cameraPos).length() - b->radius;
 
     return aDist < bDist;
 }
-
 
 void Bubbles::_preRender(RenderState &state)
 {
@@ -88,12 +82,12 @@ void Bubbles::_preRender(RenderState &state)
     glEnableVertexAttribArray(centerInLoc);
 
     glVertexAttribPointer(centerInLoc, 3, GL_FLOAT, GL_FALSE,
-                          sizeof(particle_t), 0);
+                          sizeof(Particle), 0);
 
     glEnableVertexAttribArray(radiusInLoc);
 
     glVertexAttribPointer(radiusInLoc, 1, GL_FLOAT, GL_FALSE,
-                          sizeof(particle_t),
+                          sizeof(Particle),
                           BUFFER_OFFSET(2 * sizeof(Vec3)));
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);

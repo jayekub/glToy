@@ -7,15 +7,19 @@ OBJS = \
     TextureRenderPass.o \
     TextureRenderer.o \
     ofxMSAFluidSolver.o \
-    CellNoiseFluid.o \
-    CellNoiseScene.o \
     Graph.o \
     Visitor.o \
     SceneRenderVisitor.o \
     Noise.o \
+    ParticleSystem.o \
     Anemone.o \
+    FluidSimField.o \
+    CellNoiseFluid.o \
+    CellNoiseScene.o \
     Bubbles.o \
-    BubblesScene.o
+    BubblesScene.o \
+    Spray.o \
+    SprayScene.o
 
 TARGET = glToy
 
