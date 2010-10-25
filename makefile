@@ -40,14 +40,15 @@ CFLAGS = -O3 -Wall -fmessage-length=0
 LDFLAGS =
 
 ifeq ($(OS),CYGWIN_NT-5.1)
-    FREEGLUT_DIR = "C:\MinGW\freeglut"
-    BOOST_DIR = "C:\Program Files\boost_1_44_0"
+    FREEGLUT_DIR = c:/MinGW/freeglut
+    BOOST_DIR = c:/MinGW/boost_1_44_0
 
     CFLAGS += -D_WIN32
+    LDFLAGS = -Wl,--subsystem,windows -Wl,--enable-auto-import
     INCLUDES += -I$(FREEGLUT_DIR)/include -I$(BOOST_DIR)
 
     OBJS += gl3w.o
-    LIBS = -lglut32 -lglu32 -lopengl32
+    LIBS = -L$(FREEGLUT_DIR)/lib -lfreeglut -lglu32 -lopengl32
 endif
 
 CXXFLAGS = $(CFLAGS) -std=c++0x
@@ -65,7 +66,7 @@ BUILD_OBJS = $(patsubst %,$(BUILD_DIR)/%,$(OBJS))
 all: $(TARGET)
 
 $(TARGET): $(BUILD_OBJS)
-	$(CXX) $(LDFLAGS) $(LIBS) -o $(TARGET) $^
+	$(CXX) -o $(TARGET) $^ $(LIBS) $(LDFLAGS)
 
 $(BUILD_DIR)/%.o : $(SRC_DIR)/%.c
 	@mkdir -p $(BUILD_DIR)
@@ -81,4 +82,7 @@ clean:
 	$(RM) $(BUILD_OBJS) $(BUILD_OBJS:%.o=%.d) $(TARGET) gmon.out
 	$(RM) -r $(BUILD_DIR)
 
--include $(BUILD_OBJS:%.o=%.d)
+# XXX need to figure out how to generate .d files that work on windows...
+ifneq ($(OS),CYGWIN_NT-5.1)
+    -include $(BUILD_OBJS:%.o=%.d)
+endif

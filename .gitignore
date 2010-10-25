@@ -1,4 +1,5 @@
 glToy
+glToy.exe
 *.o
 *.d
 .*
