@@ -9,6 +9,7 @@ class Camera;
 class Light;
 class Transform;
 class Bubbles;
+class CameraController;
 
 class RenderPass;
 class TextureRenderPass;
@@ -34,13 +35,12 @@ public:
 private:
     float _rotationAngle;
     bool _dof;
-    bool _grabMouse;
-    Vec2 _lastMousePos;
 
     Graph *_graph;
     Camera *_camera;
     Transform *_bubblesTransform;
     Bubbles *_bubbles;
+    CameraController *_cameraController;
 
     TextureRenderPass *_geomPass, *_blurPass1, *_blurPass2;
 

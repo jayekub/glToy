@@ -7,17 +7,21 @@
 Spray::Spray(
     const char *name,
     const Vec3 &size) :
-    ParticleSystem(name, size, BOUNCE)
+    ParticleSystem(name, size, NONE, true)
 {
     _sprayProgram.addShader(
-        new Program::Shader("shaders/spray.vs", GL_VERTEX_SHADER));
+        (new Program::Shader(GL_VERTEX_SHADER))
+            ->addFile("shaders/common.inc")
+             .addFile("shaders/spray.vs").compile());
 
+    /*
     _sprayProgram.addShader(
         (new Program::Shader(GL_GEOMETRY_SHADER))
             ->addFile("shaders/common.inc")
              //.addFile("shaders/sphere.inc")
              //.addFile("shaders/noise.inc")
              .addFile("shaders/spray.gs").compile());
+    */
 
     _sprayProgram.addShader(
         ((new Program::Shader(GL_FRAGMENT_SHADER))
@@ -35,9 +39,9 @@ void Spray::_preRender(RenderState &state)
 {
     _sprayProgram.use();
     _sprayProgram.setUniform("modelMat", state.getTransformMat())
-                   .setUniform("viewMat", state.viewMat)
-                   .setUniform("projMat", state.projectionMat)
-                   .setUniform("cameraPos", state.camera->position);
+                  .setUniform("viewMat", state.viewMat)
+                  .setUniform("projMat", state.projectionMat)
+                  .setUniform("cameraPos", state.camera->position);
 
     const GLuint centerInLoc = _sprayProgram.attribute("centerIn");
     const GLuint velocityInLoc = _sprayProgram.attribute("velocityIn");
@@ -63,8 +67,15 @@ void Spray::_preRender(RenderState &state)
                           BUFFER_OFFSET(2 * sizeof(Vec3)));
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void Spray::_postRender(RenderState &state)
 {
+    glDisable(GL_BLEND);
+    glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
 }

@@ -4,6 +4,7 @@
 #include "Camera.h"
 #include "Transform.h"
 #include "Spray.h"
+#include "CameraController.h"
 
 #include "Program.h"
 #include "SceneRenderVisitor.h"
@@ -20,6 +21,7 @@ SprayScene::~SprayScene()
 {
     // Graph deletes all registered nodes
     delete _graph;
+    delete _cameraController;
     delete _sceneRenderer;
 }
 
@@ -42,6 +44,17 @@ void SprayScene::resize(int width, int height)
 
 void SprayScene::handleKey(unsigned char key, int x, int y)
 {
+    _cameraController->handleKey(key, x, y);
+}
+
+void SprayScene::handleMouse(int button, int state, int x, int y)
+{
+    _cameraController->handleMouse(button, state, x, y);
+}
+
+void SprayScene::handleMouseMotion(int x, int y)
+{
+    _cameraController->handleMouseMotion(x, y);
 }
 
 void SprayScene::_build()
@@ -58,15 +71,24 @@ void SprayScene::_build()
     _camera->nearClip = 1;
     _camera->farClip = 100.;//4.;
 
+    _cameraController = new CameraController(_camera);
+
     _graph->addGlobal(_camera);
 
     // Spray
     _sprayTransform = new Transform("bubblesTransform");
 
+    _sprayTransform->matrix = Mat4::translate(Vec3(-15., -15., -15.));
+
     _graph->root->addChild(_sprayTransform);
 
     _spray = new Spray("spray", Vec3(30., 30., 30.));
-    //_spray->emitRandom(5000, 1.5);
+
+    // XXX SprayEmitter
+    RandomEmitter *emitter = new RandomEmitter();
+
+    emitter->emitOnce(5000, 1.5, 100.);
+    _spray->addEmitter(emitter);
 
     _sprayTransform->addChild(_spray);
 

@@ -1,5 +1,6 @@
 #include "ofxMSAFluidSolver.h"
 #include "Particle.h"
+#include "ParticleSystem.h"
 
 #include "FluidSimField.h"
 
@@ -33,19 +34,20 @@ void FluidSimField::addForceAtPos(float x, float y, float fx, float fy)
     _fluidSolver->addForceAtPos(x, y, fx, fy);
 }
 
-Vec3 FluidSimField::_particleAcceleration(
-    double dt,
+bool FluidSimField::_affectParticle(
     Particle *p,
-    const ParticleSystem *particleSystem)
+    double dt,
+    const ParticleSystem *particleSystem) const
 {
-    // XXX get rid of this stupid class
-    ofPoint fluidVel;
+    Vec3 fluidVel;
     Vec3 sysSize = particleSystem->getSize();
 
     _fluidSolver->getInfoAtPos(p->position.x / sysSize.x,
                                p->position.y / sysSize.y,
                                &fluidVel, NULL);
 
-    return Vec3(24. * fluidVel.x, 24. * fluidVel.y, 0.);
-    //return Vec3(0., 0., 0.);
+    // XXX figure out this fudge factor
+    p->velocity += 24. * Vec3(fluidVel.x, fluidVel.y, 0.) * dt;
+
+    return false;
 }

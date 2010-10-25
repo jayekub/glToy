@@ -33,7 +33,7 @@ ParticleSystem::~ParticleSystem()
 void ParticleSystem::update(double dt)
 {
     BOOST_FOREACH(Emitter *e, _emitters) {
-        e->_emitParticles(dt, this, &_particles);
+        e->_emitParticles(dt, this, _particles);
     }
 
 #define WRAP_DIM(p, d) \
@@ -49,7 +49,10 @@ p->position.d = p->position.d < 0. ? \
         p->position += p->velocity * dt;
 
         BOOST_FOREACH(Field *f, _fields) {
-            p->velocity += f->_particleAcceleration(dt, p, this) * dt;
+            // return value true means this particle should be killed
+            if (f->_affectParticle(p, dt, this)) {
+                //_particles.erase(p);
+            }
         }
 
         switch(_wallType) {
@@ -160,36 +163,3 @@ bool ParticleSystem::_particlelt(const Particle *a, const Particle *b,
     return aDist < bDist;
 }
 
-//// RandomEmitter
-
-void RandomEmitter::emitOnce(int numParticles, float maxSpeed,
-                             float meanRadius)
-{
-    _numToEmit = numParticles;
-    _maxSpeed = maxSpeed;
-    _meanRadius = meanRadius;
-}
-
-void RandomEmitter::_emitParticles(
-    double dt,
-    const ParticleSystem *particleSystem,
-    std::vector<Particle *> *particles)
-{
-    for (int i = 0; i < _numToEmit; ++i) {
-        Particle *p = new Particle();
-        const Vec3 ps = particleSystem->getSize();
-
-        p->position =
-            Vec3(randFloat() * ps.x,
-                 randFloat() * ps.y,
-                 randFloat() * ps.z);
-
-        p->velocity = _maxSpeed * Vec3::randVec(-1, 1).normalize();
-
-        p->radius = _meanRadius * (randFloat() + 0.5);
-
-        particles->push_back(p);
-    }
-
-    _numToEmit = 0;
-}

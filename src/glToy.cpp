@@ -12,6 +12,7 @@
 
 #include "BubblesScene.h"
 #include "CellNoiseScene.h"
+#include "SprayScene.h"
 
 #include "Program.h"
 #include "ScreenRenderPass.h"
@@ -31,13 +32,31 @@ bool _debug = false;
 bool _grabMouse = false;
 
 Scene *_currentScene;
-ScreenRenderPass *_screenPass;
+int _currentSceneIndex = -1;
 
-BubblesScene *_bubblesScene = NULL;
-CellNoiseScene *_cellNoiseScene = NULL;
+ScreenRenderPass *_screenPass;
 
 ////
 
+void nextScene()
+{
+    delete _currentScene;
+
+    switch (_currentSceneIndex) {
+        case 0:
+            _currentScene = new BubblesScene(windowWidth, windowHeight);
+            break;
+        case 1:
+            _currentScene = new CellNoiseScene(windowWidth, windowHeight);
+            break;
+        case 2:
+        default:
+            _currentScene = new SprayScene(windowWidth, windowHeight);
+            break;
+    }
+
+    _currentSceneIndex = (_currentSceneIndex + 1) % 3;
+}
 
 void resize(int w, int h) {
     windowWidth = w;
@@ -53,11 +72,11 @@ void handleKey(unsigned char key, int x, int y)
     switch(key) {;
         case 'r':
             _reset = true;
-            break;
+            return;
 
         case 'p':
             _pause = !_pause;
-            break;
+            return;
 
         case 'm':
             _debug = !_debug;
@@ -70,28 +89,15 @@ void handleKey(unsigned char key, int x, int y)
                 glPolygonMode(GL_BACK, GL_FILL);
             }
 
-            break;
+            return;
 
         case 'n':
-            if (_bubblesScene) {
-                delete _bubblesScene;
-                _bubblesScene = NULL;
-
-                _cellNoiseScene = new CellNoiseScene(windowWidth, windowHeight);
-                _currentScene = _cellNoiseScene;
-            } else {
-                delete _cellNoiseScene;
-                _cellNoiseScene = NULL;
-
-                _bubblesScene = new BubblesScene(windowWidth, windowHeight);
-                _currentScene = _bubblesScene;
-            }
-
-            break;
+            nextScene();
+            return;
 
         case 'q':
             exit(0);
-            break;
+            return;
     }
 
     _currentScene->handleKey(key, x, y);
@@ -203,9 +209,7 @@ int main(int argc, char **argv) {
 
     _screenPass = new ScreenRenderPass(windowWidth, windowHeight);
 
-    _bubblesScene = new BubblesScene(windowWidth, windowHeight);
-    _currentScene = _bubblesScene;
-
+    nextScene();
 
     printf("OpenGL %s, GLSL %s\n", glGetString(GL_VERSION),
            glGetString(GL_SHADING_LANGUAGE_VERSION));
@@ -214,8 +218,6 @@ int main(int argc, char **argv) {
     _lastFpsTime = _lastDrawTime;
 
     glutMainLoop();
-
-    delete _bubblesScene;
 
     } catch(const char *err) {
         fprintf(stderr, "Error: %s\n", err);

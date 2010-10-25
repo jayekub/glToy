@@ -2,7 +2,7 @@
 #define __FLUIDSIMFIELD_H__
 
 #include "Vec.h"
-#include "ParticleSystem.h"
+#include "Field.h"
 
 class Particle;
 class ofxMSAFluidSolver;
@@ -20,8 +20,8 @@ public:
 protected:
     ofxMSAFluidSolver *_fluidSolver;
 
-    Vec3 _particleAcceleration(double dt, Particle *p,
-        const ParticleSystem *particleSystem);
+    bool _affectParticle(Particle *p, double dt,
+        const ParticleSystem *particleSystem) const;
 };
 
 #endif // __FLUIDSIMFIELD_H__

@@ -2,6 +2,7 @@ OBJS = \
     glToy.o \
     utils.o \
     Listener.o \
+    CameraController.o \
     Program.o \
     ScreenRenderPass.o \
     TextureRenderPass.o \
@@ -11,6 +12,8 @@ OBJS = \
     Visitor.o \
     SceneRenderVisitor.o \
     Noise.o \
+    Emitter.o \
+    Field.o \
     ParticleSystem.o \
     Anemone.o \
     FluidSimField.o \
@@ -75,6 +78,7 @@ $(BUILD_DIR)/%.o : $(SRC_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -MM -MP -MT $@ -MF $(@:%.o=%.d) $<
 
 clean:
-	rm -f $(BUILD_OBJS) $(BUILD_OBJS:%.o=%.d) $(TARGET) gmon.out
+	$(RM) $(BUILD_OBJS) $(BUILD_OBJS:%.o=%.d) $(TARGET) gmon.out
+	$(RM) -r $(BUILD_DIR)
 
 -include $(BUILD_OBJS:%.o=%.d)

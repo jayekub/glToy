@@ -113,6 +113,13 @@ struct Vec3 {
                     x * vec.y - vec.x * y);
     }
 
+    Vec3 rotate(const float &angle, const Vec3 &axis) const {
+        Vec3 P = cross(axis);
+
+        return P.length() == 0 ? *this :
+            ((*this) * cos(angle) + P.normalize() * sin(angle));
+    }
+
     Vec3 operator+(const Vec3 &vec) const {
         return Vec3(x + vec.x, y + vec.y, z + vec.z);
     }

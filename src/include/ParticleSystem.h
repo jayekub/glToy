@@ -5,37 +5,13 @@
 
 #include "Vec.h"
 #include "Prim.h"
+#include "Particle.h"
+
+#include "Emitter.h"
+#include "Field.h"
 
 // TODO split into ParticleSystem and ParticleSystemPrim or
 //      ParticleSystemRenderer
-
-class Particle;
-class ParticleSystem;
-
-class Emitter
-{
-public:
-    virtual void update(double dt) {};
-
-protected:
-    friend class ParticleSystem;
-
-    virtual void _emitParticles(double dt,
-        const ParticleSystem *particleSystem,
-        std::vector<Particle *> *particles) = 0;
-};
-
-class Field
-{
-public:
-    virtual void update(double dt) {};
-
-protected:
-    friend class ParticleSystem;
-
-    virtual Vec3 _particleAcceleration(double dt, Particle *p,
-        const ParticleSystem *particleSystem) = 0;
-};
 
 class ParticleSystem : public Prim
 {
@@ -95,28 +71,6 @@ protected:
 
     // subclasses can render additional stuff and cleanup here
     virtual void _postRender(RenderState &state) {}
-};
-
-class RandomEmitter : public Emitter
-{
-public:
-    RandomEmitter() : _numToEmit(0), _maxSpeed(0.), _meanRadius(0.) {}
-
-    void emitOnce(int numParticles, float maxSpeed, float meanRadius = 0.);
-
-private:
-    int _numToEmit;
-    float _maxSpeed;
-    float _meanRadius;
-
-    void _emitParticles(double dt, const ParticleSystem *particleSystem,
-                        std::vector<Particle *> *particles);
-};
-
-class GravityField : public Field
-{
-    Vec3 _particleAcceleration(double dt, Particle *p,
-        const ParticleSystem *particleSystem) { return Vec3(0., -9.8, 0.); }
 };
 
 #endif /* PARTICLESYSTEM_H_ */
