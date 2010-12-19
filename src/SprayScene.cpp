@@ -65,11 +65,11 @@ void SprayScene::_build()
     // Camera
     _camera = new Camera("camera");
 
-    _camera->position = Vec3(0., 0., -20);
+    _camera->position = Vec3(0., 0., -150.);
     _camera->center = Vec3(0., 0., 0.);
     _camera->up = Vec3(0., 1., 0.);
     _camera->nearClip = 1;
-    _camera->farClip = 100.;//4.;
+    _camera->farClip = 500;
 
     _cameraController = new CameraController(_camera);
 
@@ -78,17 +78,26 @@ void SprayScene::_build()
     // Spray
     _sprayTransform = new Transform("bubblesTransform");
 
-    _sprayTransform->matrix = Mat4::translate(Vec3(-15., -15., -15.));
+    _sprayTransform->matrix = Mat4::translate(Vec3(-50., -50., -50.));
 
     _graph->root->addChild(_sprayTransform);
 
-    _spray = new Spray("spray", Vec3(30., 30., 30.));
+    _spray = new Spray("spray", Vec3(100., 100., 100.));
 
     // XXX SprayEmitter
-    RandomEmitter *emitter = new RandomEmitter();
+    //RandomEmitter *emitter = new RandomEmitter();
+    //emitter->emitOnce(5000, 1.5, 100.);
 
-    emitter->emitOnce(5000, 1.5, 100.);
+    SprayEmitter *emitter = new SprayEmitter(1000, Vec3(0., 50., 50.),
+                                             Vec3(1., 1., 0.), M_PI / 2.,
+                                             100., 50.,
+                                             30., 5.);
+
     _spray->addEmitter(emitter);
+
+    GravityField *gravity = new GravityField();
+
+    _spray->addField(gravity);
 
     _sprayTransform->addChild(_spray);
 

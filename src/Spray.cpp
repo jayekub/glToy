@@ -7,7 +7,7 @@
 Spray::Spray(
     const char *name,
     const Vec3 &size) :
-    ParticleSystem(name, size, NONE, true)
+    ParticleSystem(name, size, KILL, true)
 {
     _sprayProgram.addShader(
         (new Program::Shader(GL_VERTEX_SHADER))

@@ -16,7 +16,7 @@
 class ParticleSystem : public Prim
 {
 public:
-    enum WallType { NONE, BOUNCE, WRAP };
+    enum WallType { NONE, BOUNCE, WRAP, KILL };
 
     ParticleSystem(const char *name, const Vec3 &size,
                    WallType wallType = WRAP,

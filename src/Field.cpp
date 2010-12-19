@@ -9,14 +9,14 @@ bool GravityField::_affectParticle(
     return false;
 }
 
-//// DeathPlaneField
+//// BoundaryField
 
-DeathPlaneField::DeathPlaneField(float height) :
+BoundaryField::BoundaryField(float height) :
     _height(height)
 {
 }
 
-bool DeathPlaneField::_affectParticle(
+bool BoundaryField::_affectParticle(
     Particle *p, double dt, const ParticleSystem *particleSystem) const
 {
     return p->position.z < _height;

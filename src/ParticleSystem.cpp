@@ -45,13 +45,22 @@ p->velocity.d *= p->position.d < 0. || p->position.d > _size.d ? -1. : 1.;\
 p->position.d = p->position.d < 0. ? \
     0. : p->position.d > _size.d ? _size.d : p->position.d; \
 
+#define KILL_DIM(p, d) \
+if (p->position.d < 0. || p->position.d > _size.d) killParticle = true;
+
+    std::vector<Particle *> updatedParticles;
+
+    updatedParticles.reserve(_particles.size());
+
     BOOST_FOREACH(Particle *p, _particles) {
+        bool killParticle = false;
+
         p->position += p->velocity * dt;
 
         BOOST_FOREACH(Field *f, _fields) {
             // return value true means this particle should be killed
             if (f->_affectParticle(p, dt, this)) {
-                //_particles.erase(p);
+                killParticle = true;
             }
         }
 
@@ -69,11 +78,27 @@ p->position.d = p->position.d < 0. ? \
                 WRAP_DIM(p, y);
                 WRAP_DIM(p, z);
                 break;
+
+            case KILL:
+                KILL_DIM(p, x);
+                KILL_DIM(p, y);
+                KILL_DIM(p, z);
+                break;
+        }
+
+        if (killParticle) {
+            delete p;
+        } else {
+            updatedParticles.push_back(p);
         }
     }
 
+    _particles = updatedParticles;
+
 #undef WRAP_DIM
 #undef BOUNCE_DIM
+#undef KILL_DIM
+
 }
 
 void ParticleSystem::render(RenderState &state)

@@ -25,10 +25,10 @@ class GravityField : public Field
                          const ParticleSystem * /* particleSystem */) const;
 };
 
-class DeathPlaneField : public Field
+class BoundaryField : public Field
 {
 public:
-    DeathPlaneField(float height);
+    BoundaryField(float height);
 
 protected:
     float _height;
