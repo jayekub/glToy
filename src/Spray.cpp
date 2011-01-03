@@ -7,8 +7,10 @@
 Spray::Spray(
     const char *name,
     const Vec3 &size) :
-    ParticleSystem(name, size, NONE, true)
+    ParticleSystem(name, size, KILL, true)
 {
+    //_sprayProgram.setDebug(true);
+
     _sprayProgram.addShader(
         (new Program::Shader(GL_VERTEX_SHADER))
             ->addFile("shaders/common.inc")
@@ -35,13 +37,46 @@ Spray::~Spray()
 {
 }
 
+// sort according to viewplane distance
+ParticleSystem::_ParticleLt *
+Spray::_getParticleLtImpl(const RenderState &state) const
+{
+    struct _ParticleLtImpl : public _ParticleLt {
+        
+        _ParticleLtImpl(const RenderState &state,
+                        const ParticleSystem *particleSystem) :
+            _ParticleLt(NULL), _particleSystem(particleSystem) {
+
+            _modelViewMat = state.getTransformMat() * state.viewMat;
+        }
+
+        bool operator()(const Particle *a, const Particle *b) const {
+            vec_t aDist = _modelViewMat.ptransform(a->position).z;
+            vec_t bDist = _modelViewMat.ptransform(b->position).z;
+
+            return aDist > bDist;
+        }
+
+    private:
+        Mat4 _modelViewMat;
+        const ParticleSystem *_particleSystem;
+    };
+
+    static _ParticleLtImpl *particleLtImpl = NULL;
+
+    delete particleLtImpl;
+    return new _ParticleLtImpl(state, this);
+}
+
 void Spray::_preRender(RenderState &state)
 {
     _sprayProgram.use();
     _sprayProgram.setUniform("modelMat", state.getTransformMat())
                   .setUniform("viewMat", state.viewMat)
                   .setUniform("projMat", state.projectionMat)
-                  .setUniform("cameraPos", state.camera->position);
+                  .setUniform("meanRadius", 50.f)
+                  .setUniform("radiusSpread", 20.f);
+                  //.setUniform("cameraPos", state.camera->position);
 
     const GLuint centerInLoc = _sprayProgram.attribute("centerIn");
     const GLuint velocityInLoc = _sprayProgram.attribute("velocityIn");
@@ -68,7 +103,10 @@ void Spray::_preRender(RenderState &state)
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+    glEnable(GL_POINT_SPRITE);
     glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+    glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
+
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -77,5 +115,6 @@ void Spray::_preRender(RenderState &state)
 void Spray::_postRender(RenderState &state)
 {
     glDisable(GL_BLEND);
+    glDisable(GL_POINT_SPRITE);
     glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
 }

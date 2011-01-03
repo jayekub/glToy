@@ -16,7 +16,7 @@
 class ParticleSystem : public Prim
 {
 public:
-    enum WallType { NONE, BOUNCE, WRAP };
+    enum WallType { NONE, BOUNCE, WRAP, KILL };
 
     ParticleSystem(const char *name, const Vec3 &size,
                    WallType wallType = WRAP,
@@ -37,17 +37,14 @@ public:
 
 protected:
     struct _ParticleLt {
-        _ParticleLt(const Vec3 &cameraPos,
-                    const ParticleSystem *particleSystem) :
-            _cameraPos(cameraPos), _particleSystem(particleSystem) {}
+        _ParticleLt(const _ParticleLt *impl) : _impl(impl) {}
 
-        bool operator()(const Particle *a, const Particle *b) const {
-            return _particleSystem->_particlelt(a, b, _cameraPos);
+        virtual bool operator()(const Particle *a, const Particle *b) const {
+            return (*_impl)(a, b);
         }
 
     private:
-        const Vec3 _cameraPos;
-        const ParticleSystem *_particleSystem;
+        const _ParticleLt *_impl;
     };
 
     Vec3 _size;
@@ -63,8 +60,7 @@ protected:
 
     void _destroy();
 
-    virtual bool _particlelt(const Particle *a, const Particle *b,
-                             const Vec3 &cameraPos) const;
+    virtual _ParticleLt *_getParticleLtImpl(const RenderState &state) const;
 
     // subclasses can setup Program etc here
     virtual void _preRender(RenderState &state) {}

@@ -31,7 +31,7 @@ Program::Shader &Program::Shader::compile() const
     std::string sourceStr;
 
     // XXX make this configurable?
-    sourceStr += "#version 150\n";
+    //sourceStr += "#version 150\n";
 
     BOOST_FOREACH(std::string filename, _filenames) {
         sourceStr += "#line 0\n";
@@ -48,7 +48,12 @@ Program::Shader &Program::Shader::compile() const
     glGetShaderiv(_shader, GL_COMPILE_STATUS, &compileStatus);
 
     if (compileStatus != GL_TRUE) {
-        fprintf(stderr, "%s\n", getInfoLog().c_str());
+        fprintf(stderr, "While compiling ");
+        BOOST_FOREACH(std::string filename, _filenames) {
+            fprintf(stderr, "%s ", filename.c_str());
+        }
+
+        fprintf(stderr, "\n%s\n", getInfoLog().c_str());
     }
 
     return (Shader &) *this;
@@ -299,6 +304,10 @@ void Program::_rebuildParamMaps()
                                &type, name);
 
             _uniforms[name] = glGetUniformLocation(_program, name);
+
+            if (_debug)
+                fprintf(stderr, "uniform %s at location %u\n", name,
+                        _uniforms[name]);
         }
 
         delete name;
@@ -322,6 +331,10 @@ void Program::_rebuildParamMaps()
                               name);
 
             _attributes[name] = glGetAttribLocation(_program, name);
+
+            if (_debug)
+                fprintf(stderr, "attribute %s at location %u\n", name,
+                        _attributes[name]);
         }
 
         delete name;

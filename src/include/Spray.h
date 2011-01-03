@@ -5,6 +5,8 @@
 #include "Program.h"
 #include "ParticleSystem.h"
 
+// uses point sprite rendering. particles are sorted according to view *plane*
+// distance.
 class Spray : public ParticleSystem
 {
 public:
@@ -16,6 +18,7 @@ private:
 
     Program _sprayProgram;
 
+    _ParticleLt *_getParticleLtImpl(const RenderState &state) const;
     void _preRender(RenderState &state);
     void _postRender(RenderState &state);
 };

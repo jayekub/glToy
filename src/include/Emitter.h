@@ -24,11 +24,11 @@ class RandomEmitter : public Emitter
 public:
     RandomEmitter();
 
-    void emitOnce(int numParticles, float maxSpeed, float meanRadius = 0.);
+    void emitOnce(int numParticles, float meanSpeed, float meanRadius = 0.);
 
 private:
     int _numToEmit;
-    float _maxSpeed;
+    float _meanSpeed;
     float _meanRadius;
 
     void _emitParticles(double dt, const ParticleSystem *particleSystem,
@@ -38,12 +38,28 @@ private:
 class SprayEmitter : public Emitter
 {
 public:
-    SprayEmitter(float rate, Vec3 position,
-                 Vec3 dirMean, float dirSpread,
-                 float radMean, float radSpread,
-                 float speedMean, float speedSpread);
+    SprayEmitter() :
+        _rate(0), _position(0, 0, 0), _dirMean(0, 1, 0), _dirSpread(0),
+        _radMean(10), _radSpread(0), _speedMean(10), _speedSpread(0) {}
 
-    //void update(double dt) { }
+    SprayEmitter &setRate(float rate) {_rate = rate; return *this;}
+
+    SprayEmitter &setPosition(const Vec3 &position) {
+        _position = position; return *this;}
+
+    SprayEmitter &setDir(const Vec3 &dir) {_dirMean = dir; return *this;}
+    SprayEmitter &setDirSpread(float dirSpread) {
+        _dirSpread = dirSpread; return *this;}
+
+    SprayEmitter &setRadius(float rad) {_radMean = rad; return *this;}
+    SprayEmitter &setRadiusSpread(float radSpread) {
+        _radSpread = radSpread; return *this;}
+
+    SprayEmitter &setSpeed(float speed) {_speedMean = speed; return *this;}
+    SprayEmitter &setSpeedSpread(float speedSpread) {
+        _speedSpread = speedSpread; return *this;}
+
+    //void update(double dt) }
 
 protected:
     float _rate;
@@ -54,9 +70,6 @@ protected:
     float _radSpread;
     float _speedMean;
     float _speedSpread;
-
-    // basis vectors that lie in the plane of the direction cone base
-    Vec3 _A, _B;
 
     void _emitParticles(double dt,
         const ParticleSystem *particleSystem,

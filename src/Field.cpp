@@ -1,3 +1,6 @@
+#include "Vec.h"
+#include "VecField.h"
+
 #include "ParticleSystem.h"
 
 //// GravityField
@@ -22,3 +25,22 @@ bool DeathPlaneField::_affectParticle(
     return p->position.z < _height;
 }
 
+//// AdvectionField
+
+bool AdvectionField::_affectParticle(
+    Particle *p, double dt, const ParticleSystem *particleSystem) const
+{
+    const Vec3 &fieldSize = _vecField->getSize();
+
+    float xpos = CLAMP(p->position.x, 0, fieldSize.x - 1.),
+          ypos = CLAMP(p->position.y, 0, fieldSize.y - 1.),
+          zpos = CLAMP(p->position.z, 0, fieldSize.z - 1.);
+
+    const Vec3 &fieldVel = (*_vecField)(xpos, ypos, zpos);
+
+    const float factor = _blendFactor;
+
+    p->velocity = (1. - factor)*p->velocity + factor*fieldVel;
+
+    return false;
+}

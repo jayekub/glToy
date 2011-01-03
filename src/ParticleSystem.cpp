@@ -45,13 +45,22 @@ p->velocity.d *= p->position.d < 0. || p->position.d > _size.d ? -1. : 1.;\
 p->position.d = p->position.d < 0. ? \
     0. : p->position.d > _size.d ? _size.d : p->position.d; \
 
+#define KILL_DIM(p, d) \
+killParticle |= p->position.d < 0 || p->position.d > _size.d;
+
+    std::vector<Particle *> updatedParticles;
+
+    updatedParticles.reserve(_particles.size());
+
     BOOST_FOREACH(Particle *p, _particles) {
+        bool killParticle = false;
+
         p->position += p->velocity * dt;
 
         BOOST_FOREACH(Field *f, _fields) {
             // return value true means this particle should be killed
             if (f->_affectParticle(p, dt, this)) {
-                //_particles.erase(p);
+                killParticle = true;
             }
         }
 
@@ -69,11 +78,25 @@ p->position.d = p->position.d < 0. ? \
                 WRAP_DIM(p, y);
                 WRAP_DIM(p, z);
                 break;
+
+            case KILL:
+                KILL_DIM(p, x);
+                KILL_DIM(p, y);
+                KILL_DIM(p, z);
+                break;
         }
+
+        if (killParticle)
+            delete p;
+        else
+            updatedParticles.push_back(p);
     }
+
+    _particles = updatedParticles;
 
 #undef WRAP_DIM
 #undef BOUNCE_DIM
+#undef KILL_DIM
 }
 
 void ParticleSystem::render(RenderState &state)
@@ -81,14 +104,10 @@ void ParticleSystem::render(RenderState &state)
     // if necessary, sort particles by distances from camera so that further
     // away particles are rendered first
     if (_needsDepthSort) {
-        Mat4 invModelMat = state.getTransformMat().inverse();
-        Vec3 localCameraPos = invModelMat.ptransform(
-            state.camera->position);
-
         //std::sort(_particles.begin(), _particles.end(),
-        //          _ParticleLt(localCameraPos));
+        //          _ParticleLt(_getParticleLtImpl(state)));
         std::stable_sort(_particles.begin(), _particles.end(),
-                         _ParticleLt(localCameraPos, this));
+                         _ParticleLt(_getParticleLtImpl(state)));
     }
 
     // put current particle positions in vertex buffer and allocate more
@@ -155,11 +174,34 @@ void ParticleSystem::_destroy() {
     _fields.clear();
 }
 
-bool ParticleSystem::_particlelt(const Particle *a, const Particle *b,
-                                 const Vec3 &cameraPos) const {
-    vec_t aDist = (a->position - cameraPos).length();
-    vec_t bDist = (b->position - cameraPos).length();
+// sort according to viewpoint distance
+ParticleSystem::_ParticleLt *
+ParticleSystem::_getParticleLtImpl(const RenderState &state) const
+{
+    struct _ParticleLtImpl : public _ParticleLt {
+        
+        _ParticleLtImpl(const RenderState &state,
+                        const ParticleSystem *particleSystem) :
+            _ParticleLt(NULL), _particleSystem(particleSystem) {
 
-    return aDist < bDist;
+            Mat4 invModelMat = state.getTransformMat().inverse();
+            _localCameraPos = invModelMat.ptransform(state.camera->position);
+        }
+
+        bool operator()(const Particle *a, const Particle *b) const {
+            vec_t aDist = (a->position - _localCameraPos).length();
+            vec_t bDist = (b->position - _localCameraPos).length();
+
+            return aDist < bDist;
+        }
+
+    private:
+        Vec3 _localCameraPos;
+        const ParticleSystem *_particleSystem;
+    };
+
+    static _ParticleLtImpl *particleLtImpl = NULL;
+
+    delete particleLtImpl;
+    return new _ParticleLtImpl(state, this);
 }
-

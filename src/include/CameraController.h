@@ -10,7 +10,10 @@ class CameraController
 public:
     CameraController(Camera *camera);
 
+    void update(double dt);
+
     void handleKey(unsigned char key, int x, int y);
+    void handleKeyUp(unsigned char key, int x, int y);
     void handleMouse(int button, int state, int x, int y);
     void handleMouseMotion(int x, int y);
 
@@ -19,6 +22,13 @@ private:
 
     bool _grabMouse;
     Vec2 _lastMousePos;
+
+    float _transScale;
+    float _rotScale;
+
+    Vec3 _look;
+    Vec2 _rotation;
+    Vec3 _deltaTrans;
 };
 
 #endif // __CAMERACONTROLLER_H__
