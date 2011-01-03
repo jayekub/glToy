@@ -62,9 +62,9 @@ vec3 randVec(in int seed, in float min, in float max)
     v /= 1073741824.;
     */
     
-    v.x = rand(seed * vec2(1., 1.));
-    v.y = rand((seed + v.x) * vec2(1., 1.));
-    v.z = rand((seed + v.y) * vec2(1., 1.));
+    v.x = rand(float(seed) * vec2(1., 1.));
+    v.y = rand((float(seed) + v.x) * vec2(1., 1.));
+    v.z = rand((float(seed) + v.y) * vec2(1., 1.));
     
     v = (max - min) * v + min;
     
@@ -88,7 +88,7 @@ vec3 rotateVec(in vec3 V, in float angle, in vec3 axis)
 {
     vec3 P = cross(axis, V);
     
-    return length(P) == 0 ? normalize(V) :
+    return length(P) == 0. ? normalize(V) :
         normalize(cos(angle) * V + sin(angle) * normalize(P));
 }
 
@@ -110,4 +110,14 @@ vec4 vtransform4(in mat4 transMat, in vec3 vector)
 vec3 vtransform(in mat4 transMat, in vec3 vector)
 {
     return vtransform4(transMat, vector).xyz;
+}
+
+vec4 smoothtriad(
+    in vec4 Cmin,
+    in vec4 Cmid,
+    in vec4 Cmax,
+    in float index)
+{
+    return index > 0.5 ? smoothstep(Cmid, Cmax, vec4(2.*index - 0.5)) :
+                         smoothstep(Cmin, Cmid, vec4(2.*index));
 }

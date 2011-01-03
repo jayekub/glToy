@@ -135,6 +135,6 @@ GLuint GLSLNoise::makeGradientTexture()
     249, 14, 239, 107, 49, 192, 214, 31, 181, 199, 106, 157, 184, 84, 204, 176,\
     115, 121, 50, 45, 127, 4, 150, 254, 138, 236, 205, 93, 2
 
-int ClassicNoise::_p[512] = { PERMUTATION, PERMUTATION };
+int Noise::_p[512] = { PERMUTATION, PERMUTATION };
 
 #undef PERMUTATION

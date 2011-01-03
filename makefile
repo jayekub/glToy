@@ -15,12 +15,8 @@ OBJS = \
     Emitter.o \
     Field.o \
     ParticleSystem.o \
-    Anemone.o \
     FluidSimField.o \
-    CellNoiseFluid.o \
-    CellNoiseScene.o \
-    Bubbles.o \
-    BubblesScene.o \
+    VecFieldPrim.o \
     Spray.o \
     SprayScene.o
 
@@ -54,9 +50,10 @@ endif
 CXXFLAGS = $(CFLAGS) -std=c++0x
 
 ifeq ($(OS),Darwin)
+    CXX = /opt/local/bin/g++-mp-4.5
     CXXFLAGS += -I/opt/local/include
     LIBS = -framework GLUT -framework OpenGL -framework Cocoa \
-           -L/opt/local/lib -lGLEW
+           -L/opt/local/lib
 endif
 
 BUILD_OBJS = $(patsubst %,$(BUILD_DIR)/%,$(OBJS))

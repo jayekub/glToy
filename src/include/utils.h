@@ -10,6 +10,7 @@
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define CLAMP(x, min, max) MIN(MAX((x), (min)), (max))
 
 #define BUFFER_OFFSET(i) ((char *) NULL + (i))
 

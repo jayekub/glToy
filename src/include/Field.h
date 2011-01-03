@@ -1,10 +1,10 @@
 #ifndef __FIELD_H__
 #define __FIELD_H__
 
-#include "Vec.h"
 #include "Particle.h"
 
 class ParticleSystem;
+class VecField;
 
 class Field
 {
@@ -35,6 +35,21 @@ protected:
 
     bool _affectParticle(Particle *p, double dt,
                          const ParticleSystem *particleSystem) const;
+};
+
+class AdvectionField : public Field
+{
+public:
+    AdvectionField(const VecField *vecField, float blendFactor) :
+        _vecField(vecField), _blendFactor(blendFactor) {}
+
+protected:
+    const VecField *_vecField;
+    float _blendFactor;
+
+    bool _affectParticle(Particle *p, double dt,
+                         const ParticleSystem * /* particleSystem */) const;
+
 };
 
 #endif // __FIELD_H__

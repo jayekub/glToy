@@ -21,7 +21,7 @@ private:
 
 // Port of Perlin's improved noise from reference implementation found
 // at http://mrl.nyu.edu/~perlin/noise/
-class ClassicNoise
+class Noise
 {
 public:
     static double noise3(double x, double y, double z) {
