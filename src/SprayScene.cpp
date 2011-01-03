@@ -92,12 +92,40 @@ void SprayScene::_build()
     // Spray
     _sprayTransform = new Transform("sprayTransform");
 
-    _sprayTransform->matrix = Mat4::translate(Vec3(-50., -50., -50.));
+    _sprayTransform->matrix = Mat4::translate(Vec3(-15., -15., -15.));
 
     _graph->root->addChild(_sprayTransform);
 
-    // XXX
+    ////
 
+    _spray = new Spray("spray", Vec3(30., 30., 30.));
+
+    //RandomEmitter *emitter = new RandomEmitter();
+    //emitter->emitOnce(5000, 0, 50);
+
+    SprayEmitter *emitter = new SprayEmitter();
+
+    emitter->setPosition(Vec3(15, 15, 15))
+            .setRate(100)
+            .setDir(Vec3(0, 1, 0))
+            .setDirSpread(M_PI)
+            .setRadius(50)
+            .setRadiusSpread(20)
+            .setSpeed(10);
+
+    _spray->addEmitter(emitter);
+
+    _potentialField = new VecField(Vec3(19, 19, 19));
+    _velocityField = new VecField(Vec3(30, 30, 30));
+
+    AdvectionField *field = new AdvectionField(_velocityField, 0.9);
+
+    _spray->addField(field);
+
+    _sprayTransform->addChild(_spray);
+
+    //// XXX field debugging
+    /*
     Transform *potFieldTransform = new Transform("potFieldTransform");
 
     potFieldTransform->matrix = Mat4::translate(Vec3(-70, 0, 0));
@@ -110,9 +138,6 @@ void SprayScene::_build()
     _graph->root->addChild(velFieldTransform);
     _graph->root->addChild(potFieldTransform);
 
-    _potentialField = new VecField(Vec3(19, 19, 19));
-    _velocityField = new VecField(Vec3(30, 30, 30));
-
     VecFieldPrim *potFieldPrim =
         new VecFieldPrim("potFieldPrim", _potentialField);
     VecFieldPrim *velFieldPrim =
@@ -120,38 +145,13 @@ void SprayScene::_build()
 
     potFieldPrim->setColor(Vec3(0., 0., 1.));
 
-    //potFieldTransform->addChild(potFieldPrim);
-    //velFieldTransform->addChild(velFieldPrim);
-
-    ////
-    _spray = new Spray("spray", Vec3(30., 30., 30.));
-
-    //RandomEmitter *emitter = new RandomEmitter();
-    //emitter->emitOnce(5000, 0, 50);
-
-    SprayEmitter *emitter = new SprayEmitter();
-
-    emitter->setPosition(Vec3(15, 15, 15))
-            .setRate(10)
-            .setDir(Vec3(0, 1, 0))
-            .setDirSpread(M_PI)
-            .setRadius(50)
-            .setRadiusSpread(20)
-            .setSpeed(10);
-
-    _spray->addEmitter(emitter);
-
-    AdvectionField *field = new AdvectionField(_velocityField, 0.9);
-
-    _spray->addField(field);
-
-    _sprayTransform->addChild(_spray);
+    potFieldTransform->addChild(potFieldPrim);
+    velFieldTransform->addChild(velFieldPrim);
+    */
 
     //// rendering
 
     _sceneRenderer = new SceneRenderVisitor();
-
-    ////
 
     //_updateCurlNoise(0);
 }

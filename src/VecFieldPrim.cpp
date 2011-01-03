@@ -20,10 +20,10 @@ VecFieldPrim::VecFieldPrim(const char *name, const VecField *vecField) :
     ////
 
     _vecProgram.addShader(
-        new Program::Shader("shaders/standard.vs2", GL_VERTEX_SHADER));
+        new Program::Shader("shaders/standard.vs", GL_VERTEX_SHADER));
 
     _vecProgram.addShader(
-        new Program::Shader("shaders/constant.fs2", GL_FRAGMENT_SHADER));
+        new Program::Shader("shaders/constant.fs", GL_FRAGMENT_SHADER));
 
     _vecProgram.link();
 }

@@ -59,8 +59,6 @@ public:
     SprayEmitter &setSpeedSpread(float speedSpread) {
         _speedSpread = speedSpread; return *this;}
 
-    //void update(double dt) }
-
 protected:
     float _rate;
     Vec3 _position;

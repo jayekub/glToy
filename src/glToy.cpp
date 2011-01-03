@@ -10,10 +10,8 @@
 
 #include "Listener.h"
 
-/*
 #include "BubblesScene.h"
 #include "CellNoiseScene.h"
-*/
 #include "SprayScene.h"
 
 #include "Program.h"
@@ -45,14 +43,13 @@ void nextScene()
     delete _currentScene;
 
     switch (_currentSceneIndex) {
-        /*
         case 0:
             _currentScene = new BubblesScene(windowWidth, windowHeight);
             break;
         case 1:
             _currentScene = new CellNoiseScene(windowWidth, windowHeight);
             break;
-        case 2:*/
+        case 2:
         default:
             _currentScene = new SprayScene(windowWidth, windowHeight);
             break;

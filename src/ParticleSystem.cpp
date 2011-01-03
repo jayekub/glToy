@@ -179,7 +179,7 @@ ParticleSystem::_ParticleLt *
 ParticleSystem::_getParticleLtImpl(const RenderState &state) const
 {
     struct _ParticleLtImpl : public _ParticleLt {
-        
+
         _ParticleLtImpl(const RenderState &state,
                         const ParticleSystem *particleSystem) :
             _ParticleLt(NULL), _particleSystem(particleSystem) {

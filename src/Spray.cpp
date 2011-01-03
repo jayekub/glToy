@@ -42,7 +42,7 @@ ParticleSystem::_ParticleLt *
 Spray::_getParticleLtImpl(const RenderState &state) const
 {
     struct _ParticleLtImpl : public _ParticleLt {
-        
+
         _ParticleLtImpl(const RenderState &state,
                         const ParticleSystem *particleSystem) :
             _ParticleLt(NULL), _particleSystem(particleSystem) {
@@ -103,10 +103,9 @@ void Spray::_preRender(RenderState &state)
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    glEnable(GL_POINT_SPRITE);
+    //glEnable(GL_POINT_SPRITE);
     glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
-    glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
-
+    //glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -115,6 +114,6 @@ void Spray::_preRender(RenderState &state)
 void Spray::_postRender(RenderState &state)
 {
     glDisable(GL_BLEND);
-    glDisable(GL_POINT_SPRITE);
+    //glDisable(GL_POINT_SPRITE);
     glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
 }

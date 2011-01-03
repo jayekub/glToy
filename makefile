@@ -18,7 +18,11 @@ OBJS = \
     FluidSimField.o \
     VecFieldPrim.o \
     Spray.o \
-    SprayScene.o
+    SprayScene.o \
+    Bubbles.o \
+    BubblesScene.o \
+    CellNoiseFluid.o \
+    CellNoiseScene.o
 
 TARGET = glToy
 
