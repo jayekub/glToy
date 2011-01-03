@@ -84,6 +84,7 @@ killParticle |= p->position.d < 0 || p->position.d > _size.d;
                 KILL_DIM(p, y);
                 KILL_DIM(p, z);
                 break;
+        }
 
         if (killParticle)
             delete p;

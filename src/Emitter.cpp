@@ -43,20 +43,6 @@ void RandomEmitter::_emitParticles(
 
 //// SprayEmitter
 
-<<<<<<< HEAD
-SprayEmitter::SprayEmitter(
-    float rate, Vec3 position,
-    Vec3 dirMean, float dirSpread,
-    float radMean, float radSpread,
-    float speedMean, float speedSpread) :
-    _rate(rate), _position(_position),
-    _dirMean(dirMean), _dirSpread(dirSpread),
-    _radMean(radMean), _radSpread(radSpread),
-    _speedMean(speedMean), _speedSpread(speedSpread)
-{
-    _A = _dirMean.rotate(M_PI/2., Vec3(0., 1., 0.)).normalize();
-    _B = _dirMean.rotate(M_PI/2., Vec3(1., 0., 0.)).normalize();
-}
 // TODO rename PointEmitter
 
 void SprayEmitter::_emitParticles(
