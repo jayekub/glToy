@@ -53,22 +53,37 @@ public:
             cy = CCEIL(y, _size.y - 1.),
             cz = CCEIL(z, _size.z - 1.);
 
-        const float xi = x - fx, yi = y - fy, zi = z - fz;
+        const float xd = x - fx, yd = y - fy, zd = z - fz,
+                    omxd = 1. - xd, omyd = 1. - yd, omzd = 1. - zd;
 
         // optimize for integral lookups
         //if (fx == x && fy == y && fz == z)
         //    return VAL(x, y, z);
 
         // do interpolation
-        // XXX may be slow, test/optimize
+        //
+        // nice simplified expression obtained at
+        // http://local.wasp.uwa.edu.au/~pbourke/miscellaneous/interpolation/index.html
+
+        return VAL(fx,fy,fz)*omxd*omyd*omzd +
+               VAL(cx,fy,fz)*xd*omyd*omzd +
+               VAL(fx,cy,fz)*omxd*yd*omzd +
+               VAL(fx,fy,cz)*omxd*omyd*zd +
+               VAL(cx,fy,cz)*xd*omyd*zd +
+               VAL(fx,cy,cz)*omxd*yd*zd +
+               VAL(cx,cy,fz)*xd*yd*omzd +
+               VAL(cx,cy,cz)*xd*yd*zd;
+
+        /* XXX slower version
         return
             VMIX(
                 VMIX(
-                    VMIX(VAL(fx,fy,fz),VAL(cx,fy,fz),xi),
-                    VMIX(VAL(fx,cy,fz),VAL(cx,cy,fz),xi),yi),
+                    VMIX(VAL(fx,fy,fz),VAL(cx,fy,fz),xd),
+                    VMIX(VAL(fx,cy,fz),VAL(cx,cy,fz),xd),yd),
                 VMIX(
-                    VMIX(VAL(fx,fy,cz),VAL(cx,fy,cz),xi),
-                    VMIX(VAL(fx,cy,cz),VAL(cx,cy,cz),xi), yi), zi);
+                    VMIX(VAL(fx,fy,cz),VAL(cx,fy,cz),xd),
+                    VMIX(VAL(fx,cy,cz),VAL(cx,cy,cz),xd), yd), zd);
+            */
     }
 
 #undef VAL
