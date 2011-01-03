@@ -46,11 +46,6 @@ void SprayScene::render(RenderPass *renderPass)
     _sceneRenderer->render(_graph);
 }
 
-void SprayScene::resize(int width, int height)
-{
-    Scene::resize(width, height);
-}
-
 void SprayScene::handleKey(unsigned char key, int x, int y)
 {
     _cameraController->handleKey(key, x, y);
@@ -115,7 +110,7 @@ void SprayScene::_build()
 
     _spray->addEmitter(emitter);
 
-    _potentialField = new VecField(Vec3(19, 19, 19));
+    _potentialField = new VecField(Vec3(13, 13, 13));
     _velocityField = new VecField(Vec3(30, 30, 30));
 
     AdvectionField *field = new AdvectionField(_velocityField, 0.9);

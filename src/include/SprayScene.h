@@ -27,7 +27,6 @@ public:
     void update(double dt);
     void render(RenderPass *renderPass);
 
-    void resize(int width, int height);
     void handleKey(unsigned char key, int x, int y);
     void handleKeyUp(unsigned char key, int x, int y);
     void handleMouse(int button, int state, int x, int y);

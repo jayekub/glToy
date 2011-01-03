@@ -38,8 +38,9 @@ BubblesScene::~BubblesScene()
 
 void BubblesScene::update(double dt)
 {
-    _bubbles->update(dt);
+    _cameraController->update(dt);
 
+    _bubbles->update(dt);
     _bubblesTransform->matrix *= Mat4::rotate(0.25 * dt, Vec3(0., 1., 0.));
 }
 
@@ -96,6 +97,11 @@ void BubblesScene::handleKey(unsigned char key, int x, int y)
     }
 
     _cameraController->handleKey(key, x, y);
+}
+
+void BubblesScene::handleKeyUp(unsigned char key, int x, int y)
+{
+    _cameraController->handleKeyUp(key, x, y);
 }
 
 void BubblesScene::handleMouse(int button, int state, int x, int y)

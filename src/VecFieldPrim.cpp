@@ -46,12 +46,13 @@ void VecFieldPrim::render(RenderState &state)
 
     Vec3 *vecs = (Vec3 *) glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 
-    for (int z = 0; z < size.z; ++z)
+    for (int x = 0; x < size.x; ++x)
         for (int y = 0; y < size.y; ++y)
-            for (int x = 0; x < size.x; ++x) {
+            for (int z = 0; z < size.z; ++z) {
                 const Vec3 p(x, y, z);
                 const Vec3 &v = (*_vecField)(x, y, z);
-                const int idx = (z*size.x*size.y + y*size.x + x);
+                //const int idx = (z*size.x*size.y + y*size.x + x);
+                const int idx = (x*size.y*size.z + y*size.z + z);
 
                 vecs[2*idx] = p;
                 vecs[2*idx + 1] = p + v;

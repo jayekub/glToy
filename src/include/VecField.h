@@ -27,7 +27,8 @@ public:
     VecField(const Vec3 &size) { _allocate(size); }
     ~VecField() { _deallocate(); }
 
-#define VAL(x_, y_, z_) _v[(int) ((z_)*_size.x*_size.y + (y_)*_size.x + (x_))]
+//#define VAL(x_, y_, z_) _v[(int) ((z_)*_size.x*_size.y + (y_)*_size.x + (x_))]
+#define VAL(x_, y_, z_) _v[(int) ((x_)*_size.y*_size.z + (y_)*_size.z + (z_))]
 #define VMIX(a, b, i) ((1. - (i))*(a) + (i)*(b))
 
 #define CFLOOR(x, min) (MAX(floor(x), min))
@@ -55,8 +56,8 @@ public:
         const float xi = x - fx, yi = y - fy, zi = z - fz;
 
         // optimize for integral lookups
-        if (fx == x && fy == y && fz == z)
-            return VAL(x, y, z);
+        //if (fx == x && fy == y && fz == z)
+        //    return VAL(x, y, z);
 
         // do interpolation
         // XXX may be slow, test/optimize
