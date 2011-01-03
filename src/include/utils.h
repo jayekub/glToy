@@ -12,6 +12,9 @@
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define CLAMP(x, min, max) MIN(MAX((x), (min)), (max))
 
+// faster than the math.h function, but not the optimal float-to-int
+#define FLOORI(x) ((int) (x))
+
 #define BUFFER_OFFSET(i) ((char *) NULL + (i))
 
 #define fwrap(x, m) fmod(fmod((x), (m)) + (m), (m))

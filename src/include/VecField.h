@@ -29,10 +29,7 @@ public:
 
 //#define VAL(x_, y_, z_) _v[(int) ((z_)*_size.x*_size.y + (y_)*_size.x + (x_))]
 #define VAL(x_, y_, z_) _v[(int) ((x_)*_size.y*_size.z + (y_)*_size.z + (z_))]
-#define VMIX(a, b, i) ((1. - (i))*(a) + (i)*(b))
-
-#define CFLOOR(x, min) (MAX(floor(x), min))
-#define CCEIL(x, max) (MIN(ceil(x), max))
+//#define VMIX(a, b, i) ((1. - (i))*(a) + (i)*(b))
 
     //// accessors do NOT perform bounds checking
 
@@ -48,17 +45,27 @@ public:
 
     // trilinearly interpolated lookup operator
     Vec3 operator()(float x, float y, float z) const {
-        int fx = CFLOOR(x, 0), fy = CFLOOR(y, 0), fz = CFLOOR(z, 0),
-            cx = CCEIL(x, _size.x - 1.),
-            cy = CCEIL(y, _size.y - 1.),
-            cz = CCEIL(z, _size.z - 1.);
-
-        const float xd = x - fx, yd = y - fy, zd = z - fz,
-                    omxd = 1. - xd, omyd = 1. - yd, omzd = 1. - zd;
+        const int fx = FLOORI(x), fy = FLOORI(y), fz = FLOORI(z);
+        const float xd = x - fx, yd = y - fy, zd = z - fz;
 
         // optimize for integral lookups
-        //if (fx == x && fy == y && fz == z)
-        //    return VAL(x, y, z);
+        // XXX doesn't seem worth the cost
+        //if (xd < EPS_M && yd < EPS_M && zd < EPS_M)
+        //    return VAL(fx, fy, fz);
+
+        // avoid going out of bounds for lookups along the field's edge
+        const int cx = MIN(fx + 1, _size.x - 1),
+                  cy = MIN(fy + 1, _size.y - 1),
+                  cz = MIN(fz + 1, _size.z - 1);
+
+        const float omxd = 1. - xd, omyd = 1. - yd, omzd = 1. - zd;
+
+        /*
+        if (cx > _size.x - 1 || cy > _size.y - 1 || cz > _size.z - 1) {
+            printf("(%f, %f, %f) (%f, %f, %f) -> (%d, %d, %d)\n",
+            x, y, z, xd, yd, zd, cx, cy, cz);
+        }
+        */
 
         // do interpolation
         //
