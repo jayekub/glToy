@@ -87,7 +87,7 @@ killParticle |= p->position.d < 0 || p->position.d > _size.d;
         }
 
         if (killParticle)
-            delete p;
+            _particlePool.destroy(p);
         else
             updatedParticles.push_back(p);
     }
@@ -161,7 +161,7 @@ void ParticleSystem::render(RenderState &state)
 
 void ParticleSystem::_destroy() {
     BOOST_FOREACH(Particle *p, _particles)
-        delete p;
+        _particlePool.destroy(p);
 
     BOOST_FOREACH(Emitter *e, _emitters)
         delete e;

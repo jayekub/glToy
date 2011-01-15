@@ -3,6 +3,8 @@
 
 #include <vector>
 
+#include <boost/pool/object_pool.hpp>
+
 #include "Vec.h"
 #include "Prim.h"
 #include "Particle.h"
@@ -32,6 +34,8 @@ public:
     void addEmitter(Emitter *emitter) { _emitters.push_back(emitter); }
     void addField(Field *field) { _fields.push_back(field); }
 
+    Particle *newParticle() { return _particlePool.construct(); }
+
     const Vec3 &getSize() const { return _size; }
     const std::vector<Particle *> &getParticles() { return _particles; }
 
@@ -48,7 +52,10 @@ protected:
     };
 
     Vec3 _size;
+
+    boost::object_pool<Particle> _particlePool;
     std::vector<Particle *> _particles;
+
     std::vector<Emitter *> _emitters;
     std::vector<Field *> _fields;
 
