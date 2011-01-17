@@ -7,7 +7,7 @@
 class Graph;
 class Camera;
 class Transform;
-class Spray;
+class SprayPrim;
 class CameraController;
 class VecField;
 
@@ -33,6 +33,10 @@ public:
     void handleMouseMotion(int x, int y);
 
 private:
+    ParticleSystem *_particleSystem;
+    VecField *_potentialField, *_velocityField;
+    SprayPrim *_sprayPrim;
+
     Graph *_graph;
     Camera *_camera;
     Transform *_sprayTransform;
@@ -40,8 +44,6 @@ private:
 
     SceneRenderVisitor *_sceneRenderer;
 
-    Spray *_spray;
-    VecField *_potentialField, *_velocityField;
     Program *_sprayProgram;
 
     void _build();

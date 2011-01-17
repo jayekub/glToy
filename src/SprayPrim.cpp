@@ -2,12 +2,13 @@
 #include "Noise.h"
 #include "Camera.h"
 #include "Particle.h"
-#include "Spray.h"
 
-Spray::Spray(
+#include "SprayPrim.h"
+
+SprayPrim::SprayPrim(
     const char *name,
-    const Vec3 &size) :
-    ParticleSystem(name, size, KILL, true)
+    ParticleSystem *particleSystem) :
+    ParticleSystemPrim(name, particleSystem, true)
 {
     //_sprayProgram.setDebug(true);
 
@@ -33,13 +34,9 @@ Spray::Spray(
     _sprayProgram.link();
 }
 
-Spray::~Spray()
-{
-}
-
 // sort according to viewplane distance
-ParticleSystem::_ParticleLt *
-Spray::_getParticleLtImpl(const RenderState &state) const
+ParticleSystemPrim::_ParticleLt *
+SprayPrim::_getParticleLtImpl(const RenderState &state) const
 {
     struct _ParticleLtImpl : public _ParticleLt {
 
@@ -65,10 +62,10 @@ Spray::_getParticleLtImpl(const RenderState &state) const
     static _ParticleLtImpl *particleLtImpl = NULL;
 
     delete particleLtImpl;
-    return new _ParticleLtImpl(state, this);
+    return new _ParticleLtImpl(state, _particleSystem);
 }
 
-void Spray::_preRender(RenderState &state)
+void SprayPrim::_preRender(RenderState &state)
 {
     _sprayProgram.use();
     _sprayProgram.setUniform("modelMat", state.getTransformMat())
@@ -110,7 +107,7 @@ void Spray::_preRender(RenderState &state)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-void Spray::_postRender(RenderState &state)
+void SprayPrim::_postRender(RenderState &state)
 {
     glDisable(GL_BLEND);
     //glDisable(GL_POINT_SPRITE);

@@ -4,11 +4,12 @@
 #include "RenderPass.h"
 #include "Particle.h"
 
-#include "CellNoiseFluid.h"
+#include "CellNoisePrim.h"
 
-CellNoiseFluid::CellNoiseFluid(const char *name, const Vec2 &size,
-                               float particleSize) :
-    ParticleSystem(name, Vec3(size, 0.), WRAP, false),
+CellNoisePrim::CellNoisePrim(const char *name,
+                             ParticleSystem *particleSystem,
+                             float particleSize) :
+    ParticleSystemPrim(name, particleSystem, false),
     _particleSize(particleSize)
 
 {
@@ -26,7 +27,7 @@ CellNoiseFluid::CellNoiseFluid(const char *name, const Vec2 &size,
     _cellNoiseProgram.link();
 }
 
-void CellNoiseFluid::_preRender(RenderState &state)
+void CellNoisePrim::_preRender(RenderState &state)
 {
     _cellNoiseProgram.use();
 
@@ -50,6 +51,6 @@ void CellNoiseFluid::_preRender(RenderState &state)
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void CellNoiseFluid::_postRender(RenderState &state)
+void CellNoisePrim::_postRender(RenderState &state)
 {
 }

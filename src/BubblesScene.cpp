@@ -4,8 +4,10 @@
 #include "Camera.h"
 #include "Light.h"
 #include "Transform.h"
-#include "Bubbles.h"
 #include "CameraController.h"
+
+#include "BubblesPrim.h"
+#include "ParticleSystem.h"
 
 #include "TextureRenderPass.h"
 #include "Program.h"
@@ -23,6 +25,8 @@ BubblesScene::BubblesScene(int width, int height) :
 
 BubblesScene::~BubblesScene()
 {
+    delete _particleSystem;
+
     // Graph deletes all registered nodes
     delete _graph;
     delete _cameraController;
@@ -40,7 +44,7 @@ void BubblesScene::update(double dt)
 {
     _cameraController->update(dt);
 
-    _bubbles->update(dt);
+    _particleSystem->update(dt);
     _bubblesTransform->matrix *= Mat4::rotate(0.25 * dt, Vec3(0., 1., 0.));
 }
 
@@ -166,14 +170,17 @@ void BubblesScene::_build()
 
     _bubblesTransform->addChild(bubblesOffset);
 
-    _bubbles = new Bubbles("bubbles", Vec3(30., 30., 30.));
+
+    _particleSystem = new ParticleSystem(Vec3(30., 30., 30.),
+                                         ParticleSystem::WRAP);
 
     RandomEmitter *emitter = new RandomEmitter();
 
     emitter->emitOnce(5000, 1.5, 0.5);
-    _bubbles->addEmitter(emitter);
+    _particleSystem->addEmitter(emitter);
 
-    bubblesOffset->addChild(_bubbles);
+    _bubblesPrim = new BubblesPrim("bubbles", _particleSystem);
+    bubblesOffset->addChild(_bubblesPrim);
 
     //// rendering
 
@@ -205,10 +212,4 @@ void BubblesScene::_build()
     _dofProgram->addShader(
          new Program::Shader("shaders/dof.fs", GL_FRAGMENT_SHADER));
     _dofProgram->link();
-}
-
-void BubblesScene::_translate(const Vec3 &t)
-{
-    _camera->position += 0.25 * t;
-    _camera->center += 0.25 * t;
 }

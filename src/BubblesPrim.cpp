@@ -2,14 +2,12 @@
 #include "Noise.h"
 #include "Camera.h"
 #include "Particle.h"
-#include "Bubbles.h"
+#include "BubblesPrim.h"
 
-Bubbles::Bubbles(
+BubblesPrim::BubblesPrim(
     const char *name,
-    const Vec3 &size,
-    bool drawBox) :
-    ParticleSystem(name, size, BOUNCE, true /* needsDepthSort */),
-    _drawBox(drawBox)
+    ParticleSystem *particleSystem) :
+    ParticleSystemPrim(name, particleSystem, true /* needsDepthSort */)
 {
     _bubblesProgram.addShader(
         new Program::Shader("shaders/bubbles.vs", GL_VERTEX_SHADER));
@@ -30,38 +28,9 @@ Bubbles::Bubbles(
     _bubblesProgram.link();
 
     //_bubblesProgram.setDebug(true);
-
-    ////
-
-    _boxProgram.addShader(
-       new Program::Shader("shaders/standard.vs", GL_VERTEX_SHADER));
-
-    _boxProgram.addShader(
-       new Program::Shader("shaders/box.gs", GL_GEOMETRY_SHADER));
-
-    _boxProgram.addShader(
-       new Program::Shader("shaders/constant.fs", GL_FRAGMENT_SHADER));
-
-    _boxProgram.link();
-
-    //_permTexture = GLSLNoise::makePermutationTexture();
-    //_gradTexture = GLSLNoise::makeGradientTexture();
 }
 
-Bubbles::~Bubbles()
-{
-}
-
-bool Bubbles::_particlelt(const Particle *a, const Particle * b,
-                          const Vec3 &cameraPos) const
-{
-    vec_t aDist = (a->position - cameraPos).length() - a->radius;
-    vec_t bDist = (b->position - cameraPos).length() - b->radius;
-
-    return aDist < bDist;
-}
-
-void Bubbles::_preRender(RenderState &state)
+void BubblesPrim::_preRender(RenderState &state)
 {
     // XXX fragile
     //const Light *firstLight = state.lights.begin()->second;
@@ -97,17 +66,7 @@ void Bubbles::_preRender(RenderState &state)
 
 }
 
-void Bubbles::_postRender(RenderState &state)
+void BubblesPrim::_postRender(RenderState &state)
 {
     glDisable(GL_BLEND);
-
-    if (_drawBox) {
-        /* XXX gl3
-        _boxProgram.use();
-        _boxProgram.setUniform("modelMat", state.getTransformMat())
-                   .setUniform("viewMat", state.viewMat)
-                   .setUniform("projMat", state.projectionMat);
-
-        */
-    }
 }

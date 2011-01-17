@@ -3,7 +3,8 @@
 #include "Graph.h"
 #include "Camera.h"
 #include "Transform.h"
-#include "Spray.h"
+#include "ParticleSystem.h"
+#include "SprayPrim.h"
 #include "CameraController.h"
 
 #include "Program.h"
@@ -23,6 +24,8 @@ SprayScene::SprayScene(int width, int height) :
 
 SprayScene::~SprayScene()
 {
+    delete _particleSystem;
+
     // Graph deletes all registered nodes
     delete _graph;
     delete _cameraController;
@@ -34,7 +37,7 @@ SprayScene::~SprayScene()
 void SprayScene::update(double dt)
 {
     _cameraController->update(dt);
-    _spray->update(dt);
+    _particleSystem->update(dt);
 
     _updateCurlNoise(dt);
 }
@@ -93,7 +96,8 @@ void SprayScene::_build()
 
     ////
 
-    _spray = new Spray("spray", Vec3(30., 30., 30.));
+    _particleSystem = new ParticleSystem(Vec3(30., 30., 30.),
+                                         ParticleSystem::KILL);
 
     //RandomEmitter *emitter = new RandomEmitter();
     //emitter->emitOnce(5000, 0, 50);
@@ -108,16 +112,18 @@ void SprayScene::_build()
             .setRadiusSpread(20)
             .setSpeed(10);
 
-    _spray->addEmitter(emitter);
+    _particleSystem->addEmitter(emitter);
 
     _potentialField = new VecField(Vec3(13, 13, 13));
     _velocityField = new VecField(Vec3(30, 30, 30));
 
     AdvectionField *field = new AdvectionField(_velocityField, 0.9);
 
-    _spray->addField(field);
+    _particleSystem->addField(field);
 
-    _sprayTransform->addChild(_spray);
+    _sprayPrim = new SprayPrim("spray", _particleSystem);
+
+    _sprayTransform->addChild(_sprayPrim);
 
     //// XXX field debugging
     /*

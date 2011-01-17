@@ -5,8 +5,9 @@
 #include "RenderState.h"
 #include "Scene.h"
 
+class particleSystem;
 class FluidSimField;
-class CellNoiseFluid;
+class CellNoisePrim;
 class TextureRenderPass;
 class TextureRenderer;
 class Program;
@@ -26,13 +27,15 @@ public:
     void handleMouseMotion(int x, int y);
 
 private:
+    ParticleSystem *_particleSystem0, *_particleSystem1;
+
     bool _grabMouse;
     Vec2 _lastMousePos;
 
     float _fluidSize;
     FluidSimField *_fluidField;
 
-    CellNoiseFluid *_cellNoiseFluid0, *_cellNoiseFluid1;
+    CellNoisePrim *_cellNoisePrim0, *_cellNoisePrim1;
     TextureRenderPass *_cellNoisePass0, *_cellNoisePass1;
 
     TextureRenderer *_combineRenderer;

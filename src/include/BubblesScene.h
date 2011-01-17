@@ -4,11 +4,13 @@
 #include "Vec.h"
 #include "Scene.h"
 
+class ParticleSystem;
+
 class Graph;
 class Camera;
 class Light;
 class Transform;
-class Bubbles;
+class BubblesPrim;
 class CameraController;
 
 class RenderPass;
@@ -34,13 +36,15 @@ public:
     void handleMouseMotion(int x, int y);
 
 private:
+    ParticleSystem *_particleSystem;
+
     float _rotationAngle;
     bool _dof;
 
     Graph *_graph;
     Camera *_camera;
     Transform *_bubblesTransform;
-    Bubbles *_bubbles;
+    BubblesPrim *_bubblesPrim;
     CameraController *_cameraController;
 
     TextureRenderPass *_geomPass, *_blurPass1, *_blurPass2;
@@ -51,7 +55,6 @@ private:
     TextureRenderer *_textureRenderer;
 
     void _build();
-    void _translate(const Vec3 &t);
 };
 
 #endif // _BUBBLESSCENE_H_

@@ -2,26 +2,27 @@ OBJS = \
     glToy.o \
     utils.o \
     Listener.o \
-    CameraController.o \
+    Noise.o \
     Program.o \
+    CameraController.o \
     ScreenRenderPass.o \
     TextureRenderPass.o \
     TextureRenderer.o \
-    ofxMSAFluidSolver.o \
     Graph.o \
     Visitor.o \
     SceneRenderVisitor.o \
-    Noise.o \
+    ParticleSystem.o \
+    ParticleSystemPrim.o \
     Emitter.o \
     Field.o \
-    ParticleSystem.o \
     FluidSimField.o \
     VecFieldPrim.o \
-    Spray.o \
+    SprayPrim.o \
     SprayScene.o \
-    Bubbles.o \
+    BubblesPrim.o \
     BubblesScene.o \
-    CellNoiseFluid.o \
+    ofxMSAFluidSolver.o \
+    CellNoisePrim.o \
     CellNoiseScene.o
 
 TARGET = glToy

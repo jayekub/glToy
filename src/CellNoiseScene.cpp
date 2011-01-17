@@ -1,8 +1,10 @@
-#include "FluidSimField.h"
-#include "CellNoiseFluid.h"
 #include "Program.h"
 #include "TextureRenderPass.h"
 #include "TextureRenderer.h"
+
+#include "ParticleSystem.h"
+#include "FluidSimField.h"
+#include "CellNoisePrim.h"
 
 #include "CellNoiseScene.h"
 
@@ -16,8 +18,11 @@ CellNoiseScene::CellNoiseScene(int width, int height,
 
 CellNoiseScene::~CellNoiseScene()
 {
-    delete _cellNoiseFluid0;
-    delete _cellNoiseFluid1;
+    delete _particleSystem0;
+    delete _particleSystem1;
+
+    delete _cellNoisePrim0;
+    delete _cellNoisePrim1;
 
     delete _cellNoisePass0;
     delete _cellNoisePass1;
@@ -30,8 +35,8 @@ void CellNoiseScene::update(double dt)
 {
     _fluidField->update(dt);
 
-    _cellNoiseFluid0->update(dt);
-    _cellNoiseFluid1->update(dt);
+    _particleSystem0->update(dt);
+    _particleSystem1->update(dt);
 }
 
 void CellNoiseScene::render(RenderPass *renderPass)
@@ -43,7 +48,7 @@ void CellNoiseScene::render(RenderPass *renderPass)
 
     glClearColor(1., 1., 1., 1.);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    _cellNoiseFluid0->render(_renderState);
+    _cellNoisePrim0->render(_renderState);
 
     _cellNoisePass0->end();
 
@@ -53,7 +58,7 @@ void CellNoiseScene::render(RenderPass *renderPass)
 
     glClearColor(1., 1., 1., 1.);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    _cellNoiseFluid1->render(_renderState);
+    _cellNoisePrim1->render(_renderState);
 
     _cellNoisePass1->end();
 
@@ -97,26 +102,32 @@ void CellNoiseScene::_build()
     _renderState.projectionMat = Mat4::ortho(0., _width, _height, 0., 0., 1.);
     //_renderState.projectionMat = Mat4::ortho(0., 1., 1., 0., 0., 1.);
 
-    _cellNoiseFluid0 =
-        new CellNoiseFluid("cellNoiseFluid0", Vec2(1., 1.), .15);
+    _particleSystem0 = new ParticleSystem(Vec3(1., 1., 0.),
+                                          ParticleSystem::WRAP);
 
-    _cellNoiseFluid1 =
-        new CellNoiseFluid("cellNoiseFluid1", Vec2(1., 1.), .15);
+    _particleSystem1 = new ParticleSystem(Vec3(1., 1., 0.),
+                                          ParticleSystem::WRAP);
+
+    _cellNoisePrim0 =
+        new CellNoisePrim("cellNoise0", _particleSystem0, .15);
+
+    _cellNoisePrim1 =
+        new CellNoisePrim("cellNoise1", _particleSystem1, .15);
 
     _fluidField = new FluidSimField(_fluidSize);
 
-    _cellNoiseFluid0->addField(_fluidField);
-    _cellNoiseFluid1->addField(_fluidField);
+    _particleSystem0->addField(_fluidField);
+    _particleSystem1->addField(_fluidField);
 
     RandomEmitter *emitter0 = new RandomEmitter();
 
     emitter0->emitOnce(200, 0.);
-    _cellNoiseFluid0->addEmitter(emitter0);
+    _particleSystem0->addEmitter(emitter0);
 
     RandomEmitter *emitter1 = new RandomEmitter();
 
     emitter1->emitOnce(1000, 0.);
-    _cellNoiseFluid1->addEmitter(emitter1);
+    _particleSystem1->addEmitter(emitter1);
 
     _cellNoisePass0 = new TextureRenderPass(_width, _height);
     _cellNoisePass1 = new TextureRenderPass(_width, _height);

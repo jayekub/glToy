@@ -1,16 +1,17 @@
-#ifndef _CELLNOISEFLUID_H_
-#define _CELLNOISEFLUID_H_
+#ifndef _CELLNOISEPRIM_H_
+#define _CELLNOISEPRIM_H_
 
 #include "utils.h"
 #include "Program.h"
 #include "RenderState.h"
-#include "ParticleSystem.h"
+#include "ParticleSystemPrim.h"
 
-class CellNoiseFluid : public ParticleSystem
+class CellNoisePrim : public ParticleSystemPrim
 {
 public:
     // particleSize is radius of particles as a fraction of screen width
-    CellNoiseFluid(const char *name, const Vec2 &size, float particleSize);
+    CellNoisePrim(const char *name, ParticleSystem *particleSystem,
+                   float particleSize);
 
 private:
     float _particleSize;
@@ -21,4 +22,4 @@ private:
     void _postRender(RenderState &state);
 };
 
-#endif /* _CELLNOISEFLUID_H_ */
+#endif /* _CELLNOISEPRIM_H_ */

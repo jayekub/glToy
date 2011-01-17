@@ -1,17 +1,16 @@
-#ifndef SPRAY_H_
-#define SPRAY_H_
+#ifndef _SPRAYPRIM_H_
+#define _SPRAYPRIM_H_
 
 #include "RenderState.h"
 #include "Program.h"
-#include "ParticleSystem.h"
+#include "ParticleSystemPrim.h"
 
 // uses point sprite rendering. particles are sorted according to view *plane*
 // distance.
-class Spray : public ParticleSystem
+class SprayPrim : public ParticleSystemPrim
 {
 public:
-    Spray(const char *name, const Vec3 &size);
-    virtual ~Spray();
+    SprayPrim(const char *name, ParticleSystem *particleSystem);
 
 private:
     float _radius;
@@ -23,4 +22,4 @@ private:
     void _postRender(RenderState &state);
 };
 
-#endif /* SPRAY_H_ */
+#endif /* _SPRAYPRIM_H_ */
