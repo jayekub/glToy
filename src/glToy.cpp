@@ -169,6 +169,7 @@ int main(int argc, char **argv) {
 
     //glutInitContextVersion(3, 2);
     //glutInitContextProfile(GLUT_CORE_PROFILE);
+    //glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
 
     glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
 
@@ -192,9 +193,6 @@ int main(int argc, char **argv) {
 #ifdef USE_GL3W
     gl3wInit();
 #endif
-
-    //checkExtension(GL_VERSION_3_2);
-    //checkExtension(GLEW_ARB_geometry_shader4);
 
     ////
 

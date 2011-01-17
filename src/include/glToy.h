@@ -27,6 +27,8 @@
 #  include <GL/glut.h>
 #endif
 
+#include <GL/freeglut_ext.h>
+
 #define BUFFER_OFFSET(i) ((char *) NULL + (i))
 
 #include <stdio.h>

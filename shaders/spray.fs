@@ -3,12 +3,12 @@ uniform float radiusSpread;
 
 out vec4 color;
 
-//varying vec3 velocity;
-varying float radius;
+//in vec3 velocity;
+in float radius;
 
 void main()
 {
-#if 1
+#if 0
     vec2 v = gl_PointCoord.st - vec2(0.5, 0.5);
     float len = length(v);
 
@@ -27,6 +27,6 @@ void main()
 
     if (len > 0.5) discard;
 #else
-    color = vec4(1, 0, 0, 1);
+    color = vec4(gl_PointCoord.st, 1, 1);
 #endif
 }

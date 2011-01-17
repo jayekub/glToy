@@ -31,7 +31,7 @@ Program::Shader &Program::Shader::compile() const
     std::string sourceStr;
 
     // XXX make this configurable?
-    //sourceStr += "#version 150\n";
+    sourceStr += "#version 150\n";
 
     BOOST_FOREACH(std::string filename, _filenames) {
         sourceStr += "#line 0\n";
