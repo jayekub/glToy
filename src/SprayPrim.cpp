@@ -14,17 +14,12 @@ SprayPrim::SprayPrim(
 
     _sprayProgram.addShader(
         (new Program::Shader(GL_VERTEX_SHADER))
-            ->addFile("shaders/common.inc")
-             .addFile("shaders/spray.vs").compile());
+             ->addFile("shaders/particlequad.vs").compile());
 
-    /*
     _sprayProgram.addShader(
         (new Program::Shader(GL_GEOMETRY_SHADER))
             ->addFile("shaders/common.inc")
-             //.addFile("shaders/sphere.inc")
-             //.addFile("shaders/noise.inc")
-             .addFile("shaders/spray.gs").compile());
-    */
+             .addFile("shaders/particlequad.gs").compile());
 
     _sprayProgram.addShader(
         ((new Program::Shader(GL_FRAGMENT_SHADER))
@@ -34,6 +29,7 @@ SprayPrim::SprayPrim(
     _sprayProgram.link();
 }
 
+/*
 // sort according to viewplane distance
 ParticleSystemPrim::_ParticleLt *
 SprayPrim::_getParticleLtImpl(const RenderState &state) const
@@ -64,16 +60,17 @@ SprayPrim::_getParticleLtImpl(const RenderState &state) const
     delete particleLtImpl;
     return new _ParticleLtImpl(state, _particleSystem);
 }
+*/
 
 void SprayPrim::_preRender(RenderState &state)
 {
     _sprayProgram.use();
     _sprayProgram.setUniform("modelMat", state.getTransformMat())
-                  .setUniform("viewMat", state.viewMat)
-                  .setUniform("projMat", state.projectionMat)
-                  .setUniform("meanRadius", 50.f)
-                  .setUniform("radiusSpread", 20.f);
-                  //.setUniform("cameraPos", state.camera->position);
+                 .setUniform("viewMat", state.viewMat)
+                 .setUniform("projMat", state.projectionMat)
+                 .setUniform("cameraPos", state.camera->position)
+                 .setUniform("meanRadius", 0.5f)
+                 .setUniform("radiusSpread", 0.25f);
 
     const GLuint centerInLoc = _sprayProgram.attribute("centerIn");
     const GLuint velocityInLoc = _sprayProgram.attribute("velocityIn");

@@ -108,8 +108,8 @@ void SprayScene::_build()
             .setRate(100)
             .setDir(Vec3(0, 1, 0))
             .setDirSpread(M_PI)
-            .setRadius(50)
-            .setRadiusSpread(20)
+            .setRadius(.5)
+            .setRadiusSpread(.25)
             .setSpeed(10);
 
     _particleSystem->addEmitter(emitter);

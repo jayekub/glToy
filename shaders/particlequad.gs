@@ -14,8 +14,9 @@ in vec3 center[];
 in float radius[];
 
 out vec3 Pw;
-flat out vec3 bcenter;
-flat out float bradius;
+out vec2 ptexcoord;
+flat out vec3 pcenter;
+flat out float pradius;
 
 void main()
 {
@@ -40,15 +41,22 @@ void main()
 
     vec3 Xw = radius[0] * normalize(cross(UPw, Vw));
     vec3 Yw = radius[0] * normalize(cross(Vw, Xw));
-    vec3 Zw = radius[0] * Vw;
+    vec3 Zw = radius[0] * Vw; // offset from center by radius to account for
+                              // spherical particles
 
-    // compute quad corners
+    // compute quad corners and texcoords
     vec3 cornersW[4];
+    vec2 texcoord[4];
 
     cornersW[0] = centerW - Xw - Yw - Zw;
     cornersW[1] = centerW + Xw - Yw - Zw;
     cornersW[2] = centerW + Xw + Yw - Zw;
     cornersW[3] = centerW - Xw + Yw - Zw;
+
+    texcoord[0] = vec2(1., 1.);
+    texcoord[1] = vec2(0., 1.);
+    texcoord[2] = vec2(0., 0.);
+    texcoord[3] = vec2(1., 0.);
 
     // transform corners to clip space and check for intersections with the
     // clipping planes--discard if there are any to avoid mangled particles
@@ -72,8 +80,9 @@ void main()
     if (!discardParticle) {
 
 #define EMIT_VERT(n) \
-    bcenter = centerW; \
-    bradius = radius[0]; \
+    pcenter = centerW; \
+    pradius = radius[0]; \
+    ptexcoord = texcoord[n]; \
     Pw = cornersW[n]; \
     gl_Position = cornersC[n]; \
     EmitVertex();

@@ -7,8 +7,8 @@ uniform mat4 projMat;
 uniform vec3 cameraPos;
 uniform vec3 lightPos;
 
-flat in vec3 bcenter;
-flat in float bradius;
+flat in vec3 pcenter;
+flat in float pradius;
 in vec3 Pw;
 in vec3 Vw;
 
@@ -37,7 +37,7 @@ vec4 shade_point(
 
 void main()
 {
-//    color = vec4(bcenter.xyz, 1.);
+//    color = vec4(pcenter.xyz, 1.);
 
 #if 1
     // persp
@@ -49,19 +49,19 @@ void main()
 //    vec3 V = normalize(vec3(0., 0., Pw.z - cameraPos.z));
 
     float t1, t2;
-    if (sphere_intersect(O, V, bcenter, bradius, t1, t2) < 2) {
+    if (sphere_intersect(O, V, pcenter, pradius, t1, t2) < 2) {
 //        color = vec4(0., 0., 1., 1.);
         discard;
     } else {
 //        color = vec4(.2, .2, .6, .5);
 
         vec3 Phit1 = O + t1 * V;
-        vec3 Nhit1 = sphere_normal(Phit1, bcenter);
+        vec3 Nhit1 = sphere_normal(Phit1, pcenter);
 
         vec4 color1 = shade_point(Phit1, Nhit1, V, bubbleColor);
 
         vec3 Phit2 = O + t2 * V;
-        vec3 Nhit2 = -1. * sphere_normal(Phit2, bcenter);
+        vec3 Nhit2 = -1. * sphere_normal(Phit2, pcenter);
 
         vec4 color2 = shade_point(Phit2, Nhit2, V, bubbleColor);
 

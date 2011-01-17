@@ -10,14 +10,12 @@ BubblesPrim::BubblesPrim(
     ParticleSystemPrim(name, particleSystem, true /* needsDepthSort */)
 {
     _bubblesProgram.addShader(
-        new Program::Shader("shaders/bubbles.vs", GL_VERTEX_SHADER));
+        new Program::Shader("shaders/particlequad.vs", GL_VERTEX_SHADER));
 
     _bubblesProgram.addShader(
         (new Program::Shader(GL_GEOMETRY_SHADER))
             ->addFile("shaders/common.inc")
-             //.addFile("shaders/sphere.inc")
-             //.addFile("shaders/noise.inc")
-             .addFile("shaders/bubbles.gs").compile());
+             .addFile("shaders/particlequad.gs").compile());
 
     _bubblesProgram.addShader(
         ((new Program::Shader(GL_FRAGMENT_SHADER))
