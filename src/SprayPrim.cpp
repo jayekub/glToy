@@ -19,7 +19,7 @@ SprayPrim::SprayPrim(
     _sprayProgram.addShader(
         (new Program::Shader(GL_GEOMETRY_SHADER))
             ->addFile("shaders/common.inc")
-             .addFile("shaders/particlequad.gs").compile());
+             .addFile("shaders/mblurparticlequad.gs").compile());
 
     _sprayProgram.addShader(
         ((new Program::Shader(GL_FRAGMENT_SHADER))
@@ -69,6 +69,7 @@ void SprayPrim::_preRender(RenderState &state)
                  .setUniform("viewMat", state.viewMat)
                  .setUniform("projMat", state.projectionMat)
                  .setUniform("cameraPos", state.camera->position)
+                 .setUniform("dt", (float) std::max(1e-3, state.camera->dt))
                  .setUniform("meanRadius", 0.5f)
                  .setUniform("radiusSpread", 0.25f);
 
@@ -97,8 +98,11 @@ void SprayPrim::_preRender(RenderState &state)
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+    //glEnable(GL_POINT_SPRITE);
+    //glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+
     glEnable(GL_PROGRAM_POINT_SIZE);
-    glPointParameteri(GL_POINT_SPRITE_COORD_ORIGIN, GL_UPPER_LEFT);
+    //glPointParameteri(GL_POINT_SPRITE_COORD_ORIGIN, GL_UPPER_LEFT);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -107,6 +111,5 @@ void SprayPrim::_preRender(RenderState &state)
 void SprayPrim::_postRender(RenderState &state)
 {
     glDisable(GL_BLEND);
-    //glDisable(GL_POINT_SPRITE);
     glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
 }

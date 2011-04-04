@@ -1,10 +1,10 @@
 #ifndef _UTILS_H_
 #define _UTILS_H_
 
+#include <cstdlib>
+
 #include <string>
 #include <vector>
-
-#include <stdlib.h>
 
 #include "glToy.h"
 
@@ -12,7 +12,7 @@
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define CLAMP(x, min, max) MIN(MAX((x), (min)), (max))
 
-// faster than the math.h function, but not the optimal float-to-int
+// faster than the cmath function, but not the optimal float-to-int
 #define FLOORI(x) ((int) (x))
 
 #define BUFFER_OFFSET(i) ((char *) NULL + (i))

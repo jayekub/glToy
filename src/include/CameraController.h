@@ -16,6 +16,7 @@ public:
     void handleKeyUp(unsigned char key, int x, int y);
     void handleMouse(int button, int state, int x, int y);
     void handleMouseMotion(int x, int y);
+    void handlePassiveMouseMotion(int x, int y);
 
 private:
     Camera *_camera;

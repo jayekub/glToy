@@ -1,7 +1,7 @@
 #ifndef _VECFIELD_H_
 #define _VECFIELD_H_
 
-#include <math.h>
+//#include <cmath>
 
 #include "Vec.h"
 
@@ -102,6 +102,7 @@ public:
         const VecField &me = *this;
 
         // central difference
+        // XXX wrong near edges
         DECL_AND_SET_H(x);
         float x0 = MIN(x + h, _size.x - 1),
               x1 = MAX(x - h, 0);

@@ -35,9 +35,9 @@ BUILD_DIR = build
 OS := $(shell uname -s)
 
 INCLUDES = -I$(SRC_DIR)/include/
-LIBS = -lGLU -lglut
+LIBS = -lGLU -lglut -lgomp
 
-CFLAGS = -O3 -Wall -fmessage-length=0
+CFLAGS = -O3 -Wall -fmessage-length=0 -g -fopenmp
 LDFLAGS =
 
 ifeq ($(OS),CYGWIN_NT-5.1)

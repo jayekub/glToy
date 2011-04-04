@@ -1,7 +1,7 @@
 #ifndef MAT_H_
 #define MAT_H_
 
-#include <math.h>
+#include <cmath>
 
 #include <boost/format.hpp>
 
@@ -190,9 +190,9 @@ public:
         Mat4x4 R = Mat4x4::identity();
         Vec3 A = axis.normalize();
 
-        vec_t c = cos(angle);
+        vec_t c = std::cos(angle);
         vec_t omc = 1. - c;
-        vec_t s = sin(angle);
+        vec_t s = std::sin(angle);
 
         vec_t &x = A.x;
         vec_t &y = A.y;
@@ -250,7 +250,7 @@ public:
     static Mat4x4 perspective(vec_t fovy, vec_t aspect,
                               vec_t zNear, vec_t zFar) {
 
-        vec_t f = 1. / tan(fovy / 2.);
+        vec_t f = 1. / std::tan(fovy / 2.);
 
         Mat4x4 P;
 

@@ -77,3 +77,8 @@ void CameraController::handleMouseMotion(int x, int y)
 
     _lastMousePos = Vec2(x, y);
 }
+
+void CameraController::handlePassiveMouseMotion(int x, int y)
+{
+    handleMouseMotion(x, y);
+}

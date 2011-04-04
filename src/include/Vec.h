@@ -1,8 +1,7 @@
 #ifndef VEC_H_
 #define VEC_H_
 
-#include <math.h>
-
+#include <cmath>
 #include <string>
 
 #include <boost/format.hpp>
@@ -28,7 +27,7 @@ struct Vec2 {
     }
 
     vec_t length() const {
-        return sqrt(x * x + y * y);
+        return std::sqrt(x * x + y * y);
     }
 
     Vec2 normalize() const {
@@ -96,7 +95,7 @@ struct Vec3 {
         x(vec.x), y(vec.y), z(z_) {}
 
     vec_t length() const {
-        return sqrt(x * x + y * y + z * z);
+        return std::sqrt(x * x + y * y + z * z);
     }
 
     Vec3 normalize() const {
@@ -117,7 +116,7 @@ struct Vec3 {
         Vec3 P = cross(axis);
 
         return P.length() == 0 ? *this :
-            ((*this) * cos(angle) + P.normalize() * sin(angle));
+            ((*this) * std::cos(angle) + P.normalize() * std::sin(angle));
     }
 
     Vec3 operator+(const Vec3 &vec) const {
@@ -136,6 +135,14 @@ struct Vec3 {
         x += vec.x;
         y += vec.y;
         z += vec.z;
+
+        return *this;
+    }
+
+    Vec3 &operator-=(const Vec3 &vec) {
+        x -= vec.x;
+        y -= vec.y;
+        z -= vec.z;
 
         return *this;
     }

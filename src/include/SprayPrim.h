@@ -5,9 +5,10 @@
 #include "Program.h"
 #include "ParticleSystemPrim.h"
 
-// XXX point sprite rendering may be broken for nvidia drivers. use quads for now
-// uses point sprite rendering. particles are sorted according to view *plane*
-// distance.
+// XXX point sprite rendering may be broken for nvidia drivers. use quads for
+// now uses point sprite rendering. particles are sorted according to view
+// *plane* distance.
+
 class SprayPrim : public ParticleSystemPrim
 {
 public:

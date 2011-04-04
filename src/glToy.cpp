@@ -103,6 +103,11 @@ void handleKey(unsigned char key, int x, int y)
     _currentScene->handleKey(key, x, y);
 }
 
+void handleSpecialKey(int key, int x, int y)
+{
+    _currentScene->handleSpecialKey(key, x, y);
+}
+
 void handleKeyUp(unsigned char key, int x, int y)
 {
     _currentScene->handleKeyUp(key, x, y);
@@ -202,6 +207,7 @@ int main(int argc, char **argv) {
 
     glutReshapeFunc(resize);
     glutKeyboardFunc(handleKey);
+    glutSpecialFunc(handleSpecialKey);
     glutKeyboardUpFunc(handleKeyUp);
 
     glutMouseFunc(handleMouse);

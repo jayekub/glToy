@@ -31,7 +31,7 @@ public:
     Particle *newParticle() { return _particlePool.construct(); }
 
     const Vec3 &getSize() const { return _size; }
-//    const std::vector<Particle *> &getParticles() { return _particles; }
+    const std::vector<Particle *> &getParticles() { return _particles; }
 
 protected:
     friend class ParticleSystemPrim;

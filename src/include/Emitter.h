@@ -42,22 +42,33 @@ public:
         _rate(0), _position(0, 0, 0), _dirMean(0, 1, 0), _dirSpread(0),
         _radMean(10), _radSpread(0), _speedMean(10), _speedSpread(0) {}
 
-    SprayEmitter &setRate(float rate) {_rate = rate; return *this;}
+    SprayEmitter &setRate(float rate) { _rate = rate; return *this; }
+    const float &getRate() const { return _rate; }
 
     SprayEmitter &setPosition(const Vec3 &position) {
-        _position = position; return *this;}
+        _position = position; return *this; }
+    const Vec3 &getPosition() const { return _position; }
 
-    SprayEmitter &setDir(const Vec3 &dir) {_dirMean = dir; return *this;}
+    SprayEmitter &setDir(const Vec3 &dir) { _dirMean = dir; return *this; }
+    const Vec3 &getDir() const { return _dirMean; }
+
     SprayEmitter &setDirSpread(float dirSpread) {
-        _dirSpread = dirSpread; return *this;}
+        _dirSpread = dirSpread; return *this; }
+    const float &getDirSpread() const { return _dirSpread; }
 
-    SprayEmitter &setRadius(float rad) {_radMean = rad; return *this;}
+    SprayEmitter &setRadius(float rad) { _radMean = rad; return *this; }
+    const float &getRadius() const { return _radMean; }
+
     SprayEmitter &setRadiusSpread(float radSpread) {
-        _radSpread = radSpread; return *this;}
+        _radSpread = radSpread; return *this; }
+    const float &getRadSpread() const { return _radSpread; }
 
-    SprayEmitter &setSpeed(float speed) {_speedMean = speed; return *this;}
+    SprayEmitter &setSpeed(float speed) { _speedMean = speed; return *this; }
+    const float &getSpeed() const { return _speedMean; }
+
     SprayEmitter &setSpeedSpread(float speedSpread) {
-        _speedSpread = speedSpread; return *this;}
+        _speedSpread = speedSpread; return *this; }
+    const float &getSpeedSpread() const { return _speedSpread; }
 
 protected:
     float _rate;

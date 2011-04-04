@@ -12,20 +12,23 @@ struct Camera : public Node
     enum ProjectionType { FLAT, ORTHO, PERSP };
     ProjectionType projection;
 
-    // common options
+    // common params
     float nearClip, farClip;
 
     Vec3 position, center, up;
 
-    // ortho options
+    // ortho params
     float width, height;
 
-    // persp options
+    // persp params
     float fov;
 
-    // shadow cam options
+    // shadow cam params
     bool isShadowCamera;
     Light *light;
+
+    // motion blur params
+    double dt;
 
     void accept(Visitor *visitor) { visitor->visitCamera(this); }
 
@@ -34,7 +37,7 @@ struct Camera : public Node
         projection(PERSP), nearClip(1.), farClip(1000.),
         position(0., 0., 0.), center(0., 0., 1.), up(0., 1., 0.),
         width(2.), height(2.), fov(45),
-        isShadowCamera(false), light(NULL) {};
+        isShadowCamera(false), light(NULL), dt(0.) {};
 };
 
 #endif /* CAMERA_H_ */
