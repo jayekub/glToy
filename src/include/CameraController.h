@@ -1,15 +1,15 @@
 #ifndef __CAMERACONTROLLER_H__
 #define __CAMERACONTROLLER_H__
 
+#include "ptrs.h"
+#include "Camera.h"
 #include "Vec.h"
 
-class Camera;
+DEF_SCOPED_PTR(CameraController);
 
 class CameraController
 {
 public:
-    CameraController(Camera *camera);
-
     void update(double dt);
 
     void handleKey(unsigned char key, int x, int y);
@@ -18,8 +18,11 @@ public:
     void handleMouseMotion(int x, int y);
     void handlePassiveMouseMotion(int x, int y);
 
+    static CameraControllerPtr create(const CameraPtr &camera) {
+        return CameraControllerPtr(new CameraController(camera)); }
+
 private:
-    Camera *_camera;
+    CameraPtr _camera;
 
     bool _grabMouse;
     Vec2 _lastMousePos;
@@ -30,6 +33,8 @@ private:
     Vec3 _look;
     Vec2 _rotation;
     Vec3 _deltaTrans;
+
+    CameraController(CameraPtr camera);
 };
 
 #endif // __CAMERACONTROLLER_H__

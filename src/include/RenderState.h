@@ -5,32 +5,31 @@
 #include <string>
 #include <unordered_map>
 
+#include "RenderPass.h"
+#include "Camera.h"
+#include "Light.h"
 #include "Vec.h"
 #include "Mat.h"
 
-class RenderPass;
-class Camera;
-class Light;
-
 struct RenderState
 {
-    RenderPass *renderPass;
+    RenderPassConstPtr renderPass;
 
     std::string cameraName;
-    Camera *camera;
+    CameraConstPtr camera;
 
     Mat4 viewMat;
     Mat4 projectionMat;
 
-    std::unordered_map<const char *, Light *> lights;
-    std::unordered_map<const char *, Vec3> lightPositions;
+    std::unordered_map<std::string, LightConstPtr> lights;
+    std::unordered_map<std::string, Vec3> lightPositions;
 
     void reset()
     {
-        renderPass = NULL;
+        renderPass = RenderPassPtr();
 
         cameraName = "";
-        camera = NULL;
+        camera = CameraPtr();
 
         viewMat = Mat4::identity();
         projectionMat = Mat4::identity();

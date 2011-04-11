@@ -3,13 +3,15 @@
 
 #include <vector>
 
+#include "ptr.h"
+
 class Particle;
 class ParticleSystem;
 
 class Emitter
 {
 public:
-    virtual void update(double dt) {};
+    virtual void update(double dt) { };
 
 protected:
     friend class ParticleSystem;
@@ -19,12 +21,16 @@ protected:
         std::vector<Particle *> &particles) = 0;
 };
 
+DEF_SHARED_PTR(RandomEmitter);
+
 class RandomEmitter : public Emitter
 {
 public:
     RandomEmitter();
 
     void emitOnce(int numParticles, float meanSpeed, float meanRadius = 0.);
+
+    DEF_CREATE(RandomEmitter);
 
 private:
     int _numToEmit;

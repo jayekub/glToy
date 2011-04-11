@@ -1,11 +1,15 @@
 #ifndef CAMERA_H_
 #define CAMERA_H_
 
+#include <string>
+
+#include "ptr.h"
 #include "Node.h"
+#include "Light.h"
 #include "Visitor.h"
 #include "Vec.h"
 
-class Light;
+DEF_SHARED_PTR(Camera);
 
 struct Camera : public Node
 {
@@ -25,14 +29,18 @@ struct Camera : public Node
 
     // shadow cam params
     bool isShadowCamera;
-    Light *light;
+    LightPtr light;
 
     // motion blur params
     double dt;
 
-    void accept(Visitor *visitor) { visitor->visitCamera(this); }
+    void accept(VisitorPtr &visitor) const {
+        visitor->visitCamera(CameraConstPtr(this)); }
 
-    Camera(const char *name_) :
+    DEF_CREATE_1(Camera, const std::string &, name_);
+
+private
+    Camera(const std::string &name_) :
         Node(name_),
         projection(PERSP), nearClip(1.), farClip(1000.),
         position(0., 0., 0.), center(0., 0., 1.), up(0., 1., 0.),

@@ -8,9 +8,10 @@ OBJS = \
     ScreenRenderPass.o \
     TextureRenderPass.o \
     TextureRenderer.o \
+    Node.o \
     Graph.o \
     Visitor.o \
-    SceneRenderVisitor.o \
+    SceneRenderer.o \
     ParticleSystem.o \
     ParticleSystemPrim.o \
     Emitter.o \
@@ -37,7 +38,7 @@ OS := $(shell uname -s)
 INCLUDES = -I$(SRC_DIR)/include/
 LIBS = -lGLU -lglut -lgomp
 
-CFLAGS = -O3 -Wall -fmessage-length=0 -g -fopenmp
+CFLAGS = -O3 -Wall -fmessage-length=0 -g
 LDFLAGS =
 
 ifeq ($(OS),CYGWIN_NT-5.1)

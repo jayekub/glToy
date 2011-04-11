@@ -1,8 +1,8 @@
 #include "utils.h"
-#include "Camera.h"
+#include "Mat.h"
 #include "CameraController.h"
 
-CameraController::CameraController(Camera *camera) :
+CameraController::CameraController(CameraPtr camera) :
     _camera(camera), _grabMouse(false), _transScale(25.), _rotScale(.01)
 {
     _look = (_camera->center - _camera->position).normalize();

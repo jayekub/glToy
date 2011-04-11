@@ -1,16 +1,23 @@
 #ifndef _PRIM_H_
 #define _PRIM_H_
 
+#include <string>
+
+#include "ptr.h"
 #include "Node.h"
 #include "Visitor.h"
 #include "RenderState.h"
 
-struct Prim : public Node
-{
-    Prim(const char *name) : Node(name) {};
+DEF_SHARED_PTR(Prim);
 
-    virtual void render(RenderState &state) = 0;
-    virtual void accept(Visitor *visitor) { visitor->visitPrim(this); }
+class Prim : public Node
+{
+public:
+    Prim(const std::string &name) : Node(name) { };
+
+    virtual void render(RenderState &state) const = 0;
+    virtual void accept(VisitorPtr &visitor) const {
+        visitor->visitPrim(PrimConstPtr(this)); }
 };
 
-#endif // PRIM_H_
+#endif // _PRIM_H_

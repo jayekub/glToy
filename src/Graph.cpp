@@ -1,36 +1,28 @@
 #include <boost/foreach.hpp>
 
-#include "Node.h"
 #include "Transform.h"
 #include "Graph.h"
 
-Graph::Graph(const char *name_) : name(name_)
+Graph::Graph(const std::string &name_) :
+    name(name_), root(TransformPtr(new Transform("rootTransform")))
 {
-    root = new Transform("rootTransform");
     registerNode(root);
 };
 
-Graph::~Graph()
-{
-    BOOST_FOREACH(_NodeMap::value_type graphPair, _graphNodes) {
-        delete graphPair.second;
-    }
-}
-
-void Graph::addGlobal(Node *node)
+void Graph::addGlobal(const NodePtr &node)
 {
     globals.push_back(node);
     registerNode(node);
 }
 
-void Graph::registerNode(Node *node)
+void Graph::registerNode(const NodePtr &node)
 {
-    _graphNodes[node->name] = node;
-    node->_graph = this;
+    _graphNodes[node->name] = NodeConstWeakPtr(node);
+    node->_graph = GraphPtr(this);
 }
 
-Node *Graph::getNode(const char *name) const
+NodeConstWeakPtr Graph::getNode(const std::string &name) const
 {
     _NodeMap::const_iterator nodeIt = _graphNodes.find(name);
-    return (nodeIt == _graphNodes.end()) ? NULL : nodeIt->second;
+    return (nodeIt == _graphNodes.end()) ? NodeWeakPtr() : nodeIt->second;
 }

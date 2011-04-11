@@ -1,28 +1,14 @@
-#include <stdio.h>
-#include <string.h>
+#include <iostream>
 
-#include "RenderPass.h"
+#include "SceneRenderer.h"
 
-#include "Graph.h"
-#include "Camera.h"
-#include "Light.h"
-#include "Transform.h"
-#include "Prim.h"
-#include "Mat.h"
-
-#include "SceneRenderVisitor.h"
-
-SceneRenderVisitor::SceneRenderVisitor(
-        RenderPass *renderPass, const std::string &cameraName) :
+SceneRenderer::SceneRenderer(
+    const RenderPassConstPtr &renderPass, const std::string &cameraName) :
     _renderPass(renderPass), _cameraName(cameraName)
 {
 }
 
-SceneRenderVisitor::~SceneRenderVisitor()
-{
-}
-
-void SceneRenderVisitor::render(Graph *scene)
+void SceneRenderer::render(const GraphPtr &scene)
 {
     state.reset();
 
@@ -31,26 +17,28 @@ void SceneRenderVisitor::render(Graph *scene)
 
     _renderPass->begin();
 
-    glClearColor(0., 0., 0., 1.0);
+    glClearColor(0., 0., 0., 0.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     _visitNodes(scene->globals);
 
     if (!state.camera) {
-        fprintf(stderr, "Couldn't find camera %s. Aborting.\n",
-                state.cameraName.c_str());
+        std::cerr << "Couldn't find camera " << state.cameraName
+                  << ". Aborting." << std::endl;
         return;
     }
 
-    scene->root->accept(this);
+    //SceneRendererPtr me(this);
+    boost::scoped_ptr<Visitor> me(this);
+    scene->root->accept(me);
 
     _renderPass->end();
 }
 
-void SceneRenderVisitor::visitCamera(Camera *camera)
+void SceneRenderer::visitCamera(const CameraConstPtr &camera)
 {
     // XXX find a faster way to do this!
-    if (strcmp(state.cameraName.c_str(), camera->name) == 0) {
+    if (state.cameraName == camera->name) {
         int vpWidth = state.renderPass->getWidth();
         int vpHeight = state.renderPass->getHeight();
 
@@ -105,14 +93,14 @@ void SceneRenderVisitor::visitCamera(Camera *camera)
     _visitChildren(camera);
 }
 
-void SceneRenderVisitor::visitLight(Light *light)
+void SceneRenderer::visitLight(const LightConstPtr &light)
 {
     state.lights[light->name] = light;
     state.lightPositions[light->name] =
         state.getTransformMat().getTranslation();
 }
 
-void SceneRenderVisitor::visitTransform(Transform *transform)
+void SceneRenderer::visitTransform(const TransformConstPtr &transform)
 {
     state.pushTransformMat();
 
@@ -123,7 +111,7 @@ void SceneRenderVisitor::visitTransform(Transform *transform)
     state.popTransformMat();
 }
 
-void SceneRenderVisitor::visitPrim(Prim *prim)
+void SceneRenderer::visitPrim(const PrimConstPtr &prim)
 {
     prim->render(state);
 

@@ -1,35 +1,34 @@
-#ifndef NODE_H_
-#define NODE_H_
+#ifndef _NODE_H_
+#define _NODE_H_
 
+#include <string>
 #include <vector>
 
-#include <boost/foreach.hpp>
+#include "ptr.h"
 
-#include "Graph.h"
+#define DEF_NODE_CREATE(type) \
+    static type##Ptr create(const std::string &name_) { \
+        return type##Ptr(new type(name_)); }
 
+struct Graph;
 class Visitor;
+
+DEF_SHARED_PTR(Node);
 
 struct Node
 {
+    std::string name;
+    std::vector<NodeConstPtr> children;
+
+    virtual void accept(boost::scoped_ptr<Visitor> &visitor) const = 0;
+    virtual void addChild(const NodePtr &child);
+
+protected:
+    Node(const std::string &name_) : name(name_) { };
+
 private:
-    friend class Graph;
-    Graph *_graph;
-
-public:
-    const char *name;
-    std::vector<Node *> children;
-
-    virtual void accept(Visitor *visitor) = 0;
-
-    virtual void addChild(Node *child) {
-        children.push_back(child);
-        _graph->registerNode(child);
-    }
-
-    Node(const char *name_) : name(name_) {};
-    virtual ~Node() {};
-
-
+    friend struct Graph;
+    boost::shared_ptr<Graph> _graph;
 };
 
-#endif // NODE_H_
+#endif // _NODE_H_

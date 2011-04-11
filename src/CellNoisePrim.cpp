@@ -1,17 +1,11 @@
-#include <boost/foreach.hpp>
-
 #include "ofxMSAFluidSolver.h"
 #include "RenderPass.h"
 #include "Particle.h"
 
 #include "CellNoisePrim.h"
 
-CellNoisePrim::CellNoisePrim(const char *name,
-                             ParticleSystem *particleSystem,
-                             float particleSize) :
-    ParticleSystemPrim(name, particleSystem, false),
-    _particleSize(particleSize)
-
+CellNoisePrim::CellNoisePrim(const std::string &name_)
+    ParticleSystemPrim(name, false)
 {
     _cellNoiseProgram.addShader(
         new Program::Shader("shaders/cellnoise.vs", GL_VERTEX_SHADER));

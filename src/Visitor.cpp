@@ -3,12 +3,8 @@
 #include "Node.h"
 #include "Visitor.h"
 
-Visitor::Visitor()
-{
-}
-
 void
-Visitor::_visitChildren(Node *node)
+Visitor::_visitChildren(const NodeConstPtr &node)
 {
     //fprintf(stderr, "visiting %s\n", node->name);
     //PRINT_GLERROR(node->name);
@@ -16,9 +12,24 @@ Visitor::_visitChildren(Node *node)
 }
 
 void
-Visitor::_visitNodes(const std::vector<Node *> &nodes)
+Visitor::_visitNodes(const std::vector<NodeConstPtr> &nodes)
 {
-    BOOST_FOREACH(Node *node, nodes) {
-        node->accept(this);
+    VisitorPtr me(this);
+
+    BOOST_FOREACH(NodeConstPtr node, nodes) {
+        node->accept(me);
+    }
+}
+
+void
+Visitor::_visitNodes(const std::vector<NodeConstWeakPtr> &nodes)
+{
+    VisitorPtr me(this);
+
+    BOOST_FOREACH(NodeConstWeakPtr weakNode, nodes) {
+        if (!weakNode.expired()) {
+            NodeConstPtr node(weakNode);
+            node->accept(me);
+        }
     }
 }

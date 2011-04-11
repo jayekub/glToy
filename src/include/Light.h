@@ -1,9 +1,12 @@
-#ifndef LIGHT_H_
-#define LIGHT_H_
+#ifndef _LIGHT_H_
+#define _LIGHT_H_
 
+#include "ptr.h"
 #include "Visitor.h"
 #include "Vec.h"
 #include "Mat.h"
+
+DEF_SHARED_PTR(Light);
 
 struct Light : public Node
 {
@@ -17,12 +20,17 @@ struct Light : public Node
     GLuint shadowTexture;
     Mat4x4 shadowMatrix;
 
-    void accept(Visitor *visitor) { visitor->visitLight(this); }
+    void accept(VisitorPtr &visitor) const {
+        visitor->visitLight(LightConstPtr(this)); }
 
-    Light(const char *name_) :
+    static LightPtr create(const std::string &name_) {
+        return LightPtr(new Light(name_)); }
+
+private:
+    Light(const std::string &name_) :
         Node(name_),
         type(POINT), color(1., 1., 1.), direction(0., 0., 0.),
         hasShadow(false) {};
 };
 
-#endif /* LIGHT_H_ */
+#endif // _LIGHT_H_
