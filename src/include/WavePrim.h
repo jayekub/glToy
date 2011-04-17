@@ -8,7 +8,7 @@
 class WavePrim : public Prim
 {
 public:
-    WavePrim(const char *name, int size = 500);
+    WavePrim(const char *name, int size = 100);
     ~WavePrim();
 
     void update(double dt);

@@ -219,7 +219,7 @@ int main(int argc, char **argv) {
     glutPassiveMotionFunc(handlePassiveMouseMotion);
 
     glEnable(GL_DEPTH_TEST);
-//    glEnable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
 
     _screenPass = new ScreenRenderPass(windowWidth, windowHeight);
 

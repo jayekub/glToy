@@ -2,7 +2,7 @@
 layout(points) in;
 
 // num vertices out is 6 * numSegments * numSides
-layout(triangle_strip, max_vertices = 200) out;
+layout(triangle_strip, max_vertices = 73) out;
 
 //layout(points, max_vertices = 60) out;
 

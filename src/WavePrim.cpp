@@ -36,7 +36,7 @@ WavePrim::WavePrim(const char *name, int size) :
     _waveProgram.addShader(
         ((new Program::Shader(GL_FRAGMENT_SHADER))
         ->addFile("shaders/common.inc")
-         .addFile("shaders/constant.fs").compile()));
+         .addFile("shaders/wave.fs").compile()));
 
     _waveProgram.link();
 }
@@ -57,6 +57,7 @@ void WavePrim::render(RenderState &state)
     _waveProgram.setUniform("modelMat", state.getTransformMat())
                 .setUniform("viewMat", state.viewMat)
                 .setUniform("projMat", state.projectionMat)
+                .setUniform("cameraPos", state.camera->position)
                 .setUniform("time", (float) _time)
                 .setUniform("color", Vec3(0, 0, 1));
 

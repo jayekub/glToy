@@ -50,7 +50,7 @@ Anemone::Anemone(
     glBindBuffer(GL_ARRAY_BUFFER, 0);*/
 
     _anemoneProgram.addShader(
-           new Program::Shader("shaders/vertexid.vs", GL_VERTEX_SHADER));
+           new Program::Shader("shaders/standard.vs", GL_VERTEX_SHADER));
 
     _anemoneProgram.addShader(
            &((new Program::Shader(GL_GEOMETRY_SHADER))
@@ -61,7 +61,8 @@ Anemone::Anemone(
 
     _anemoneProgram.addShader(
            &((new Program::Shader(GL_FRAGMENT_SHADER))
-                   ->addFile("shaders/tube.inc")
+                   ->addFile("shaders/common.inc")
+                    .addFile("shaders/tube.inc")
                     .addFile("shaders/anemone.fs").compile()));
 
     _anemoneProgram.link();

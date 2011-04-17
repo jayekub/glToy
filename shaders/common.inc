@@ -69,6 +69,7 @@ float rand(in vec2 v)
 {
     return fract(sin(dot(v.xy, vec2(12.9898, 78.233))) * 43758.5453);
 }
+*/
 
 vec3 randVec(in int seed, in float min, in float max)
 {
@@ -79,15 +80,14 @@ vec3 randVec(in int seed, in float min, in float max)
     //v.z = hash(seed * seed * seed);
     //v /= 1073741824.;
     
-    v.x = rand(float(seed) * vec2(1., 1.));
-    v.y = rand((float(seed) + v.x) * vec2(1., 1.));
-    v.z = rand((float(seed) + v.y) * vec2(1., 1.));
+    v.x = frand(seed);
+    v.y = frand(seed + int(v.x));
+    v.z = frand(seed + int(v.y));
     
     v = (max - min) * v + min;
     
     return v;
 }
-*/
 
 // returns an arbitrary vector perpendicular to V
 vec3 perpVec(in vec3 V)

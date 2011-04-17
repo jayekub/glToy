@@ -24,6 +24,7 @@ OBJS = \
     ofxMSAFluidSolver.o \
     CellNoisePrim.o \
     CellNoiseScene.o \
+    Anemone.o \
     WavePrim.o \
     WaveScene.o
 

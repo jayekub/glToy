@@ -4,9 +4,10 @@
 #include "Camera.h"
 #include "CameraController.h"
 #include "Transform.h"
-#include "RenderPass.h"
-
 #include "WavePrim.h"
+#include "Anemone.h"
+
+#include "RenderPass.h"
 #include "SceneRenderVisitor.h"
 
 #include "WaveScene.h"
@@ -31,6 +32,7 @@ void WaveScene::update(double dt)
     _camera->dt = dt;
 
     _wavePrim->update(dt);
+//    _anemone->update(dt);
 }
 
 void WaveScene::render(RenderPass *renderPass)
@@ -79,15 +81,25 @@ void WaveScene::_build()
     _graph->addGlobal(_camera);
 
     // Wave
-    _waveTransform = new Transform("waveTransform");
+    Transform *waveTransform = new Transform("waveTransform");
 
     //_waveTransform->matrix = Mat4::translate(Vec3(500, 500, 10));
 
-    _graph->root->addChild(_waveTransform);
+    _graph->root->addChild(waveTransform);
 
     _wavePrim = new WavePrim("wave");
 
-    _waveTransform->addChild(_wavePrim);
+    waveTransform->addChild(_wavePrim);
+
+/*
+    // Anemone
+    Transform *anemoneTransform = new Transform("anemoneTransform");
+
+    _graph->root->addChild(anemoneTransform);
+
+    _anemone = new Anemone("anemone", 25, 3, 1, .5);
+    anemoneTransform->addChild(_anemone);
+    */
 
     //// rendering
 

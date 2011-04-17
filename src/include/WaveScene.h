@@ -6,9 +6,10 @@
 
 class Graph;
 class Camera;
+class CameraController;
 class Transform;
 class WavePrim;
-class CameraController;
+class Anemone;
 
 class RenderPass;
 class Program;
@@ -36,8 +37,10 @@ private:
     Graph *_graph;
     Camera *_camera;
     CameraController *_cameraController;
-    Transform *_waveTransform;
+    //Transform *_waveTransform;
+
     WavePrim *_wavePrim;
+    Anemone *_anemone;
 
     SceneRenderVisitor *_sceneRenderer;
 
