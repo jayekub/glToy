@@ -9,7 +9,9 @@ struct Prim : public Node
 {
     Prim(const char *name) : Node(name) {};
 
+    // TODO make const
     virtual void render(RenderState &state) = 0;
+
     virtual void accept(Visitor *visitor) { visitor->visitPrim(this); }
 };
 

@@ -5,10 +5,13 @@ uniform mat4 projMat;
 in vec3 vertexIn;
 in vec2 texcoordIn;
 
+out vec3 vertex;
 out vec2 texcoord;
 
 void main()
 {
-    gl_Position = projMat * viewMat * modelMat * vec4(vertexIn, 1.);
+    vertex = vertexIn;
     texcoord = texcoordIn;
+
+    gl_Position = projMat * viewMat * modelMat * vec4(vertexIn, 1.);
 }

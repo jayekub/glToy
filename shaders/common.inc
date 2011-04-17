@@ -36,16 +36,35 @@ vec4 composite_hits(in hit hits[MAX_HITS], in int numHits)
     return finalColor;
 }
 
-/*
-// Some commonly used PRNG function. Where does it come from?
-float rand(in int n)
+// Some commonly used PRNG function. Where does it come from? (iq)
+float frand(in int n)
 {
     n = (n << 13) ^ n;
     n = (n * (n * n * 15731 + 789221) + 1376312589) & 0x7fffffff;
     return float(n);
 }
-*/
 
+float noise3f(in vec3 p)
+{
+    ivec3 ip = ivec3(floor(p));
+    vec3 u = fract(p);
+    u = u*u*(3.0-2.0*u);
+
+    int n = ip.x + ip.y*57 + ip.z*113;
+
+    float res = mix(mix(mix(frand(n+(0+57*0+113*0)),
+                            frand(n+(1+57*0+113*0)),u.x),
+                        mix(frand(n+(0+57*1+113*0)),
+                            frand(n+(1+57*1+113*0)),u.x),u.y),
+                    mix(mix(frand(n+(0+57*0+113*1)),
+                            frand(n+(1+57*0+113*1)),u.x),
+                        mix(frand(n+(0+57*1+113*1)),
+                            frand(n+(1+57*1+113*1)),u.x),u.y),u.z);
+
+    return 1.0 - res*(1.0/1073741824.0);
+}
+
+/*
 float rand(in vec2 v)
 {
     return fract(sin(dot(v.xy, vec2(12.9898, 78.233))) * 43758.5453);
@@ -55,12 +74,10 @@ vec3 randVec(in int seed, in float min, in float max)
 {
     vec3 v;
     
-    /*
-    v.x = hash(seed * 57 * 113);
-    v.y = hash(seed * seed * 113);
-    v.z = hash(seed * seed * seed);
-    v /= 1073741824.;
-    */
+    //v.x = hash(seed * 57 * 113);
+    //v.y = hash(seed * seed * 113);
+    //v.z = hash(seed * seed * seed);
+    //v /= 1073741824.;
     
     v.x = rand(float(seed) * vec2(1., 1.));
     v.y = rand((float(seed) + v.x) * vec2(1., 1.));
@@ -70,6 +87,7 @@ vec3 randVec(in int seed, in float min, in float max)
     
     return v;
 }
+*/
 
 // returns an arbitrary vector perpendicular to V
 vec3 perpVec(in vec3 V)

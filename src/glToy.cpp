@@ -13,6 +13,7 @@
 #include "BubblesScene.h"
 #include "CellNoiseScene.h"
 #include "SprayScene.h"
+#include "WaveScene.h"
 
 #include "Program.h"
 #include "ScreenRenderPass.h"
@@ -50,8 +51,11 @@ void nextScene()
             _currentScene = new CellNoiseScene(windowWidth, windowHeight);
             break;
         case 2:
-        default:
             _currentScene = new SprayScene(windowWidth, windowHeight);
+            break;
+        case 3:
+        default:
+            _currentScene = new WaveScene(windowWidth, windowHeight);
             break;
     }
 

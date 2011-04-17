@@ -23,7 +23,9 @@ OBJS = \
     BubblesScene.o \
     ofxMSAFluidSolver.o \
     CellNoisePrim.o \
-    CellNoiseScene.o
+    CellNoiseScene.o \
+    WavePrim.o \
+    WaveScene.o
 
 TARGET = glToy
 
@@ -35,9 +37,9 @@ BUILD_DIR = build
 OS := $(shell uname -s)
 
 INCLUDES = -I$(SRC_DIR)/include/
-LIBS = -lGLU -lglut -lgomp
+LIBS = -lGLU -lglut
 
-CFLAGS = -O3 -Wall -fmessage-length=0 -g -fopenmp
+CFLAGS = -O3 -Wall -fmessage-length=0 -g
 LDFLAGS =
 
 ifeq ($(OS),CYGWIN_NT-5.1)
